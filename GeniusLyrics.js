@@ -1,15 +1,17 @@
 // ==UserScript==
-// @name         Spotify Genius Lyrics
-// @description  Show lyrics from genius.com on the Spotify web player
-// @namespace    https://greasyfork.org/users/20068
+// @exclude      *
+// ==UserLibrary==
+// @name         GeniusLyrics
+// @description  Downloads and shows genius lyrics for Tampermonkey scripts
+// @version      1
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
-// @copyright    2019, cuzi (https://github.com/cvzi)
-// @supportURL   https://github.com/cvzi/Spotify-Genius-Lyrics-userscript/issues
-// @version      12
-// @include      https://open.spotify.com/*
-// @grant        GM.xmlHttpRequest
-// @grant        GM.setValue
+// @copyright    2020, cuzi (https://github.com/cvzi)
+// @supportURL   https://github.com/cvzi/GeniusLyricsUserscriptLibrary/issues
+// ==/UserLibrary==
+// @homepageURL  https://github.com/cvzi/GeniusLyricsUserscriptLibrary
+// @grant        GM.xmlhttpRequest
 // @grant        GM.getValue
+// @grant        GM.setValue
 // @connect      genius.com
 // ==/UserScript==
 
