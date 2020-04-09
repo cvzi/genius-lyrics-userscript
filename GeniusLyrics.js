@@ -592,6 +592,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
           if (!c) {
             c = document.body.appendChild(document.createElement('div'))
             c.setAttribute('id', 'annotationcontainer958')
+            const isChrome = navigator.userAgent.indexOf('Chrome') !== -1
             document.head.appendChild(document.createElement('style')).innerHTML = `
             #annotationcontainer958 {
               opacity:0.0;
@@ -614,8 +615,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
               width: 0px;
               height: 0px;
               margin-top: 20px;
-              inset: -1rem 0px 0px 50%;
-              margin-left: calc(-15px);
+              ${isChrome ? 'margin-left: calc(50% - 15px);' : 'inset: -1rem 0px 0px 50%;'}
               border-style: solid;
               border-width: 0px 25px 20px;
               border-color: transparent transparent rgb(170, 170, 170);
@@ -985,7 +985,15 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
             html = html.replace(/\$body/g, decodeHTML(annotation.body.html)).replace(/\$author/g, decodeHTML(annotation.created_by.name))
             div0.innerHTML = html
             targetBlankLinks145() // Change link target to _blank
-            window.setTimeout(function () { document.body.addEventListener('click', hideAnnotationOnClick1234) }, 100) // hide on click
+            window.setTimeout(function () { // hide on click
+              document.body.addEventListener('click', hideAnnotationOnClick1234)
+            }, 100)
+            window.setTimeout(function () { // Resize iframes and images in frame
+              const maxWidth = (document.body.clientWidth - 40) + 'px'
+              main.querySelectorAll('iframe,img').forEach(function (e) {
+                e.style.maxWidth = maxWidth
+              })
+            }, 100)
           }
         }
         function hideAnnotationOnClick1234 (ev) {
@@ -1096,13 +1104,14 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
 
             headhtml = `<style>
             body {
-              background-color: white; color:black;
+              background:#ffffff linear-gradient(to bottom, #fafafa, #ffffff) fixed;
+              color:black;
               font-family:Roboto, Arial, sans-serif;
               max-width:${bodyWidth - 20}px;
               overflow-x:hidden;
             }
-            .mylyrics {color: black; font-size: 1.3em; line-height: 1.1em;font-weight: 300; padding:0.1em;}
-            .mylyrics a:link,.mylyrics a:visited,.mylyrics a:hover{color:black; padding:0; line-height: 1.1em; background-color:white;box-shadow: none;}
+            .mylyrics {color: black; font-size: 1.3em; line-height: 1.3em;font-weight: 300; padding:0.1em;}
+            .mylyrics a:link,.mylyrics a:visited,.mylyrics a:hover{color:black; padding:0; line-height: 1.3em; box-shadow: none;}
             .myheader {font-size: 1.0em; font-weight:300}
             .myheader a:link,.myheader a:visited {color: rgb(96, 96, 96);; font-size:1.0em; font-weight:300; text-decoration:none}
             h1.mytitle {font-size: 1.1em;}
@@ -1171,9 +1180,9 @@ Genius:  ${originalUrl}
         // Extract title
         const title = '<div class="header_with_cover_art-primary_info">' + html.split('class="header_with_cover_art-primary_info">')[1].split('</div>').slice(0, 3).join('</div>') + '</div></div>'
 
-        // Remove body content, add onload attribute to body, hide horizontal scroll bar, add lyrics
+        // Remove body content, hide horizontal scroll bar, add lyrics
         let parts = html.split('<body', 2)
-        html = parts[0] + '<body onload="onload7846552()"' + parts[1].split('>')[0] + '>\n\n' +
+        html = parts[0] + '<body' + parts[1].split('>')[0] + '>\n\n' +
       title + '\n\n' + lyrics +
       '\n\n<div class="annotationbox" id="annotationbox"></div><div style="height:5em"></div></body></html>'
 
@@ -1183,20 +1192,21 @@ Genius:  ${originalUrl}
         // CSS
         headhtml += `<style>
           body {
-            background-color: white; color:black;
+            background:#ffffff linear-gradient(to bottom, #fafafa, #ffffff) fixed;
+            color:black;
             font-family:Roboto, Arial, sans-serif;
             overflow-x:hidden;
             max-width:${bodyWidth}px;
           }
           .mylyrics {color: black; font-size: 1.3em; line-height: 1.1em;font-weight: 300; padding:0.1em;}
-          .referent {background-color:white;box-shadow: none;}
-          .windows a.referent {padding:0; line-height: 1.1em; background-color:white;box-shadow: none;}
+          .referent {background-color:inherit;box-shadow: none; line-height: 1.1em !important; }
+          .windows a.referent {padding:0; line-height: 1.1em; background-color:inherit;box-shadow: none;}
           .windows a.referent:hover {background-color: rgb(230,230,230);border-radius: 2px;}
           .referent:hover {background-color: rgb(230,230,230);border-radius: 2px;}
-          .windows a.referent:not(.referent--green):not(.referent--red):not(.referent--highlighted):not(.referent--image) { opacity:1.0; background-color: white; box-shadow: none; color:rgb(6, 95, 212); transition: color .2s linear;transition-property: color;transition-duration: 0.2s;transition-timing-function: linear;transition-delay: 0s;}
-          .referent:not(.referent--green):not(.referent--red):not(.referent--highlighted):not(.referent--image) { opacity:1.0; background-color: white; box-shadow: none; color:blue; transition: color .2s linear;transition-property: color;transition-duration: 0.2s;transition-timing-function: linear;transition-delay: 0s;}
+          .windows a.referent:not(.referent--green):not(.referent--red):not(.referent--highlighted):not(.referent--image) { opacity:1.0; background-color: inherit; box-shadow: none; color:rgb(6, 95, 212); transition: color .2s linear;transition-property: color;transition-duration: 0.2s;transition-timing-function: linear;transition-delay: 0s;}
+          .referent:not(.referent--green):not(.referent--red):not(.referent--highlighted):not(.referent--image) { opacity:1.0; background-color: inherit; box-shadow: none; color:#2c1cb7; transition: color .2s linear;transition-property: color;transition-duration: 0.2s;transition-timing-function: linear;transition-delay: 0s;}
           .windows a.referent:hover:not(.referent--green):not(.referent--red):not(.referent--highlighted):not(.referent--image) { background-color: rgb(230,230,230);border-radius: 2px;}
-          .referent--yellow.referent--highlighted { opacity:1.0; background-color: white; box-shadow: none; color:blue; transition: color .2s linear;transition-property: color;transition-duration: 0.2s;transition-timing-function: linear;transition-delay: 0s;}
+          .referent--yellow.referent--highlighted { opacity:1.0; background-color: inherit; box-shadow: none; color:#2c1cb7; transition: color .2s linear;transition-property: color;transition-duration: 0.2s;transition-timing-function: linear;transition-delay: 0s;}
           .annotationbox {position:absolute; display:none; max-width:95%; min-width: 160px;padding: 3px 7px;margin: 2px 0 0;background-color: rgba(245, 245, 245, 0.98);background-clip: padding-box;border: 1px solid rgba(0,0,0,.15);border-radius: .25rem;}
           .annotationbox .annotationlabel {display:block;color:rgb(10, 10, 10);border-bottom:1px solid rgb(200,200,200);padding: 0;font-weight:600}
           .annotationbox .annotation_rich_text_formatting {color: black}
@@ -1497,7 +1507,7 @@ Genius:  ${originalUrl}
             font-family:spotify-circular,spotify-circular-cyrillic,spotify-circular-arabic,spotify-circular-hebrew,Helvetica Neue,Helvetica,Arial,Hiragino Kaku Gothic Pro,Meiryo,MS Gothic,sans-serif;
           }
           .mylyrics {color: rgb(255,255,255,0.6); font-size: 1.3em; line-height: 1.1em;font-weight: 300; padding:0.1em;}
-          .referent {background-color:transparent;box-shadow: none;}
+          .referent {background-color:transparent;box-shadow: none;  line-height: 1.1em !important; }
           .windows a.referent {padding:0; line-height: 1.1em; background-color:transparent;box-shadow: none;}
           .windows a.referent:hover {background-color: hsla(0,0%,0%,.2);border-radius: 2px;}
           .referent:hover {background-color: hsla(0,0%,0%,.2);border-radius: 2px;}
