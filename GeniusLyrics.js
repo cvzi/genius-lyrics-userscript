@@ -196,7 +196,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       method: obj.method ? obj.method : 'GET',
       data: obj.data,
       headers: headers,
-      onerror: obj.error ? obj.error : function xmlHttpRequestGenericOnError (response) { console.log(response) },
+      onerror: obj.error ? obj.error : function xmlHttpRequestGenericOnError (response) { console.log('xmlHttpRequestGenericOnError: ' + response) },
       onload: function xmlHttpRequestOnLoad (response) {
         const time = (new Date()).toJSON()
         // Chrome fix: Otherwise JSON.stringify(requestCache) omits responseText
