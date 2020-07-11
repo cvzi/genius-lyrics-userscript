@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      1
+// @version      2
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2020, cuzi (https://github.com/cvzi)
 // @supportURL   https://github.com/cvzi/GeniusLyricsUserscriptLibrary/issues
@@ -1620,9 +1620,9 @@ Genius:  ${originalUrl}
       resizeButton.appendChild(document.createTextNode('⇹'))
       resizeButton.addEventListener('mousedown', custom.initResize)
       bar.appendChild(resizeButton)
-    }
 
-    bar.appendChild(separator.cloneNode(true))
+      bar.appendChild(separator.cloneNode(true))
+    }
 
     // Hide button
     const hideButton = document.createElement('a')
@@ -1648,19 +1648,21 @@ Genius:  ${originalUrl}
     })
     bar.appendChild(configButton)
 
-    bar.appendChild(separator.cloneNode(true))
-
     // Wrong lyrics
-    const wrongLyricsButton = document.createElement('a')
-    wrongLyricsButton.href = '#'
-    wrongLyricsButton.appendChild(document.createTextNode('Wrong lyrics'))
-    wrongLyricsButton.addEventListener('click', function wrongLyricsButtonClick (ev) {
-      ev.preventDefault()
-      document.querySelectorAll('.loadingspinnerholder').forEach((spinner) => spinner.remove())
-      forgetLyricsSelection(genius.current.title, genius.current.artists, this.dataset.hit)
-      custom.showSearchField(genius.current.artists + ' ' + genius.current.title)
-    })
-    bar.appendChild(wrongLyricsButton)
+    if (searchresultsLengths === 0) {
+      bar.appendChild(separator.cloneNode(true))
+
+      const wrongLyricsButton = document.createElement('a')
+      wrongLyricsButton.href = '#'
+      wrongLyricsButton.appendChild(document.createTextNode('Wrong lyrics'))
+      wrongLyricsButton.addEventListener('click', function wrongLyricsButtonClick (ev) {
+        ev.preventDefault()
+        document.querySelectorAll('.loadingspinnerholder').forEach((spinner) => spinner.remove())
+        forgetLyricsSelection(genius.current.title, genius.current.artists, this.dataset.hit)
+        custom.showSearchField(genius.current.artists + ' ' + genius.current.title)
+      })
+      bar.appendChild(wrongLyricsButton)
+    }
 
     // Back button
     if (searchresultsLengths) {
@@ -1675,7 +1677,7 @@ Genius:  ${originalUrl}
       }
       backbutton.addEventListener('click', function backbuttonClick (ev) {
         ev.preventDefault()
-        custom.addLyrics(true)
+        custom.showSearchField(genius.current.artists + ' ' + genius.current.title)
       })
       bar.appendChild(backbutton)
     }
@@ -1842,6 +1844,11 @@ Genius:  ${originalUrl}
     label.setAttribute('for', 'checkAnnotationsEnabled748')
     label.appendChild(document.createTextNode(' Show annotations'))
 
+    // Custom buttons
+    if ('config' in custom) {
+      custom.config.forEach(f => f(win.appendChild(document.createElement('div'))))
+    }
+
     // Buttons
     div = win.appendChild(document.createElement('div'))
 
@@ -1897,7 +1904,7 @@ Genius:  ${originalUrl}
       border-radius:10%;
       border:2px solid black;
       color:black;
-      z-index:55;
+      z-index:103;
       font-size:1.2em
     }
     #myconfigwin39457845 h1 {
