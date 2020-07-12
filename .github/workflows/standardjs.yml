@@ -13,4 +13,4 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - run: npx standard --verbose
+    - run: npx standard --verbose | npx snazzy
