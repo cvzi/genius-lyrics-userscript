@@ -3,13 +3,13 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      2
+// @version      3
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2020, cuzi (https://github.com/cvzi)
 // @supportURL   https://github.com/cvzi/GeniusLyricsUserscriptLibrary/issues
 // ==/UserLibrary==
 // @homepageURL  https://github.com/cvzi/GeniusLyricsUserscriptLibrary
-// @grant        GM.xmlhttpRequest
+// @grant        GM.xmlHttpRequest
 // @grant        GM.getValue
 // @grant        GM.setValue
 // @connect      genius.com
@@ -25,7 +25,6 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     'scriptName',
     'domain',
     'emptyURL',
-    'main',
     'listSongs',
     'showSearchField',
     'addLyrics',
@@ -1582,6 +1581,11 @@ Genius:  ${originalUrl}
               custom.addLyrics(!!force, true)
             } else if (force) {
               custom.showSearchField()
+            } else {
+              // No results
+              if ('onNoResults' in custom) {
+                custom.onNoResults(songTitle, songArtistsArr)
+              }
             }
           } else if (hits.length === 1) {
             showLyrics(hits[0])
@@ -1720,6 +1724,9 @@ Genius:  ${originalUrl}
             iframe.contentWindow.postMessage({ iAm: custom.scriptName, type: 'writehtml', html: html, themeKey: genius.option.themeKey }, '*')
           }, 1500)
           const clear = function () {
+            if ('onLyricsReady' in custom) {
+              custom.onLyricsReady(song, container)
+            }
             window.clearInterval(iv)
             window.setTimeout(function () {
               iframe.style.opacity = 1.0
@@ -1773,6 +1780,7 @@ Genius:  ${originalUrl}
 
     // Switch: Show automatically
     let div = win.appendChild(document.createElement('div'))
+    div.classList.add('divAutoShow')
     const checkAutoShow = div.appendChild(document.createElement('input'))
     checkAutoShow.type = 'checkbox'
     checkAutoShow.id = 'checkAutoShow748'
@@ -2008,7 +2016,9 @@ Genius:  ${originalUrl}
         listenToMessages()
         loadCache()
         addCss()
-        genius.iv.main = window.setInterval(custom.main, 2000)
+        if ('main' in custom) {
+          genius.iv.main = window.setInterval(custom.main, 2000)
+        }
         if ('onResize' in custom) {
           window.addEventListener('resize', custom.onResize)
         }
