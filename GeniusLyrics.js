@@ -15,7 +15,14 @@
 // @connect      genius.com
 // ==/UserScript==
 
+// TODO save scroll speed global and per song
+// TODO pause button for instrumental parts
+
 /* global Reflect */
+
+if (typeof module !== 'undefined') {
+  module.exports = geniusLyrics
+}
 
 function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   'use strict'

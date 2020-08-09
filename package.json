@@ -1,5 +1,5 @@
 {
-  "name": "geniuslyricsuserscriptlibrary",
+  "name": "genius-lyrics-userscript",
   "version": "1.0.0",
   "description": "A userscript library to show lyrics from genius.com on other websites",
   "main": "GeniusLyrics.js",
@@ -11,7 +11,9 @@
     "url": "git+https://github.com/cvzi/GeniusLyricsUserscriptLibrary.git"
   },
   "keywords": [
-    "genius"
+    "genius",
+    "lyrics",
+    "userscript"
   ],
   "author": "cuzi@openmail.cc",
   "license": "GPL-3.0-or-later",
