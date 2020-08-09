@@ -1,5 +1,5 @@
 {
-  "name": "genius-lyrics-userscript",
+  "name": "@cvzi/genius-lyrics-userscript",
   "version": "3.0.0",
   "description": "A userscript library to show lyrics from genius.com on other websites",
   "main": "GeniusLyrics.js",
