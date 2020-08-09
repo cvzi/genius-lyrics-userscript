@@ -20,5 +20,6 @@
   "bugs": {
     "url": "https://github.com/cvzi/GeniusLyricsUserscriptLibrary/issues"
   },
-  "homepage": "https://github.com/cvzi/GeniusLyricsUserscriptLibrary"
+  "homepage": "https://github.com/cvzi/GeniusLyricsUserscriptLibrary",
+  "publishConfig": { "registry": "https://npm.pkg.github.com/" }
 }
