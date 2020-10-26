@@ -1593,7 +1593,7 @@ Genius:  ${originalUrl}
       }
       const hitFromCache = getLyricsSelection(songTitle, songArtists)
       if (!force && hitFromCache) {
-        showLyrics(hitFromCache, true)
+        showLyrics(hitFromCache, 1)
       } else {
         geniusSearch(songTitle + ' ' + songArtists, function geniusSearchCb (r) {
           const hits = r.response.sections[0].hits
@@ -1611,7 +1611,7 @@ Genius:  ${originalUrl}
               }
             }
           } else if (hits.length === 1) {
-            showLyrics(hits[0])
+            showLyrics(hits[0], 1)
           } else {
             custom.listSongs(hits)
           }
@@ -1675,8 +1675,8 @@ Genius:  ${originalUrl}
     })
     bar.appendChild(configButton)
 
-    // Wrong lyrics
-    if (searchresultsLengths === 0) {
+    if (searchresultsLengths === 1) {
+      // Wrong lyrics button
       bar.appendChild(separator.cloneNode(true))
 
       const wrongLyricsButton = document.createElement('a')
@@ -1689,10 +1689,8 @@ Genius:  ${originalUrl}
         custom.showSearchField(genius.current.artists + ' ' + genius.current.title)
       })
       bar.appendChild(wrongLyricsButton)
-    }
-
-    // Back button
-    if (searchresultsLengths) {
+    } else if (searchresultsLengths > 1) {
+      // Back button
       bar.appendChild(separator.cloneNode(true))
 
       const backbutton = document.createElement('a')
