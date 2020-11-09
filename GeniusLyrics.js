@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      4
+// @version      4.0.0
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2020, cuzi (https://github.com/cvzi)
 // @supportURL   https://github.com/cvzi/GeniusLyricsUserscriptLibrary/issues
@@ -85,11 +85,11 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     }
   }
 
-  var requestCache = {}
-  var selectionCache = {}
-  var theme
-  var annotationsEnabled = true
-  var onMessage = []
+  let requestCache = {}
+  let selectionCache = {}
+  let theme
+  let annotationsEnabled = true
+  const onMessage = []
 
   function getHostname (url) {
     const a = document.createElement('a')
@@ -222,8 +222,8 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       onload: function xmlHttpRequestOnLoad (response) {
         const time = (new Date()).toJSON()
         // Chrome fix: Otherwise JSON.stringify(requestCache) omits responseText
-        var newobj = {}
-        for (var key in response) {
+        const newobj = {}
+        for (const key in response) {
           newobj[key] = response[key]
         }
         newobj.responseText = response.responseText
@@ -361,9 +361,6 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       scripts: function themeGeniusScripts () {
         const onload = []
 
-        // Define globals
-        var annotations1234
-
         // Hide footer
         function hideFooter895 () {
           const f = document.querySelectorAll('.footer div')
@@ -412,16 +409,16 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
             e.className = e.className.replace(/\breferent--yellow\b/, '').replace(/\breferent--highlighted\b/, '')
           })
           this.className += ' referent--yellow referent--highlighted'
-          if (typeof annotations1234 === 'undefined') {
+          if (!('annotations1234' in window)) {
             if (document.getElementById('annotationsdata1234')) {
-              annotations1234 = JSON.parse(document.getElementById('annotationsdata1234').innerHTML)
+              window.annotations1234 = JSON.parse(document.getElementById('annotationsdata1234').innerHTML)
             } else {
-              annotations1234 = {}
+              window.annotations1234 = {}
               console.log('No annotation data found #annotationsdata1234')
             }
           }
-          if (id in annotations1234) {
-            const annotation = annotations1234[id][0]
+          if (id in window.annotations1234) {
+            const annotation = window.annotations1234[id][0]
             const main = document.querySelector('.song_body.column_layout .column_layout-column_span.column_layout-column_span--secondary')
             main.style.paddingRight = 0
             main.innerHTML = ''
@@ -440,7 +437,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         }
         onload.push(function () {
           if (document.getElementById('annotationsdata1234')) {
-            annotations1234 = JSON.parse(document.getElementById('annotationsdata1234').innerHTML)
+            window.annotations1234 = JSON.parse(document.getElementById('annotationsdata1234').innerHTML)
           }
         })
 
@@ -532,9 +529,6 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       name: 'Genius React',
       scripts: function themeGeniusReactScripts () {
         const onload = []
-
-        // Define globals
-        var annotations1234
 
         function hideStuff () {
         // Hide "This is a work in progress"
@@ -733,18 +727,18 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
           this.classList.add('highlighted')
 
           // Load all annotations
-          if (typeof annotations1234 === 'undefined') {
+          if (!('annotations1234' in window)) {
             if (document.getElementById('annotationsdata1234')) {
-              annotations1234 = JSON.parse(document.getElementById('annotationsdata1234').innerHTML)
+              window.annotations1234 = JSON.parse(document.getElementById('annotationsdata1234').innerHTML)
             } else {
-              annotations1234 = {}
+              window.annotations1234 = {}
               console.log('No annotation data found #annotationsdata1234')
             }
           }
 
-          if (id in annotations1234) {
+          if (id in window.annotations1234) {
             const [annotationTabBar, annotationContent] = getAnnotationsContainer(this)
-            annotations1234[id].forEach(function (annotation) {
+            window.annotations1234[id].forEach(function (annotation) {
             // Example for multiple annotations: https://genius.com/72796/
               const tabButton = annotationTabBar.appendChild(document.createElement('div'))
               tabButton.dataset.annotid = annotation.id
@@ -820,7 +814,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
             </div>`
             })
             annotationTabBar.appendChild(document.createElement('br')).style.clear = 'left'
-            if (annotations1234[id].length === 1) {
+            if (window.annotations1234[id].length === 1) {
               annotationTabBar.style.display = 'none'
             }
             annotationTabBar.querySelector('.tabbutton').classList.add('selected')
@@ -838,7 +832,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         }
         onload.push(function () {
           if (document.getElementById('annotationsdata1234')) {
-            annotations1234 = JSON.parse(document.getElementById('annotationsdata1234').innerHTML)
+            window.annotations1234 = JSON.parse(document.getElementById('annotationsdata1234').innerHTML)
           }
         })
 
@@ -942,8 +936,6 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       scripts: function themeCleanWhiteScripts () {
         const onload = []
 
-        var annotations1234
-
         // Hide cookies box function
         // var iv45
         // function hideCookieBox458 () {if(document.querySelector(".optanon-allow-all")){document.querySelector(".optanon-allow-all").click(); clearInterval(iv458)}}
@@ -982,16 +974,16 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
             e.className = e.className.replace(/\breferent--yellow\b/, '').replace(/\breferent--highlighted\b/, '')
           })
           this.className += ' referent--yellow referent--highlighted'
-          if (typeof annotations1234 === 'undefined') {
+          if (!('annotations1234' in window)) {
             if (document.getElementById('annotationsdata1234')) {
-              annotations1234 = JSON.parse(document.getElementById('annotationsdata1234').innerHTML)
+              window.annotations1234 = JSON.parse(document.getElementById('annotationsdata1234').innerHTML)
             } else {
-              annotations1234 = {}
+              window.annotations1234 = {}
               console.log('No annotation data found #annotationsdata1234')
             }
           }
-          if (id in annotations1234) {
-            const annotation = annotations1234[id][0]
+          if (id in window.annotations1234) {
+            const annotation = window.annotations1234[id][0]
             const main = document.querySelector('.annotationbox')
             main.innerHTML = ''
             main.style.display = 'block'
@@ -1252,9 +1244,6 @@ Genius:  ${originalUrl}
       scripts: function themeSpotifyScripts () {
         const onload = []
 
-        // Define globals
-        var annotations1234
-
         // Hide cookies box function
         // var iv458
         // function hideCookieBox458 () {if(document.querySelector(".optanon-allow-all")){document.querySelector(".optanon-allow-all").click(); clearInterval(iv458)}}
@@ -1283,16 +1272,16 @@ Genius:  ${originalUrl}
             e.className = e.className.replace(/\breferent--yellow\b/, '').replace(/\breferent--highlighted\b/, '')
           })
           this.className += ' referent--yellow referent--highlighted'
-          if (typeof annotations1234 === 'undefined') {
+          if (!('annotations1234' in window)) {
             if (document.getElementById('annotationsdata1234')) {
-              annotations1234 = JSON.parse(document.getElementById('annotationsdata1234').innerHTML)
+              window.annotations1234 = JSON.parse(document.getElementById('annotationsdata1234').innerHTML)
             } else {
-              annotations1234 = {}
+              window.nnotations1234 = {}
               console.log('No annotation data found #annotationsdata1234')
             }
           }
-          if (id in annotations1234) {
-            const annotation = annotations1234[id][0]
+          if (id in window.annotations1234) {
+            const annotation = window.annotations1234[id][0]
             const main = document.querySelector('.annotationbox')
             main.innerHTML = ''
             main.style.display = 'block'
@@ -1330,7 +1319,7 @@ Genius:  ${originalUrl}
 
         onload.push(function () {
           if (document.getElementById('annotationsdata1234')) {
-            annotations1234 = JSON.parse(document.getElementById('annotationsdata1234').innerHTML)
+            window.annotations1234 = JSON.parse(document.getElementById('annotationsdata1234').innerHTML)
           }
         })
 

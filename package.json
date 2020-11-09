@@ -1,27 +1,39 @@
 {
-  "name": "@cvzi/genius-lyrics-userscript",
-  "version": "3.0.0",
+  "name": "genius-lyrics-userscript",
+  "version": "4.0.0",
   "description": "A userscript library to show lyrics from genius.com on other websites",
   "main": "GeniusLyrics.js",
   "scripts": {
-    "test": "standard"
+    "test": "standard",
+    "lint": "standard --fix",
+    "start": "node -r esm index.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cvzi/GeniusLyricsUserscriptLibrary.git"
+    "url": "github:cvzi/GeniusLyricsUserscriptLibrary.git"
   },
   "keywords": [
     "genius",
     "lyrics",
-    "userscript"
+    "userscript",
+    "tampermonkey"
   ],
-  "author": "cuzi@openmail.cc",
+  "author": "cuzi",
   "license": "GPL-3.0-or-later",
   "bugs": {
-    "url": "https://github.com/cvzi/GeniusLyricsUserscriptLibrary/issues"
+    "url": "https://github.com/cvzi/GeniusLyricsUserscriptLibrary/issues",
+    "email": "cuzi@openmail.cc"
   },
   "homepage": "https://github.com/cvzi/GeniusLyricsUserscriptLibrary",
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/"
+  },
+  "devDependencies": {
+    "standard": "^16.0.1"
+  },
+  "standard": {
+    "ignore": [
+      "!.github/"
+    ]
   }
 }
