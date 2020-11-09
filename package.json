@@ -5,8 +5,7 @@
   "main": "GeniusLyrics.js",
   "scripts": {
     "test": "standard",
-    "lint": "standard --fix",
-    "start": "node -r esm index.js"
+    "lint": "standard --fix"
   },
   "repository": {
     "type": "git",
