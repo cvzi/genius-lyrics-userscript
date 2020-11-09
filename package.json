@@ -1,6 +1,6 @@
 {
   "name": "genius-lyrics-userscript",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "A userscript library to show lyrics from genius.com on other websites",
   "main": "GeniusLyrics.js",
   "scripts": {
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "github:cvzi/GeniusLyricsUserscriptLibrary.git"
+    "url": "github:cvzi/genius-lyrics-userscript.git"
   },
   "keywords": [
     "genius",
@@ -20,13 +20,10 @@
   "author": "cuzi",
   "license": "GPL-3.0-or-later",
   "bugs": {
-    "url": "https://github.com/cvzi/GeniusLyricsUserscriptLibrary/issues",
+    "url": "https://github.com/cvzi/genius-lyrics-userscript/issues",
     "email": "cuzi@openmail.cc"
   },
-  "homepage": "https://github.com/cvzi/GeniusLyricsUserscriptLibrary",
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/"
-  },
+  "homepage": "https://github.com/cvzi/genius-lyrics-userscript",
   "devDependencies": {
     "standard": "^16.0.1"
   },

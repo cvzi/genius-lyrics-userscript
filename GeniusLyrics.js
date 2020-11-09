@@ -3,12 +3,12 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      4.0.0
+// @version      4.0.1
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2020, cuzi (https://github.com/cvzi)
-// @supportURL   https://github.com/cvzi/GeniusLyricsUserscriptLibrary/issues
+// @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
 // ==/UserLibrary==
-// @homepageURL  https://github.com/cvzi/GeniusLyricsUserscriptLibrary
+// @homepageURL  https://github.com/cvzi/genius-lyrics-userscript
 // @grant        GM.xmlHttpRequest
 // @grant        GM.getValue
 // @grant        GM.setValue
@@ -1170,7 +1170,7 @@ Genius:  ${originalUrl}
 
 </pre><br>
         You can simply post the information on github:<br>
-        <a target="_blank" href="https://github.com/cvzi/GeniusLyricsUserscriptLibrary/issues/1">https://github.com/cvzi/GeniusLyricsUserscriptLibrary/issues/1</a>
+        <a target="_blank" href="https://github.com/cvzi/genius-lyrics-userscript/issues/1">https://github.com/cvzi/genius-lyrics-userscript/issues/1</a>
         <br>
         or via email: <a target="_blank" href="mailto:cuzi@openmail.cc">cuzi@openmail.cc</a>
         <br>
@@ -1894,7 +1894,7 @@ Genius:  ${originalUrl}
     // Footer
     div = win.appendChild(document.createElement('div'))
     div.innerHTML = `<p style="font-size:15px;">
-      Powered by <a style="font-size:15px;" target="_blank" href="https://github.com/cvzi/GeniusLyricsUserscriptLibrary/">GeniusLyrics.js</a>, Copyright © 2019 <a style="font-size:15px;" href="mailto:cuzi@openmail.cc">cuzi</a>.
+      Powered by <a style="font-size:15px;" target="_blank" href="https://github.com/cvzi/genius-lyrics-userscript/">GeniusLyrics.js</a>, Copyright © 2019 <a style="font-size:15px;" href="mailto:cuzi@openmail.cc">cuzi</a>.
       <br>Licensed under the GNU General Public License v3.0</p>`
   }
 
