@@ -6,4 +6,4 @@ It's primarily designed for Firefox with [Tampermonkey](https://addons.mozilla.o
 
 This **DOES NOT** work with Greasemonkey because of [this bug greasemonkey/issues/2574](https://github.com/greasemonkey/greasemonkey/issues/2574) in Greasemonkey.
 
-![Codestyle standard status](https://github.com/cvzi/genius-lyrics-userscript/workflows/standardjs/badge.svg)
+[![Codestyle standard status](https://github.com/cvzi/genius-lyrics-userscript/workflows/standardjs/badge.svg)](https://standardjs.com/)
