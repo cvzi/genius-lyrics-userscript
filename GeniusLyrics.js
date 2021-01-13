@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      4.0.1
+// @version      4.1.0
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2020, cuzi (https://github.com/cvzi)
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -1601,6 +1601,20 @@ Genius:  ${originalUrl}
             }
           } else if (hits.length === 1) {
             showLyrics(hits[0], 1)
+          } else if(songArtistsArr.length === 1) {
+            // Check if one result is an exact match
+            let exactMatches = []
+            for (let i = 0; i < hits.length; i++) {
+              if (hits[i].result.title.toLowerCase() === songTitle.toLowerCase() && hits[i].result.primary_artist.name.toLowerCase() === songArtistsArr[0].toLowerCase()) {
+                exactMatches.push(hits[i])
+              }
+            }
+            if (exactMatches.length === 1) {
+              showLyrics(exactMatches[0], hits.length)
+            } else {
+              // Multiple matches and not one exact match, let user decide
+              custom.listSongs(hits)
+            }
           } else {
             custom.listSongs(hits)
           }
