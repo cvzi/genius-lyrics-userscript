@@ -1601,9 +1601,9 @@ Genius:  ${originalUrl}
             }
           } else if (hits.length === 1) {
             showLyrics(hits[0], 1)
-          } else if(songArtistsArr.length === 1) {
+          } else if (songArtistsArr.length === 1) {
             // Check if one result is an exact match
-            let exactMatches = []
+            const exactMatches = []
             for (let i = 0; i < hits.length; i++) {
               if (hits[i].result.title.toLowerCase() === songTitle.toLowerCase() && hits[i].result.primary_artist.name.toLowerCase() === songArtistsArr[0].toLowerCase()) {
                 exactMatches.push(hits[i])
