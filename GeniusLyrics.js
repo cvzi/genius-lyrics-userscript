@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      4.1.3
+// @version      5.0.0
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2020, cuzi (https://github.com/cvzi)
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -31,8 +31,6 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-// TODO save scroll speed global and per song
-// TODO pause button for instrumental parts
 
 /* global Reflect */
 
@@ -69,12 +67,14 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     },
     f: {
       metricPrefix: metricPrefix,
+      cleanUpSongTitle: cleanUpSongTitle,
       showLyrics: showLyrics,
       loadLyrics: loadLyrics,
       rememberLyricsSelection: rememberLyricsSelection,
       getLyricsSelection: getLyricsSelection,
       geniusSearch: geniusSearch,
-      searchByQuery: searchByQuery
+      searchByQuery: searchByQuery,
+      scrollLyrics: scrollLyrics
     },
     current: {
       title: '',
@@ -82,13 +82,15 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     },
     iv: {
       main: null
-    }
+    },
+    debug: false
   }
 
   let requestCache = {}
   let selectionCache = {}
   let theme
   let annotationsEnabled = true
+  let autoScrollEnabled = false
   const onMessage = []
 
   function getHostname (url) {
@@ -128,6 +130,27 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     const sizes = ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y']
     const i = Math.floor(Math.log(n) / Math.log(k))
     return parseFloat((n / Math.pow(k, i)).toFixed(dm)) + sizes[i]
+  }
+
+  function cleanUpSongTitle (songTitle) {
+    // Remove featuring artists and version info from song title
+    songTitle = songTitle.replace(/\((master|stereo|mono|anniversary|digital|edition|naked|original|re|ed|no.*?\d+|mix|version|\d+th|\d{4}|\s|\.|-|\/)+\)/i, '').trim()
+    songTitle = songTitle.replace(/fe?a?t\.?u?r?i?n?g?\s+[^)]+/i, '')
+    songTitle = songTitle.replace(/\(\s*\)/, ' ').replace('"', ' ').replace('[', ' ').replace(']', ' ').replace('|', ' ')
+    songTitle = songTitle.replace(/\s\s+/, ' ')
+    songTitle = songTitle.trim()
+    return songTitle
+  }
+
+  function sumOffsets (obj, sums) {
+    sums = (typeof sums !== 'undefined') ? sums : { left: 0, top: 0 }
+    if (!obj) {
+      return sums
+    } else {
+      sums.left += obj.offsetLeft
+      sums.top += obj.offsetTop
+      return sumOffsets(obj.offsetParent, sums)
+    }
   }
 
   function parsePreloadedStateData (obj, parent) {
@@ -218,7 +241,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       method: obj.method ? obj.method : 'GET',
       data: obj.data,
       headers: headers,
-      onerror: obj.error ? obj.error : function xmlHttpRequestGenericOnError (response) { console.log('xmlHttpRequestGenericOnError: ' + response) },
+      onerror: obj.error ? obj.error : function xmlHttpRequestGenericOnError (response) { console.error('xmlHttpRequestGenericOnError: ' + response) },
       onload: function xmlHttpRequestOnLoad (response) {
         const time = (new Date()).toJSON()
         // Chrome fix: Otherwise JSON.stringify(requestCache) omits responseText
@@ -414,7 +437,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
               window.annotations1234 = JSON.parse(document.getElementById('annotationsdata1234').innerHTML)
             } else {
               window.annotations1234 = {}
-              console.log('No annotation data found #annotationsdata1234')
+              console.warn('No annotation data found #annotationsdata1234')
             }
           }
           if (id in window.annotations1234) {
@@ -523,6 +546,131 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         const parts = html.split('</head>')
         html = parts[0] + '\n' + headhtml + '\n</head>' + parts.slice(1).join('</head>')
         return cb(html)
+      },
+      scrollLyrics: function (position) {
+        window.staticOffsetTop = 'staticOffsetTop' in window ? window.staticOffsetTop : -200
+
+        const div = document.querySelector('.lyrics')
+        const offset = sumOffsets(div)
+        const newScrollTop = offset.top + window.staticOffsetTop + div.scrollHeight * position
+
+        if (window.lastScrollTopPosition && Math.abs(window.lastScrollTopPosition - document.scrollingElement.scrollTop) > 5) {
+          window.newScrollTopPosition = newScrollTop
+          // User scrolled -> stop auto scroll
+          if (!document.getElementById('resumeAutoScrollButton')) {
+            const resumeButton = document.body.appendChild(document.createElement('div'))
+            const resumeButtonFromHere = document.body.appendChild(document.createElement('div'))
+
+            resumeButton.setAttribute('id', 'resumeAutoScrollButton')
+            resumeButton.setAttribute('title', 'Resume auto scrolling')
+            resumeButton.style = 'position:fixed; right:65px; top:30%; cursor: pointer;border: 1px solid #d9d9d9;border-radius:100%;padding: 11px; z-index:101; background:white; '
+            const arrowUpDown = resumeButton.appendChild(document.createElement('div'))
+            arrowUpDown.style = 'width: 0;height: 0;margin-left: 2px;'
+            if (document.scrollingElement.scrollTop - window.newScrollTopPosition < 0) {
+              arrowUpDown.style.borderBottom = ''
+              arrowUpDown.style.borderTop = '18px solid #222'
+              arrowUpDown.style.borderRight = '9px inset transparent'
+              arrowUpDown.style.borderLeft = '9px inset transparent'
+            } else {
+              arrowUpDown.style.borderBottom = '18px solid #222'
+              arrowUpDown.style.borderTop = ''
+              arrowUpDown.style.borderRight = '9px inset transparent'
+              arrowUpDown.style.borderLeft = '9px inset transparent'
+            }
+            resumeButton.addEventListener('click', function resumeAutoScroll () {
+              resumeButton.remove()
+              resumeButtonFromHere.remove()
+              window.lastScrollTopPosition = null
+              // Resume auto scrolling
+              document.scrollingElement.scrollTo({
+                top: window.newScrollTopPosition,
+                behavior: 'smooth'
+              })
+            })
+
+            resumeButtonFromHere.setAttribute('id', 'resumeAutoScrollFromHereButton')
+            resumeButtonFromHere.setAttribute('title', 'Resume auto scrolling from here')
+            resumeButtonFromHere.style = 'position:fixed; right:20px; top:30%; cursor: pointer;border: 1px solid #d9d9d9;border-radius:100%;padding: 11px; z-index:101; background:white; '
+            const arrowRight = resumeButtonFromHere.appendChild(document.createElement('div'))
+            arrowRight.style = 'width: 0;height: 0;border-top: 9px inset transparent;border-bottom: 9px inset transparent;border-left: 15px solid #222;margin-left: 2px;'
+            resumeButtonFromHere.addEventListener('click', function resumeAutoScrollFromHere () {
+              resumeButton.remove()
+              resumeButtonFromHere.remove()
+              // Resume auto scrolling from current position
+              document.querySelectorAll('.scrolllabel').forEach((e) => e.remove())
+              window.first = false
+              window.lastScrollTopPosition = null
+              window.staticOffsetTop += document.scrollingElement.scrollTop - window.newScrollTopPosition
+            })
+          } else {
+            const arrowUpDown = document.querySelector('#resumeAutoScrollButton div')
+            if (document.scrollingElement.scrollTop - window.newScrollTopPosition < 0) {
+              arrowUpDown.style.borderBottom = ''
+              arrowUpDown.style.borderTop = '18px solid #222'
+              arrowUpDown.style.borderRight = '9px inset transparent'
+              arrowUpDown.style.borderLeft = '9px inset transparent'
+            } else {
+              arrowUpDown.style.borderBottom = '18px solid #222'
+              arrowUpDown.style.borderTop = ''
+              arrowUpDown.style.borderRight = '9px inset transparent'
+              arrowUpDown.style.borderLeft = '9px inset transparent'
+            }
+          }
+          return
+        }
+
+        window.lastScrollTopPosition = newScrollTop
+        document.scrollingElement.scrollTo({
+          top: newScrollTop,
+          behavior: 'smooth'
+        })
+
+        if (genius.debug) {
+          if (!window.first) {
+            window.first = true
+
+            for (let i = 0; i < 11; i++) {
+              const label = document.body.appendChild(document.createElement('div'))
+              label.classList.add('scrolllabel')
+              label.appendChild(document.createTextNode(`${i * 10}% + ${window.staticOffsetTop}px`))
+              label.style.position = 'absolute'
+              label.style.top = (offset.top + window.staticOffsetTop + div.scrollHeight * 0.1 * i) + 'px'
+              label.style.color = 'rgba(255,0,0,0.5)'
+              label.style.zIndex = 1000
+            }
+
+            let label = document.body.appendChild(document.createElement('div'))
+            label.classList.add('scrolllabel')
+            label.appendChild(document.createTextNode(`Start @ offset.top +  window.staticOffsetTop = ${offset.top}px + ${window.staticOffsetTop}px`))
+            label.style.position = 'absolute'
+            label.style.top = offset.top + window.staticOffsetTop + 'px'
+            label.style.left = '200px'
+            label.style.color = '#008000a6'
+            label.style.zIndex = 1000
+
+            label = document.body.appendChild(document.createElement('div'))
+            label.classList.add('scrolllabel')
+            label.appendChild(document.createTextNode(`Base @ offset.top = ${offset.top}px`))
+            label.style.position = 'absolute'
+            label.style.top = offset.top + 'px'
+            label.style.left = '200px'
+            label.style.color = '#008000a6'
+            label.style.zIndex = 1000
+          }
+
+          let indicator = document.getElementById('scrollindicator')
+          if (!indicator) {
+            indicator = document.body.appendChild(document.createElement('div'))
+            indicator.classList.add('scrolllabel')
+            indicator.setAttribute('id', 'scrollindicator')
+            indicator.style.position = 'absolute'
+            indicator.style.left = '150px'
+            indicator.style.color = '#00dbff'
+            indicator.style.zIndex = 1000
+          }
+          indicator.style.top = (offset.top + window.staticOffsetTop + div.scrollHeight * position) + 'px'
+          indicator.innerHTML = `${parseInt(position * 100)}%  -> ${parseInt(newScrollTop)}px`
+        }
       }
     },
     geniusReact: {
@@ -1558,13 +1706,13 @@ Genius:  ${originalUrl}
       if (!genius.option.themeKey.endsWith('React') && (genius.option.themeKey + 'React') in themes) {
         genius.option.themeKey += 'React'
         theme = themes[genius.option.themeKey]
-        console.log(`Temporarily activated React theme: ${theme.name}`)
+        console.debug(`Temporarily activated React theme: ${theme.name}`)
       }
     } else {
       if (genius.option.themeKey.endsWith('React') && genius.option.themeKey.substring(0, genius.option.themeKey.length - 5) in themes) {
         genius.option.themeKey = genius.option.themeKey.substring(0, genius.option.themeKey.length - 5)
         theme = themes[genius.option.themeKey]
-        console.log(`Temporarily deactivated React theme: ${theme.name}`)
+        console.debug(`Temporarily deactivated React theme: ${theme.name}`)
       }
     }
     return theme.combine(song, html, annotations, cb)
@@ -1748,7 +1896,11 @@ Genius:  ${originalUrl}
           const iv = window.setInterval(function () {
             spinner.innerHTML = '2'
             spinnerHolder.title = 'Rendering...'
-            iframe.contentWindow.postMessage({ iAm: custom.scriptName, type: 'writehtml', html: html, themeKey: genius.option.themeKey }, '*')
+            if (iframe.contentWindow && iframe.contentWindow.postMessage) {
+              iframe.contentWindow.postMessage({ iAm: custom.scriptName, type: 'writehtml', html: html, themeKey: genius.option.themeKey }, '*')
+            } else {
+              console.debug('iframe.contentWindow is ', iframe.contentWindow)
+            }
           }, 1500)
           const clear = function () {
             if ('onLyricsReady' in custom) {
@@ -1770,6 +1922,20 @@ Genius:  ${originalUrl}
         })
       })
     })
+  }
+
+  function scrollLyrics (positionFraction) {
+    if (!autoScrollEnabled) {
+      return
+    }
+    if (!('scrollLyrics' in theme)) {
+      return
+    }
+    // Relay the event to the iframe
+    const iframe = document.getElementById('lyricsiframe')
+    if (iframe && iframe.contentWindow && iframe.contentWindow.postMessage) {
+      iframe.contentWindow.postMessage({ iAm: custom.scriptName, type: 'scrollLyrics', position: positionFraction }, '*')
+    }
   }
 
   function searchByQuery (query, container) {
@@ -1879,6 +2045,26 @@ Genius:  ${originalUrl}
     label.setAttribute('for', 'checkAnnotationsEnabled748')
     label.appendChild(document.createTextNode(' Show annotations'))
 
+    // Switch: Automatic scrolling
+    div = win.appendChild(document.createElement('div'))
+    const checkAutoScrollEnabled = div.appendChild(document.createElement('input'))
+    checkAutoScrollEnabled.type = 'checkbox'
+    checkAutoScrollEnabled.id = 'checkAutoScrollEnabled748'
+    checkAutoScrollEnabled.checked = autoScrollEnabled === true
+    const onAutoScrollEnabled = function onAutoScrollEnabledListener () {
+      if (checkAutoScrollEnabled.checked !== autoScrollEnabled) {
+        autoScrollEnabled = checkAutoScrollEnabled.checked === true
+        custom.addLyrics(true)
+        custom.GM.setValue('autoscrollenabled', autoScrollEnabled)
+      }
+    }
+    checkAutoScrollEnabled.addEventListener('click', onAutoScrollEnabled)
+    checkAutoScrollEnabled.addEventListener('change', onAutoScrollEnabled)
+
+    label = div.appendChild(document.createElement('label'))
+    label.setAttribute('for', 'checkAutoScrollEnabled748')
+    label.appendChild(document.createTextNode(' Automatic scrolling (currently only supported in Genius theme)'))
+
     // Custom buttons
     if ('config' in custom) {
       custom.config.forEach(f => f(win.appendChild(document.createElement('div'))))
@@ -1905,6 +2091,26 @@ Genius:  ${originalUrl}
         clearCacheButton.innerHTML = 'Cleared'
         selectionCache = {}
         requestCache = {}
+      })
+    })
+
+    const debugButton = div.appendChild(document.createElement('button'))
+    debugButton.title = 'Do not enable this.'
+    debugButton.style.float = 'right'
+    const updateDebugButton = function () {
+      if (genius.debug) {
+        debugButton.innerHTML = 'Debug is on'
+        debugButton.style.opacity = '1.0'
+      } else {
+        debugButton.innerHTML = 'Debug is off'
+        debugButton.style.opacity = '0.2'
+      }
+    }
+    updateDebugButton()
+    debugButton.addEventListener('click', function onDebugButtonClick () {
+      genius.debug = !genius.debug
+      custom.GM.setValue('debug', genius.debug).then(function () {
+        updateDebugButton()
       })
     })
 
@@ -2005,17 +2211,21 @@ Genius:  ${originalUrl}
 
   (function () {
     Promise.all([
+      custom.GM.getValue('debug', genius.debug),
       custom.GM.getValue('theme', genius.option.themeKey),
-      custom.GM.getValue('annotationsenabled', annotationsEnabled)
+      custom.GM.getValue('annotationsenabled', annotationsEnabled),
+      custom.GM.getValue('autoscrollenabled', autoScrollEnabled)
     ]).then(function (values) {
-      if (Object.prototype.hasOwnProperty.call(themes, values[0])) {
-        genius.option.themeKey = values[0]
+      genius.debug = !!values[0]
+      if (Object.prototype.hasOwnProperty.call(themes, values[1])) {
+        genius.option.themeKey = values[1]
       } else {
-        console.log('Invalid value for theme key: custom.GM.getValue("theme") = ' + values[0])
+        console.error('Invalid value for theme key: custom.GM.getValue("theme") = ' + values[1])
         genius.option.themeKey = Reflect.ownKeys(themes)[0]
       }
       theme = themes[genius.option.themeKey]
-      annotationsEnabled = !!values[1]
+      annotationsEnabled = !!values[2]
+      autoScrollEnabled = !!values[3]
 
       if (document.location.href.startsWith(custom.emptyURL + '#html:post')) {
         let received = false
@@ -2026,7 +2236,7 @@ Genius:  ${originalUrl}
           if ('themeKey' in e.data && Object.prototype.hasOwnProperty.call(themes, e.data.themeKey)) {
             genius.option.themeKey = e.data.themeKey
             theme = themes[genius.option.themeKey]
-            console.log(`Theme activated in iframe: ${theme.name}`)
+            console.debug(`Theme activated in iframe: ${theme.name}`)
           }
           received = true
           document.write(e.data.html)
@@ -2037,9 +2247,18 @@ Genius:  ${originalUrl}
               try {
                 func()
               } catch (e) {
-                console.log(`Error in iframe onload ${func.name ? func.name : func}: ${e}`)
+                console.error(`Error in iframe onload ${func.name ? func.name : func}: ${e}`)
               }
             })
+            // Scroll lyrics event
+            if ('scrollLyrics' in theme) {
+              window.addEventListener('message', function (e) {
+                if (typeof e.data !== 'object' || !('iAm' in e.data) || e.data.iAm !== custom.scriptName || e.data.type !== 'scrollLyrics' || !('scrollLyrics' in theme)) {
+                  return
+                }
+                theme.scrollLyrics(e.data.position)
+              })
+            }
             e.source.postMessage({ iAm: custom.scriptName, type: 'pageready' }, '*')
           }, 500)
         })
