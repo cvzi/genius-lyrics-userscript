@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.0.0
+// @version      5.1.0
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2020, cuzi (https://github.com/cvzi)
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -310,7 +310,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
 
   function loadGeniusSong (song, cb) {
     request({
-      url: song.result.url,
+      url: song.result.url, // Force react theme: + '?react=1'
       error: function loadGeniusSongOnError (response) {
         window.alert(custom.scriptName + '\n\nError loadGeniusSong(' + JSON.stringify(song) + ', cb):\n' + response)
       },
@@ -318,6 +318,135 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         cb(response.responseText)
       }
     })
+  }
+
+  function scrollLyricsFunction (lyricsContainerSelector, defaultStaticOffsetTop) {
+    // Creates a scroll function for a specific theme
+    return function scrollLyricsGeneric (position) {
+      window.staticOffsetTop = 'staticOffsetTop' in window ? window.staticOffsetTop : defaultStaticOffsetTop
+
+      const div = document.querySelector(lyricsContainerSelector)
+      const offset = sumOffsets(div)
+      const newScrollTop = offset.top + window.staticOffsetTop + div.scrollHeight * position
+
+      if (window.lastScrollTopPosition && window.lastScrollTopPosition > 0 && Math.abs(window.lastScrollTopPosition - document.scrollingElement.scrollTop) > 5) {
+        window.newScrollTopPosition = newScrollTop
+        // User scrolled -> stop auto scroll
+        if (!document.getElementById('resumeAutoScrollButton')) {
+          const resumeButton = document.body.appendChild(document.createElement('div'))
+          const resumeButtonFromHere = document.body.appendChild(document.createElement('div'))
+
+          resumeButton.setAttribute('id', 'resumeAutoScrollButton')
+          resumeButton.setAttribute('title', 'Resume auto scrolling')
+          resumeButton.style = 'position:fixed; right:65px; top:30%; cursor: pointer;border: 1px solid #d9d9d9;border-radius:100%;padding: 11px; z-index:101; background:white; '
+          const arrowUpDown = resumeButton.appendChild(document.createElement('div'))
+          arrowUpDown.style = 'width: 0;height: 0;margin-left: 2px;'
+          if (document.scrollingElement.scrollTop - window.newScrollTopPosition < 0) {
+            arrowUpDown.style.borderBottom = ''
+            arrowUpDown.style.borderTop = '18px solid #222'
+            arrowUpDown.style.borderRight = '9px inset transparent'
+            arrowUpDown.style.borderLeft = '9px inset transparent'
+          } else {
+            arrowUpDown.style.borderBottom = '18px solid #222'
+            arrowUpDown.style.borderTop = ''
+            arrowUpDown.style.borderRight = '9px inset transparent'
+            arrowUpDown.style.borderLeft = '9px inset transparent'
+          }
+          resumeButton.addEventListener('click', function resumeAutoScroll () {
+            resumeButton.remove()
+            resumeButtonFromHere.remove()
+            window.lastScrollTopPosition = null
+            // Resume auto scrolling
+            document.scrollingElement.scrollTo({
+              top: window.newScrollTopPosition,
+              behavior: 'smooth'
+            })
+          })
+
+          resumeButtonFromHere.setAttribute('id', 'resumeAutoScrollFromHereButton')
+          resumeButtonFromHere.setAttribute('title', 'Resume auto scrolling from here')
+          resumeButtonFromHere.style = 'position:fixed; right:20px; top:30%; cursor: pointer;border: 1px solid #d9d9d9;border-radius:100%;padding: 11px; z-index:101; background:white; '
+          const arrowRight = resumeButtonFromHere.appendChild(document.createElement('div'))
+          arrowRight.style = 'width: 0;height: 0;border-top: 9px inset transparent;border-bottom: 9px inset transparent;border-left: 15px solid #222;margin-left: 2px;'
+          resumeButtonFromHere.addEventListener('click', function resumeAutoScrollFromHere () {
+            resumeButton.remove()
+            resumeButtonFromHere.remove()
+            // Resume auto scrolling from current position
+            document.querySelectorAll('.scrolllabel').forEach((e) => e.remove())
+            window.first = false
+            window.lastScrollTopPosition = null
+            window.staticOffsetTop += document.scrollingElement.scrollTop - window.newScrollTopPosition
+          })
+        } else {
+          const arrowUpDown = document.querySelector('#resumeAutoScrollButton div')
+          if (document.scrollingElement.scrollTop - window.newScrollTopPosition < 0) {
+            arrowUpDown.style.borderBottom = ''
+            arrowUpDown.style.borderTop = '18px solid #222'
+            arrowUpDown.style.borderRight = '9px inset transparent'
+            arrowUpDown.style.borderLeft = '9px inset transparent'
+          } else {
+            arrowUpDown.style.borderBottom = '18px solid #222'
+            arrowUpDown.style.borderTop = ''
+            arrowUpDown.style.borderRight = '9px inset transparent'
+            arrowUpDown.style.borderLeft = '9px inset transparent'
+          }
+        }
+        return
+      }
+
+      window.lastScrollTopPosition = newScrollTop
+      document.scrollingElement.scrollTo({
+        top: newScrollTop,
+        behavior: 'smooth'
+      })
+
+      if (genius.debug) {
+        if (!window.first) {
+          window.first = true
+
+          for (let i = 0; i < 11; i++) {
+            const label = document.body.appendChild(document.createElement('div'))
+            label.classList.add('scrolllabel')
+            label.appendChild(document.createTextNode(`${i * 10}% + ${window.staticOffsetTop}px`))
+            label.style.position = 'absolute'
+            label.style.top = (offset.top + window.staticOffsetTop + div.scrollHeight * 0.1 * i) + 'px'
+            label.style.color = 'rgba(255,0,0,0.5)'
+            label.style.zIndex = 1000
+          }
+
+          let label = document.body.appendChild(document.createElement('div'))
+          label.classList.add('scrolllabel')
+          label.appendChild(document.createTextNode(`Start @ offset.top +  window.staticOffsetTop = ${offset.top}px + ${window.staticOffsetTop}px`))
+          label.style.position = 'absolute'
+          label.style.top = offset.top + window.staticOffsetTop + 'px'
+          label.style.left = '200px'
+          label.style.color = '#008000a6'
+          label.style.zIndex = 1000
+
+          label = document.body.appendChild(document.createElement('div'))
+          label.classList.add('scrolllabel')
+          label.appendChild(document.createTextNode(`Base @ offset.top = ${offset.top}px`))
+          label.style.position = 'absolute'
+          label.style.top = offset.top + 'px'
+          label.style.left = '200px'
+          label.style.color = '#008000a6'
+          label.style.zIndex = 1000
+        }
+
+        let indicator = document.getElementById('scrollindicator')
+        if (!indicator) {
+          indicator = document.body.appendChild(document.createElement('div'))
+          indicator.classList.add('scrolllabel')
+          indicator.setAttribute('id', 'scrollindicator')
+          indicator.style.position = 'absolute'
+          indicator.style.left = '150px'
+          indicator.style.color = '#00dbff'
+          indicator.style.zIndex = 1000
+        }
+        indicator.style.top = (offset.top + window.staticOffsetTop + div.scrollHeight * position) + 'px'
+        indicator.innerHTML = `${parseInt(position * 100)}%  -> ${parseInt(newScrollTop)}px`
+      }
+    }
   }
 
   function loadGeniusAnnotations (song, html, annotationsEnabled, cb) {
@@ -547,131 +676,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         html = parts[0] + '\n' + headhtml + '\n</head>' + parts.slice(1).join('</head>')
         return cb(html)
       },
-      scrollLyrics: function (position) {
-        window.staticOffsetTop = 'staticOffsetTop' in window ? window.staticOffsetTop : -200
-
-        const div = document.querySelector('.lyrics')
-        const offset = sumOffsets(div)
-        const newScrollTop = offset.top + window.staticOffsetTop + div.scrollHeight * position
-
-        if (window.lastScrollTopPosition && Math.abs(window.lastScrollTopPosition - document.scrollingElement.scrollTop) > 5) {
-          window.newScrollTopPosition = newScrollTop
-          // User scrolled -> stop auto scroll
-          if (!document.getElementById('resumeAutoScrollButton')) {
-            const resumeButton = document.body.appendChild(document.createElement('div'))
-            const resumeButtonFromHere = document.body.appendChild(document.createElement('div'))
-
-            resumeButton.setAttribute('id', 'resumeAutoScrollButton')
-            resumeButton.setAttribute('title', 'Resume auto scrolling')
-            resumeButton.style = 'position:fixed; right:65px; top:30%; cursor: pointer;border: 1px solid #d9d9d9;border-radius:100%;padding: 11px; z-index:101; background:white; '
-            const arrowUpDown = resumeButton.appendChild(document.createElement('div'))
-            arrowUpDown.style = 'width: 0;height: 0;margin-left: 2px;'
-            if (document.scrollingElement.scrollTop - window.newScrollTopPosition < 0) {
-              arrowUpDown.style.borderBottom = ''
-              arrowUpDown.style.borderTop = '18px solid #222'
-              arrowUpDown.style.borderRight = '9px inset transparent'
-              arrowUpDown.style.borderLeft = '9px inset transparent'
-            } else {
-              arrowUpDown.style.borderBottom = '18px solid #222'
-              arrowUpDown.style.borderTop = ''
-              arrowUpDown.style.borderRight = '9px inset transparent'
-              arrowUpDown.style.borderLeft = '9px inset transparent'
-            }
-            resumeButton.addEventListener('click', function resumeAutoScroll () {
-              resumeButton.remove()
-              resumeButtonFromHere.remove()
-              window.lastScrollTopPosition = null
-              // Resume auto scrolling
-              document.scrollingElement.scrollTo({
-                top: window.newScrollTopPosition,
-                behavior: 'smooth'
-              })
-            })
-
-            resumeButtonFromHere.setAttribute('id', 'resumeAutoScrollFromHereButton')
-            resumeButtonFromHere.setAttribute('title', 'Resume auto scrolling from here')
-            resumeButtonFromHere.style = 'position:fixed; right:20px; top:30%; cursor: pointer;border: 1px solid #d9d9d9;border-radius:100%;padding: 11px; z-index:101; background:white; '
-            const arrowRight = resumeButtonFromHere.appendChild(document.createElement('div'))
-            arrowRight.style = 'width: 0;height: 0;border-top: 9px inset transparent;border-bottom: 9px inset transparent;border-left: 15px solid #222;margin-left: 2px;'
-            resumeButtonFromHere.addEventListener('click', function resumeAutoScrollFromHere () {
-              resumeButton.remove()
-              resumeButtonFromHere.remove()
-              // Resume auto scrolling from current position
-              document.querySelectorAll('.scrolllabel').forEach((e) => e.remove())
-              window.first = false
-              window.lastScrollTopPosition = null
-              window.staticOffsetTop += document.scrollingElement.scrollTop - window.newScrollTopPosition
-            })
-          } else {
-            const arrowUpDown = document.querySelector('#resumeAutoScrollButton div')
-            if (document.scrollingElement.scrollTop - window.newScrollTopPosition < 0) {
-              arrowUpDown.style.borderBottom = ''
-              arrowUpDown.style.borderTop = '18px solid #222'
-              arrowUpDown.style.borderRight = '9px inset transparent'
-              arrowUpDown.style.borderLeft = '9px inset transparent'
-            } else {
-              arrowUpDown.style.borderBottom = '18px solid #222'
-              arrowUpDown.style.borderTop = ''
-              arrowUpDown.style.borderRight = '9px inset transparent'
-              arrowUpDown.style.borderLeft = '9px inset transparent'
-            }
-          }
-          return
-        }
-
-        window.lastScrollTopPosition = newScrollTop
-        document.scrollingElement.scrollTo({
-          top: newScrollTop,
-          behavior: 'smooth'
-        })
-
-        if (genius.debug) {
-          if (!window.first) {
-            window.first = true
-
-            for (let i = 0; i < 11; i++) {
-              const label = document.body.appendChild(document.createElement('div'))
-              label.classList.add('scrolllabel')
-              label.appendChild(document.createTextNode(`${i * 10}% + ${window.staticOffsetTop}px`))
-              label.style.position = 'absolute'
-              label.style.top = (offset.top + window.staticOffsetTop + div.scrollHeight * 0.1 * i) + 'px'
-              label.style.color = 'rgba(255,0,0,0.5)'
-              label.style.zIndex = 1000
-            }
-
-            let label = document.body.appendChild(document.createElement('div'))
-            label.classList.add('scrolllabel')
-            label.appendChild(document.createTextNode(`Start @ offset.top +  window.staticOffsetTop = ${offset.top}px + ${window.staticOffsetTop}px`))
-            label.style.position = 'absolute'
-            label.style.top = offset.top + window.staticOffsetTop + 'px'
-            label.style.left = '200px'
-            label.style.color = '#008000a6'
-            label.style.zIndex = 1000
-
-            label = document.body.appendChild(document.createElement('div'))
-            label.classList.add('scrolllabel')
-            label.appendChild(document.createTextNode(`Base @ offset.top = ${offset.top}px`))
-            label.style.position = 'absolute'
-            label.style.top = offset.top + 'px'
-            label.style.left = '200px'
-            label.style.color = '#008000a6'
-            label.style.zIndex = 1000
-          }
-
-          let indicator = document.getElementById('scrollindicator')
-          if (!indicator) {
-            indicator = document.body.appendChild(document.createElement('div'))
-            indicator.classList.add('scrolllabel')
-            indicator.setAttribute('id', 'scrollindicator')
-            indicator.style.position = 'absolute'
-            indicator.style.left = '150px'
-            indicator.style.color = '#00dbff'
-            indicator.style.zIndex = 1000
-          }
-          indicator.style.top = (offset.top + window.staticOffsetTop + div.scrollHeight * position) + 'px'
-          indicator.innerHTML = `${parseInt(position * 100)}%  -> ${parseInt(newScrollTop)}px`
-        }
-      }
+      scrollLyrics: scrollLyricsFunction('.lyrics', -200)
     },
     geniusReact: {
       name: 'Genius React',
@@ -1079,7 +1084,8 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         const parts = html.split('</head>')
         html = parts[0] + '\n' + headhtml + '\n</head>' + parts.slice(1).join('</head>')
         return cb(html)
-      }
+      },
+      scrollLyrics: scrollLyricsFunction('div[class^="Lyrics__Container"]', -200)
     },
 
     cleanwhite: {
@@ -1387,7 +1393,8 @@ Genius:  ${originalUrl}
         parts = html.split('</head>')
         html = parts[0] + '\n' + headhtml + '\n</head>' + parts.slice(1).join('</head>')
         return onCombine(html)
-      }
+      },
+      scrollLyrics: scrollLyricsFunction('.mylyrics', -200)
     },
 
     spotify: {
@@ -1694,7 +1701,8 @@ Genius:  ${originalUrl}
         parts = html.split('</head>')
         html = parts[0] + '\n' + headhtml + '\n</head>' + parts.slice(1).join('</head>')
         return onCombine(html)
-      }
+      },
+      scrollLyrics: scrollLyricsFunction('.mylyrics', -200)
     }
   }
 
@@ -2063,7 +2071,7 @@ Genius:  ${originalUrl}
 
     label = div.appendChild(document.createElement('label'))
     label.setAttribute('for', 'checkAutoScrollEnabled748')
-    label.appendChild(document.createTextNode(' Automatic scrolling (currently only supported in Genius theme)'))
+    label.appendChild(document.createTextNode(' Automatic scrolling'))
 
     // Custom buttons
     if ('config' in custom) {
