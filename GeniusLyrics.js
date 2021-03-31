@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.1.0
+// @version      5.1.1
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2020, cuzi (https://github.com/cvzi)
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -32,7 +32,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-/* global Reflect */
+/* global Reflect, top */
 
 if (typeof module !== 'undefined') {
   module.exports = geniusLyrics
@@ -92,6 +92,46 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   let annotationsEnabled = true
   let autoScrollEnabled = false
   const onMessage = []
+
+  let cleanWindow = null
+
+  function freshWindowFromIframe () {
+    const iframe = document.body.appendChild(document.createElement('iframe'))
+    iframe.style.display = 'none'
+    return iframe.contentWindow
+  }
+  const setTimeout = function (a, b) {
+    if (window.setTimeout.toString().indexOf('[native code]') !== -1) {
+      return window.setTimeout(a, b)
+    }
+    if (top.setTimeout.toString().indexOf('[native code]') !== -1) {
+      return top.setTimeout(a, b)
+    }
+    if (!cleanWindow && document.body) {
+      cleanWindow = freshWindowFromIframe()
+    }
+    if (cleanWindow) {
+      return cleanWindow.setTimeout(a, b)
+    } else {
+      return window.setTimeout(a, b)
+    }
+  }
+  const setInterval = function (a, b) {
+    if (window.setInterval.toString().indexOf('[native code]') !== -1) {
+      return window.setInterval(a, b)
+    }
+    if (top.setInterval.toString().indexOf('[native code]') !== -1) {
+      return top.setInterval(a, b)
+    }
+    if (!cleanWindow && document.body) {
+      cleanWindow = freshWindowFromIframe()
+    }
+    if (cleanWindow) {
+      return cleanWindow.setInterval(a, b)
+    } else {
+      return window.setInterval(a, b)
+    }
+  }
 
   function getHostname (url) {
     const a = document.createElement('a')
@@ -584,7 +624,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
             html = html.replace(/\$body/g, decodeHTML(annotation.body.html)).replace(/\$author/g, decodeHTML(annotation.created_by.name))
             div0.innerHTML = html
             targetBlankLinks145() // Change link target to _blank
-            window.setTimeout(checkAnnotationHeight458, 200) // Change link target to _blank
+            setTimeout(checkAnnotationHeight458, 200) // Change link target to _blank
           }
         }
         onload.push(function () {
@@ -613,7 +653,8 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
             a.target = '_blank'
           })
         }
-        onload.push(() => window.setTimeout(targetBlankLinks145, 1000))
+        onload.push(targetBlankLinks145)
+        onload.push(() => setTimeout(targetBlankLinks145, 1000))
 
         if (!annotationsEnabled) {
         // Remove all annotations
@@ -974,7 +1015,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
             annotationContent.querySelector('.annotationtab').classList.add('selected')
 
             // Resize iframes and images in frame
-            window.setTimeout(function () {
+            setTimeout(function () {
               const maxWidth = (document.body.clientWidth - 40) + 'px'
               annotationContent.querySelectorAll('iframe,img').forEach(function (e) {
                 e.style.maxWidth = maxWidth
@@ -1007,7 +1048,8 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
             }
           })
         }
-        onload.push(() => window.setTimeout(targetBlankLinks145, 1000))
+        onload.push(targetBlankLinks145)
+        onload.push(() => setTimeout(targetBlankLinks145, 1000))
 
         if (!annotationsEnabled) {
         // Remove all annotations
@@ -1096,7 +1138,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         // Hide cookies box function
         // var iv45
         // function hideCookieBox458 () {if(document.querySelector(".optanon-allow-all")){document.querySelector(".optanon-allow-all").click(); clearInterval(iv458)}}
-        // onload.push(function() { iv458 = window.setInterval(hideCookieBox458, 500) }
+        // onload.push(function() { iv458 = setInterval(hideCookieBox458, 500) }
 
         // Hide footer
         function hideFooter895 () {
@@ -1156,10 +1198,10 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
             html = html.replace(/\$body/g, decodeHTML(annotation.body.html)).replace(/\$author/g, decodeHTML(annotation.created_by.name))
             div0.innerHTML = html
             targetBlankLinks145() // Change link target to _blank
-            window.setTimeout(function () { // hide on click
+            setTimeout(function () { // hide on click
               document.body.addEventListener('click', hideAnnotationOnClick1234)
             }, 100)
-            window.setTimeout(function () { // Resize iframes and images in frame
+            setTimeout(function () { // Resize iframes and images in frame
               const maxWidth = (document.body.clientWidth - 40) + 'px'
               main.querySelectorAll('iframe,img').forEach(function (e) {
                 e.style.maxWidth = maxWidth
@@ -1215,7 +1257,8 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
             a.target = '_blank'
           })
         }
-        onload.push(() => window.setTimeout(targetBlankLinks145, 500))
+        onload.push(targetBlankLinks145)
+        onload.push(() => setTimeout(targetBlankLinks145, 500))
 
         if (!annotationsEnabled) {
         // Remove all annotations
@@ -1405,7 +1448,7 @@ Genius:  ${originalUrl}
         // Hide cookies box function
         // var iv458
         // function hideCookieBox458 () {if(document.querySelector(".optanon-allow-all")){document.querySelector(".optanon-allow-all").click(); clearInterval(iv458)}}
-        // onload.push(function() { iv458 = window.setInterval(hideCookieBox458, 500) })
+        // onload.push(function() { iv458 = setInterval(hideCookieBox458, 500) })
 
         // Hide footer
         function hideFooter895 () { const f = document.querySelectorAll('.footer div'); if (f.length) { removeIfExists(f[0]); removeIfExists(f[1]) } }
@@ -1455,7 +1498,7 @@ Genius:  ${originalUrl}
             html = html.replace(/\$body/g, decodeHTML(annotation.body.html)).replace(/\$author/g, decodeHTML(annotation.created_by.name))
             div0.innerHTML = html
             targetBlankLinks145() // Change link target to _blank
-            window.setTimeout(function () { document.body.addEventListener('click', hideAnnotationOnClick1234) }, 100) // hide on click
+            setTimeout(function () { document.body.addEventListener('click', hideAnnotationOnClick1234) }, 100) // hide on click
           }
         }
         function hideAnnotationOnClick1234 (ev) {
@@ -1512,7 +1555,7 @@ Genius:  ${originalUrl}
             a.target = '_blank'
           })
         }
-        onload.push(() => window.setTimeout(targetBlankLinks145, 1000))
+        onload.push(() => setTimeout(targetBlankLinks145, 1000))
 
         if (!annotationsEnabled) {
         // Remove all annotations
@@ -1901,7 +1944,7 @@ Genius:  ${originalUrl}
           spinner.innerHTML = '3'
           spinnerHolder.title = 'Loading page...'
           iframe.src = custom.emptyURL + '#html:post'
-          const iv = window.setInterval(function () {
+          const iv = setInterval(function () {
             spinner.innerHTML = '2'
             spinnerHolder.title = 'Rendering...'
             if (iframe.contentWindow && iframe.contentWindow.postMessage) {
@@ -1915,7 +1958,7 @@ Genius:  ${originalUrl}
               custom.onLyricsReady(song, container)
             }
             window.clearInterval(iv)
-            window.setTimeout(function () {
+            setTimeout(function () {
               iframe.style.opacity = 1.0
               spinnerHolder.remove()
             }, 1000)
@@ -1926,7 +1969,7 @@ Genius:  ${originalUrl}
             spinnerHolder.title = 'Calculating...'
           })
           addOneMessageListener('pageready', clear)
-          window.setTimeout(clear, 30000)
+          setTimeout(clear, 30000)
         })
       })
     })
@@ -2249,7 +2292,7 @@ Genius:  ${originalUrl}
           received = true
           document.write(e.data.html)
           e.source.postMessage({ iAm: custom.scriptName, type: 'htmlwritten' }, '*')
-          window.setTimeout(function () {
+          setTimeout(function () {
             const onload = theme.scripts()
             onload.forEach(function (func) {
               try {
@@ -2277,7 +2320,7 @@ Genius:  ${originalUrl}
         loadCache()
         addCss()
         if ('main' in custom) {
-          genius.iv.main = window.setInterval(custom.main, 2000)
+          genius.iv.main = setInterval(custom.main, 2000)
         }
         if ('onResize' in custom) {
           window.addEventListener('resize', custom.onResize)
