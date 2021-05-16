@@ -41,6 +41,11 @@ if (typeof module !== 'undefined') {
 function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   'use strict'
 
+  if (typeof custom !== 'object') {
+    if (typeof window !== 'undefined') window.alert('geniusLyrics requires options argument')
+    throw new Error('geniusLyrics requires options argument')
+  }
+
   Array.prototype.forEach.call([
     'GM',
     'scriptName',
@@ -54,8 +59,8 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     'setFrameDimensions'
   ], function (valName) {
     if (!(valName in custom)) {
-      window.alert(`geniusLyrics requires parameter ${valName}`)
-      throw new Error(`geniusLyrics requires parameter ${valName}`)
+      if (typeof window !== 'undefined') window.alert(`geniusLyrics requires parameter ${valName}`)
+      throw new Error(`geniusLyrics() requires parameter ${valName}`)
     }
   })
 
