@@ -1,6 +1,6 @@
 {
   "name": "genius-lyrics-userscript",
-  "version": "5.1.2",
+  "version": "5.1.3",
   "description": "A userscript library to show lyrics from genius.com on other websites",
   "main": "GeniusLyrics.js",
   "scripts": {
