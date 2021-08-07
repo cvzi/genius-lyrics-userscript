@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.2.0
+// @version      5.2.1
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2020, cuzi (https://github.com/cvzi)
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -2196,7 +2196,7 @@ Genius:  ${originalUrl}
     })
   }
 
-  function addKeyboardShortcut (keyParams) {
+  function pageKeyboardEvent (keyParams, fct) {
     document.addEventListener('keypress', function onKeyPress (ev) {
       if (ev.key === keyParams.key && ev.shiftKey === keyParams.shiftKey &&
       ev.ctrlKey === keyParams.ctrlKey && ev.altKey === keyParams.altKey) {
@@ -2210,22 +2210,45 @@ Genius:  ${originalUrl}
           }
           e = e.parentNode
         }
-        if (!document.getElementById('lyricsiframe')) {
-          genius.option.autoShow = true // Temporarily enable showing lyrics automatically on song change
-          window.clearInterval(genius.iv.main)
-          if ('main' in custom) {
-            genius.iv.main = window.setInterval(custom.main, 2000)
-          }
-          if ('addLyrics' in custom) {
-            custom.addLyrics(true)
-          }
-        } else {
-          genius.option.autoShow = false // Temporarily disable showing lyrics automatically on song change
-          clearInterval(genius.iv.main)
-          if ('hideLyrics' in custom) {
-            custom.hideLyrics()
-          }
-        }
+        return fct(ev)
+      }
+    })
+  }
+
+  function toggleLyrics () {
+    if (!document.getElementById('lyricsiframe')) {
+      genius.option.autoShow = true // Temporarily enable showing lyrics automatically on song change
+      window.clearInterval(genius.iv.main)
+      if ('main' in custom) {
+        genius.iv.main = window.setInterval(custom.main, 2000)
+      }
+      if ('addLyrics' in custom) {
+        custom.addLyrics(true)
+      }
+    } else {
+      genius.option.autoShow = false // Temporarily disable showing lyrics automatically on song change
+      clearInterval(genius.iv.main)
+      if ('hideLyrics' in custom) {
+        custom.hideLyrics()
+      }
+    }
+  }
+
+  function addKeyboardShortcut (keyParams) {
+    window.addEventListener('message', function (e) {
+      if ('iAm' in e.data && e.data.iAm === custom.scriptName && e.data.type === 'togglelyrics') {
+        toggleLyrics()
+      }
+    })
+    pageKeyboardEvent(keyParams, function (ev) {
+      toggleLyrics()
+    })
+  }
+
+  function addKeyboardShortcutInFrame (keyParams) {
+    pageKeyboardEvent(keyParams, function (ev) {
+      if (window.parent) {
+        window.parent.postMessage({ iAm: custom.scriptName, type: 'togglelyrics' }, '*')
       }
     })
   }
@@ -2348,6 +2371,9 @@ Genius:  ${originalUrl}
                 }
                 theme.scrollLyrics(e.data.position)
               })
+            }
+            if ('toggleLyricsKey' in custom) {
+              addKeyboardShortcutInFrame(custom.toggleLyricsKey)
             }
             e.source.postMessage({ iAm: custom.scriptName, type: 'pageready' }, '*')
           }, 500)
