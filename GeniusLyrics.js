@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.1.3
+// @version      5.2.0
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2020, cuzi (https://github.com/cvzi)
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -1955,7 +1955,7 @@ Genius:  ${originalUrl}
             if (iframe.contentWindow && iframe.contentWindow.postMessage) {
               iframe.contentWindow.postMessage({ iAm: custom.scriptName, type: 'writehtml', html: html, themeKey: genius.option.themeKey }, '*')
             } else {
-              console.debug('iframe.contentWindow is ', iframe.contentWindow)
+              // console.debug('iframe.contentWindow is ', iframe.contentWindow)
             }
           }, 1500)
           const clear = function () {
@@ -2196,6 +2196,40 @@ Genius:  ${originalUrl}
     })
   }
 
+  function addKeyboardShortcut (keyParams) {
+    document.addEventListener('keypress', function onKeyPress (ev) {
+      if (ev.key === keyParams.key && ev.shiftKey === keyParams.shiftKey &&
+      ev.ctrlKey === keyParams.ctrlKey && ev.altKey === keyParams.altKey) {
+        let e = ev.target
+        while (e) {
+          // Filter input, textarea, etc.
+          if (typeof e.value !== 'undefined') {
+            console.log(e)
+            console.log(e.value)
+            return
+          }
+          e = e.parentNode
+        }
+        if (!document.getElementById('lyricsiframe')) {
+          genius.option.autoShow = true // Temporarily enable showing lyrics automatically on song change
+          window.clearInterval(genius.iv.main)
+          if ('main' in custom) {
+            genius.iv.main = window.setInterval(custom.main, 2000)
+          }
+          if ('addLyrics' in custom) {
+            custom.addLyrics(true)
+          }
+        } else {
+          genius.option.autoShow = false // Temporarily disable showing lyrics automatically on song change
+          clearInterval(genius.iv.main)
+          if ('hideLyrics' in custom) {
+            custom.hideLyrics()
+          }
+        }
+      }
+    })
+  }
+
   function addCss () {
     document.head.appendChild(document.createElement('style')).innerHTML = `
     #myconfigwin39457845 {
@@ -2329,6 +2363,9 @@ Genius:  ${originalUrl}
         }
         if ('onResize' in custom) {
           window.addEventListener('resize', custom.onResize)
+        }
+        if ('toggleLyricsKey' in custom) {
+          addKeyboardShortcut(custom.toggleLyricsKey)
         }
       }
     })
