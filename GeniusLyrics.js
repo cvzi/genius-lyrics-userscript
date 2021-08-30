@@ -7,6 +7,7 @@
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2020, cuzi (https://github.com/cvzi)
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
+// @icon         https://avatars.githubusercontent.com/u/2738430?s=200&v=4
 // ==/UserLibrary==
 // @homepageURL  https://github.com/cvzi/genius-lyrics-userscript
 // @grant        GM.xmlHttpRequest
