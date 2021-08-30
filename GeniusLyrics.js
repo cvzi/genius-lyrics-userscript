@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.2.2
+// @version      5.2.3
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2020, cuzi (https://github.com/cvzi)
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -2237,7 +2237,7 @@ Genius:  ${originalUrl}
 
   function addKeyboardShortcut (keyParams) {
     window.addEventListener('message', function (e) {
-      if ('iAm' in e.data && e.data.iAm === custom.scriptName && e.data.type === 'togglelyrics') {
+      if (typeof e.data === 'object' && 'iAm' in e.data && e.data.iAm === custom.scriptName && e.data.type === 'togglelyrics') {
         toggleLyrics()
       }
     })
