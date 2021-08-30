@@ -748,7 +748,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
             div.className = ''
           })
           // Ads
-          document.querySelectorAll('div[class^="InreadAd__Container"]').forEach(function (div) {
+          document.querySelectorAll('div[class^="InreadAd__Container"],div[class^="InreadAddesktop__Container"]').forEach(function (div) {
             div.remove()
           })
           document.querySelectorAll('div[class^="SidebarAd__Container"]').forEach(function (div) {
