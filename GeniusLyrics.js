@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.2.3
+// @version      5.2.4
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2020, cuzi (https://github.com/cvzi)
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -136,6 +136,38 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       return cleanWindow.setInterval(a, b)
     } else {
       return window.setInterval(a, b)
+    }
+  }
+  const clearTimeout = function (a, b) {
+    if (window.clearTimeout.toString().indexOf('[native code]') !== -1) {
+      return window.clearTimeout(a, b)
+    }
+    if (top.clearTimeout.toString().indexOf('[native code]') !== -1) {
+      return top.clearTimeout(a, b)
+    }
+    if (!cleanWindow && document.body) {
+      cleanWindow = freshWindowFromIframe()
+    }
+    if (cleanWindow) {
+      return cleanWindow.clearTimeout(a, b)
+    } else {
+      return window.clearTimeout(a, b)
+    }
+  }
+  const clearInterval = function (a, b) {
+    if (window.clearInterval.toString().indexOf('[native code]') !== -1) {
+      return window.clearInterval(a, b)
+    }
+    if (top.clearInterval.toString().indexOf('[native code]') !== -1) {
+      return top.clearInterval(a, b)
+    }
+    if (!cleanWindow && document.body) {
+      cleanWindow = freshWindowFromIframe()
+    }
+    if (cleanWindow) {
+      return cleanWindow.clearInterval(a, b)
+    } else {
+      return window.clearInterval(a, b)
     }
   }
 
@@ -1950,6 +1982,7 @@ Genius:  ${originalUrl}
           spinner.innerHTML = '3'
           spinnerHolder.title = 'Loading page...'
           iframe.src = custom.emptyURL + '#html:post'
+          let tv = null
           const iv = setInterval(function () {
             spinner.innerHTML = '2'
             spinnerHolder.title = 'Rendering...'
@@ -1963,19 +1996,20 @@ Genius:  ${originalUrl}
             if ('onLyricsReady' in custom) {
               custom.onLyricsReady(song, container)
             }
-            window.clearInterval(iv)
+            clearInterval(iv)
+            clearTimeout(tv)
             setTimeout(function () {
               iframe.style.opacity = 1.0
               spinnerHolder.remove()
             }, 1000)
           }
           addOneMessageListener('htmlwritten', function () {
-            window.clearInterval(iv)
+            clearInterval(iv)
             spinner.innerHTML = '1'
             spinnerHolder.title = 'Calculating...'
           })
           addOneMessageListener('pageready', clear)
-          setTimeout(clear, 30000)
+          tv = setTimeout(clear, 30000)
         })
       })
     })
@@ -2219,9 +2253,9 @@ Genius:  ${originalUrl}
   function toggleLyrics () {
     if (!document.getElementById('lyricsiframe')) {
       genius.option.autoShow = true // Temporarily enable showing lyrics automatically on song change
-      window.clearInterval(genius.iv.main)
+      clearInterval(genius.iv.main)
       if ('main' in custom) {
-        genius.iv.main = window.setInterval(custom.main, 2000)
+        genius.iv.main = setInterval(custom.main, 2000)
       }
       if ('addLyrics' in custom) {
         custom.addLyrics(true)
