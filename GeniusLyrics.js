@@ -92,6 +92,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     debug: false
   }
 
+  let loadingFailed = false
   let requestCache = {}
   let selectionCache = {}
   let theme
@@ -1982,7 +1983,8 @@ Genius:  ${originalUrl}
           spinner.innerHTML = '3'
           spinnerHolder.title = 'Loading page...'
           iframe.src = custom.emptyURL + '#html:post'
-          let tv = null
+          let tv1 = null
+          let tv2 = null
           const iv = setInterval(function () {
             spinner.innerHTML = '2'
             spinnerHolder.title = 'Rendering...'
@@ -1997,7 +1999,8 @@ Genius:  ${originalUrl}
               custom.onLyricsReady(song, container)
             }
             clearInterval(iv)
-            clearTimeout(tv)
+            clearTimeout(tv1)
+            clearTimeout(tv2)
             setTimeout(function () {
               iframe.style.opacity = 1.0
               spinnerHolder.remove()
@@ -2009,7 +2012,28 @@ Genius:  ${originalUrl}
             spinnerHolder.title = 'Calculating...'
           })
           addOneMessageListener('pageready', clear)
-          tv = setTimeout(clear, 30000)
+
+          // After 15 seconds, try to reload the iframe
+          tv1 = setTimeout(function () {
+            console.debug('tv1')
+            iframe.src = 'data:text/html,%3Ch1%3ELoading...%21%3C%2Fh1%3E'
+            window.setTimeout(function () {
+              iframe.src = custom.emptyURL + '#html:post'
+            }, 1000)
+          }, 15000)
+          // After 30 seconds, try again fresh (only once)
+          tv2 = setTimeout(function () {
+            console.debug('tv2')
+            clear()
+            if (!loadingFailed) {
+              console.debug('try again fresh')
+              loadingFailed = true
+              custom.hideLyrics()
+              window.setTimeout(function () {
+                custom.addLyrics(true)
+              }, 1000)
+            }
+          }, 30000)
         })
       })
     })
