@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.2.5
+// @version      5.2.6
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2020, cuzi (https://github.com/cvzi)
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -795,7 +795,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
           const url = document.querySelector('meta[property="og:url"]').content
           const h1 = document.querySelector('h1[class^="SongHeader"]')
           h1.innerHTML = '<a target="_blank" href="' + url + '" style="color:black">' + h1.innerHTML + '</a>'
-          const div = document.querySelector('div[class^=SongHeader__CoverArt]')
+          const div = document.querySelector('div[class^=SongHeader][class*="__CoverArt"]')
           div.innerHTML = '<a target="_blank" href="' + url + '">' + div.innerHTML + '</a>'
         }
         onload.push(clickableTitle037)
@@ -1345,13 +1345,15 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
 
             const lyricshtml = root.innerHTML
 
-            const h1 = doc.querySelector('div[class^=SongHeader__Column] h1')
+            const h1 = doc.querySelector('div[class^=SongHeader][class*=Column] h1')
             const titleNode = h1.firstChild
             const titleA = h1.appendChild(document.createElement('a'))
             titleA.href = originalUrl
             titleA.target = '_blank'
             titleA.appendChild(titleNode)
             h1.classList.add('mytitle')
+
+            removeIfExists(h1.parentNode.querySelector('div[class^="HeaderTracklist"]'))
 
             const titlehtml = '<div class="myheader">' + h1.parentNode.outerHTML + '</div>'
 
@@ -1642,13 +1644,15 @@ Genius:  ${originalUrl}
 
             const lyricshtml = root.innerHTML
 
-            const h1 = doc.querySelector('div[class^=SongHeader__Column] h1')
+            const h1 = doc.querySelector('div[class^=SongHeader][class*=Column] h1')
             const titleNode = h1.firstChild
             const titleA = h1.appendChild(document.createElement('a'))
             titleA.href = originalUrl
             titleA.target = '_blank'
             titleA.appendChild(titleNode)
             h1.classList.add('mytitle')
+
+            removeIfExists(h1.parentNode.querySelector('div[class^="HeaderTracklist"]'))
 
             const titlehtml = '<div class="myheader">' + h1.parentNode.outerHTML + '</div>'
 
