@@ -25,7 +25,7 @@
   },
   "homepage": "https://github.com/cvzi/genius-lyrics-userscript",
   "devDependencies": {
-    "standard": "^16.0.3"
+    "standard": "^16.0.4"
   },
   "standard": {
     "ignore": [
