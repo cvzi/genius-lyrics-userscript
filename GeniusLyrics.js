@@ -27,14 +27,14 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
 
-
+/*
     This library requires the following permission in the userscript:
       * grant GM.xmlHttpRequest
       * grant GM.getValue
       * grant GM.setValue
       * connect genius.com
-
 */
 
 /* global Reflect, top */
