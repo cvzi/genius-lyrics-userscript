@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.2.6
+// @version      5.2.7
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2020, cuzi (https://github.com/cvzi)
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -768,7 +768,9 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         const onload = []
 
         function hideStuff () {
-        // Hide "This is a work in progress"
+          // Hide "Manage Lyrics" and "Click here to go to the old song page"
+          removeIfExists(document.querySelector('div[class^="LyricsControls_"]'))
+          // Hide "This is a work in progress"
           removeIfExists(document.getElementById('top'))
           // Header leaderboard/nav
           removeIfExists(document.querySelector('div[class^="Leaderboard"]'))
@@ -1122,6 +1124,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         onload.push(function () {
           const bodyWidth = document.body.getClientRects()[0].width
           document.querySelector('div[class^="Lyrics__Container"]').style.maxWidth = `calc(${bodyWidth}px - 1.5em)`
+          document.querySelector('#lyrics-root').style.gridTemplateColumns = 'auto' // class="SongPageGriddesktop__TwoColumn-
         })
 
         // Open real page if not in frame
