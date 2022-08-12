@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.2.7
+// @version      5.2.8
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2020, cuzi (https://github.com/cvzi)
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -76,15 +76,15 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       themeKey: null
     },
     f: {
-      metricPrefix: metricPrefix,
-      cleanUpSongTitle: cleanUpSongTitle,
-      showLyrics: showLyrics,
-      loadLyrics: loadLyrics,
-      rememberLyricsSelection: rememberLyricsSelection,
-      getLyricsSelection: getLyricsSelection,
-      geniusSearch: geniusSearch,
-      searchByQuery: searchByQuery,
-      scrollLyrics: scrollLyrics
+      metricPrefix,
+      cleanUpSongTitle,
+      showLyrics,
+      loadLyrics,
+      rememberLyricsSelection,
+      getLyricsSelection,
+      geniusSearch,
+      searchByQuery,
+      scrollLyrics
     },
     current: {
       title: '',
@@ -323,7 +323,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       url: obj.url,
       method: obj.method ? obj.method : 'GET',
       data: obj.data,
-      headers: headers,
+      headers,
       onerror: obj.error ? obj.error : function xmlHttpRequestGenericOnError (response) { console.error('xmlHttpRequestGenericOnError: ' + response) },
       onload: function xmlHttpRequestOnLoad (response) {
         const time = (new Date()).toJSON()
@@ -2000,7 +2000,7 @@ Genius:  ${originalUrl}
             spinner.innerHTML = '2'
             spinnerHolder.title = 'Rendering...'
             if (iframe.contentWindow && iframe.contentWindow.postMessage) {
-              iframe.contentWindow.postMessage({ iAm: custom.scriptName, type: 'writehtml', html: html, themeKey: genius.option.themeKey }, '*')
+              iframe.contentWindow.postMessage({ iAm: custom.scriptName, type: 'writehtml', html, themeKey: genius.option.themeKey }, '*')
             } else {
               // console.debug('iframe.contentWindow is ', iframe.contentWindow)
             }
@@ -2422,7 +2422,7 @@ Genius:  ${originalUrl}
             console.debug(`Theme activated in iframe: ${theme.name}`)
           }
           received = true
-          document.write(e.data.html)
+          document.documentElement.innerHTML = e.data.html
           e.source.postMessage({ iAm: custom.scriptName, type: 'htmlwritten' }, '*')
           setTimeout(function () {
             const onload = theme.scripts()
@@ -2449,7 +2449,7 @@ Genius:  ${originalUrl}
           }, 500)
         })
       } else if (document.location.href.startsWith(custom.emptyURL + '?405#html,')) {
-        document.write(decodeURIComponent(document.location.hash.split('#html,')[1]))
+        document.documentElement.innerHTML = decodeURIComponent(document.location.hash.split('#html,')[1])
       } else {
         listenToMessages()
         loadCache()
