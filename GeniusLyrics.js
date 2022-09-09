@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.2.8
+// @version      5.2.9
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2020, cuzi (https://github.com/cvzi)
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -1821,7 +1821,7 @@ Genius:  ${originalUrl}
 
   function loadLyrics (force, beLessSpecific, songTitle, songArtistsArr, musicIsPlaying) {
     let songArtists = songArtistsArr.join(' ')
-    if (force || (!document.hidden && musicIsPlaying && (genius.current.title !== songTitle || genius.current.artists !== songArtists))) {
+    if (force || beLessSpecific || (!document.hidden && musicIsPlaying && (genius.current.title !== songTitle || genius.current.artists !== songArtists))) {
       genius.current.title = songTitle
       genius.current.artists = songArtists
 
