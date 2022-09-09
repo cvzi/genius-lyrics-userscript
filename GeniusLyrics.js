@@ -84,7 +84,8 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       getLyricsSelection,
       geniusSearch,
       searchByQuery,
-      scrollLyrics
+      scrollLyrics,
+      config
     },
     current: {
       title: '',
