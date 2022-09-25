@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.3.0
+// @version      5.4.0
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2020, cuzi (https://github.com/cvzi)
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -1833,6 +1833,11 @@ Genius:  ${originalUrl}
         songArtists = firstArtist
         songTitle = simpleTitle
       }
+
+      if ('onNewSongPlaying' in custom) {
+        custom.onNewSongPlaying(songTitle, songArtistsArr)
+      }
+
       const hitFromCache = getLyricsSelection(songTitle, songArtists)
       if (!force && hitFromCache) {
         showLyrics(hitFromCache, 1)
