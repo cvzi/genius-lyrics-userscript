@@ -491,7 +491,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
           for (let i = 0; i < 11; i++) {
             const label = document.body.appendChild(document.createElement('div'))
             label.classList.add('scrolllabel')
-            label.appendChild(document.createTextNode(`${i * 10}% + ${window.staticOffsetTop}px`))
+            label.textContent = (`${i * 10}% + ${window.staticOffsetTop}px`)
             label.style.position = 'absolute'
             label.style.top = (offset.top + window.staticOffsetTop + div.scrollHeight * 0.1 * i) + 'px'
             label.style.color = 'rgba(255,0,0,0.5)'
@@ -500,7 +500,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
 
           let label = document.body.appendChild(document.createElement('div'))
           label.classList.add('scrolllabel')
-          label.appendChild(document.createTextNode(`Start @ offset.top +  window.staticOffsetTop = ${offset.top}px + ${window.staticOffsetTop}px`))
+          label.textContent = (`Start @ offset.top +  window.staticOffsetTop = ${offset.top}px + ${window.staticOffsetTop}px`)
           label.style.position = 'absolute'
           label.style.top = offset.top + window.staticOffsetTop + 'px'
           label.style.left = '200px'
@@ -509,7 +509,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
 
           label = document.body.appendChild(document.createElement('div'))
           label.classList.add('scrolllabel')
-          label.appendChild(document.createTextNode(`Base @ offset.top = ${offset.top}px`))
+          label.textContent = (`Base @ offset.top = ${offset.top}px`)
           label.style.position = 'absolute'
           label.style.top = offset.top + 'px'
           label.style.left = '200px'
@@ -743,7 +743,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         headhtml += '\n<script id="annotationsdata1234" type="application/json">' + JSON.stringify(annotations).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</script>'
 
         // Scrollbar colors
-        const bodyWidth = document.getElementById('lyricsiframe').style.width || (document.getElementById('lyricsiframe').getClientRects()[0].width + 'px')
+        const bodyWidth = document.getElementById('lyricsiframe').style.width || (document.getElementById('lyricsiframe').getBoundingClientRect().width + 'px')
         headhtml += `<style>
         body{
           max-width: ${bodyWidth};
@@ -985,9 +985,9 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
               tabButton.classList.add('tabbutton')
               tabButton.addEventListener('click', switchTab)
               if (annotation.state === 'verified') {
-                tabButton.appendChild(document.createTextNode('Verified annotation'))
+                tabButton.textContent = ('Verified annotation')
               } else {
-                tabButton.appendChild(document.createTextNode('Genius annotation'))
+                tabButton.textContent = 'Genius annotation'
               }
 
               let hint = ''
@@ -1123,7 +1123,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
 
         // Adapt width
         onload.push(function () {
-          const bodyWidth = document.body.getClientRects()[0].width
+          const bodyWidth = document.body.getBoundingClientRect().width
           document.querySelector('div[class^="Lyrics__Container"]').style.maxWidth = `calc(${bodyWidth}px - 1.5em)`
           document.querySelector('#lyrics-root').style.gridTemplateColumns = 'auto' // class="SongPageGriddesktop__TwoColumn-
         })
@@ -1333,7 +1333,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       },
       combine: function themeCleanWhiteXombineGeniusResources (song, html, annotations, onCombine) {
         let headhtml = ''
-        const bodyWidth = document.getElementById('lyricsiframe').style.width || (document.getElementById('lyricsiframe').getClientRects()[0].width + 'px')
+        const bodyWidth = document.getElementById('lyricsiframe').style.width || (document.getElementById('lyricsiframe').getBoundingClientRect().width + 'px')
 
         if (html.indexOf('class="lyrics">') === -1) {
           const doc = new window.DOMParser().parseFromString(html, 'text/html')
@@ -1632,7 +1632,7 @@ Genius:  ${originalUrl}
       },
       combine: function themeSpotifyXombineGeniusResources (song, html, annotations, onCombine) {
         let headhtml = ''
-        const bodyWidth = document.getElementById('lyricsiframe').style.width || (document.getElementById('lyricsiframe').getClientRects()[0].width + 'px')
+        const bodyWidth = document.getElementById('lyricsiframe').style.width || (document.getElementById('lyricsiframe').getBoundingClientRect().width + 'px')
 
         if (html.indexOf('class="lyrics">') === -1) {
           const doc = new window.DOMParser().parseFromString(html, 'text/html')
@@ -1892,7 +1892,7 @@ Genius:  ${originalUrl}
     const separator = document.createElement('span')
     separator.setAttribute('class', 'second-line-separator')
     separator.setAttribute('style', 'padding:0px 3px')
-    separator.appendChild(document.createTextNode('•'))
+    separator.textContent = '•'
 
     const bar = document.createElement('div')
     bar.setAttribute('class', 'lyricsnavbar')
@@ -1905,7 +1905,7 @@ Genius:  ${originalUrl}
       const resizeButton = document.createElement('span')
       resizeButton.style.fontSize = '1.8em'
       resizeButton.style.cursor = 'ew-resize'
-      resizeButton.appendChild(document.createTextNode('⇹'))
+      resizeButton.textContent = '⇹'
       resizeButton.addEventListener('mousedown', custom.initResize)
       bar.appendChild(resizeButton)
 
@@ -1915,7 +1915,7 @@ Genius:  ${originalUrl}
     // Hide button
     const hideButton = document.createElement('a')
     hideButton.href = '#'
-    hideButton.appendChild(document.createTextNode('Hide'))
+    hideButton.textContent = 'Hide'
     hideButton.addEventListener('click', function hideButtonClick (ev) {
       ev.preventDefault()
       genius.option.autoShow = false // Temporarily disable showing lyrics automatically on song change
@@ -1929,7 +1929,7 @@ Genius:  ${originalUrl}
     // Config button
     const configButton = document.createElement('a')
     configButton.href = '#'
-    configButton.appendChild(document.createTextNode('Options'))
+    configButton.textContent = 'Options'
     configButton.addEventListener('click', function configButtonClick (ev) {
       ev.preventDefault()
       config()
@@ -1942,12 +1942,12 @@ Genius:  ${originalUrl}
 
       const wrongLyricsButton = document.createElement('a')
       wrongLyricsButton.href = '#'
-      wrongLyricsButton.appendChild(document.createTextNode('Wrong lyrics'))
+      wrongLyricsButton.textContent = 'Wrong lyrics'
       wrongLyricsButton.addEventListener('click', function wrongLyricsButtonClick (ev) {
         ev.preventDefault()
         document.querySelectorAll('.loadingspinnerholder').forEach((spinner) => spinner.remove())
         forgetLyricsSelection(genius.current.title, genius.current.artists, this.dataset.hit)
-        custom.showSearchField(genius.current.artists + ' ' + genius.current.title)
+        custom.showSearchField(`${genius.current.artists} ${genius.current.title}`)
       })
       bar.appendChild(wrongLyricsButton)
     } else if (searchresultsLengths > 1) {
@@ -1957,9 +1957,9 @@ Genius:  ${originalUrl}
       const backbutton = document.createElement('a')
       backbutton.href = '#'
       if (searchresultsLengths === true) {
-        backbutton.appendChild(document.createTextNode('Back to search results'))
+        backbutton.textContent = 'Back to search results'
       } else {
-        backbutton.appendChild(document.createTextNode('Back to search (' + (searchresultsLengths - 1) + ' other result' + (searchresultsLengths === 2 ? '' : 's') + ')'))
+        backbutton.textContent = 'Back to search (' + (searchresultsLengths - 1) + ' other result' + (searchresultsLengths === 2 ? '' : 's') + ')'
       }
       backbutton.addEventListener('click', function backbuttonClick (ev) {
         ev.preventDefault()
@@ -1983,7 +1983,7 @@ Genius:  ${originalUrl}
     if ('createSpinner' in custom) {
       spinner = custom.createSpinner(spinnerHolder)
     } else {
-      spinnerHolder.style.left = (iframe.getClientRects()[0].left + container.clientWidth / 2) + 'px'
+      spinnerHolder.style.left = (iframe.getBoundingClientRect().left + container.clientWidth / 2) + 'px'
       spinnerHolder.style.top = '100px'
       spinner = spinnerHolder.appendChild(document.createElement('div'))
       spinner.classList.add('loadingspinner')
@@ -2096,11 +2096,13 @@ Genius:  ${originalUrl}
     win.setAttribute('id', 'myconfigwin39457845')
 
     const h1 = document.createElement('h1')
-    win.appendChild(h1).appendChild(document.createTextNode('Options'))
+    win.appendChild(h1)
+    h1.textContent = 'Options'
     if ('scriptIssuesURL' in custom) {
       const a = document.createElement('a')
       a.href = custom.scriptIssuesURL
-      win.appendChild(a).appendChild(document.createTextNode('scriptIssuesTitle' in custom ? custom.scriptIssuesTitle : custom.scriptIssuesURL))
+      win.appendChild(a)
+      a.textContent = ('scriptIssuesTitle' in custom ? custom.scriptIssuesTitle : custom.scriptIssuesURL)
     }
 
     // Switch: Show automatically
@@ -2124,7 +2126,7 @@ Genius:  ${originalUrl}
 
     let label = div.appendChild(document.createElement('label'))
     label.setAttribute('for', 'checkAutoShow748')
-    label.appendChild(document.createTextNode(' Automatically show lyrics when new song starts'))
+    label.textContent = ' Automatically show lyrics when new song starts'
 
     div.appendChild(document.createElement('br'))
     div.appendChild(document.createTextNode('(if you disable this, a small button will appear in the top right corner to show the lyrics)'))
@@ -2145,7 +2147,7 @@ Genius:  ${originalUrl}
       if (genius.option.themeKey === key) {
         option.selected = true
       }
-      option.appendChild(document.createTextNode(themes[key].name))
+      option.textContent = themes[key].name
     }
     const onSelectTheme = function onSelectThemeListener () {
       const hasChanged = genius.option.themeKey !== selectTheme.selectedOptions[0].value
@@ -2175,7 +2177,7 @@ Genius:  ${originalUrl}
 
     label = div.appendChild(document.createElement('label'))
     label.setAttribute('for', 'checkAnnotationsEnabled748')
-    label.appendChild(document.createTextNode(' Show annotations'))
+    label.textContent = ' Show annotations'
 
     // Switch: Automatic scrolling
     div = win.appendChild(document.createElement('div'))
@@ -2195,7 +2197,7 @@ Genius:  ${originalUrl}
 
     label = div.appendChild(document.createElement('label'))
     label.setAttribute('for', 'checkAutoScrollEnabled748')
-    label.appendChild(document.createTextNode(' Automatic scrolling'))
+    label.textContent = ' Automatic scrolling'
 
     // Custom buttons
     if ('config' in custom) {
@@ -2206,7 +2208,7 @@ Genius:  ${originalUrl}
     div = win.appendChild(document.createElement('div'))
 
     const closeButton = div.appendChild(document.createElement('button'))
-    closeButton.appendChild(document.createTextNode('Close'))
+    closeButton.textContent = 'Close'
     closeButton.addEventListener('click', function onCloseButtonClick () {
       win.parentNode.removeChild(win)
       // Un-blur background
@@ -2217,7 +2219,7 @@ Genius:  ${originalUrl}
 
     const bytes = metricPrefix(JSON.stringify(selectionCache).length + JSON.stringify(requestCache).length, 2, 1024) + 'Bytes'
     const clearCacheButton = div.appendChild(document.createElement('button'))
-    clearCacheButton.appendChild(document.createTextNode('Clear cache (' + bytes + ')'))
+    clearCacheButton.textContent = 'Clear cache (' + bytes + ')'
     clearCacheButton.addEventListener('click', function onClearCacheButtonClick () {
       Promise.all([custom.GM.setValue('selectioncache', '{}'), custom.GM.setValue('requestcache', '{}')]).then(function () {
         clearCacheButton.innerHTML = 'Cleared'
@@ -2296,7 +2298,7 @@ Genius:  ${originalUrl}
       genius.option.autoShow = true // Temporarily enable showing lyrics automatically on song change
       clearInterval(genius.iv.main)
       if ('main' in custom) {
-        genius.iv.main = setInterval(custom.main, 2000)
+        custom.setupMain ? custom.setupMain(genius) : (genius.iv.main = setInterval(custom.main, 2000))
       }
       if ('addLyrics' in custom) {
         custom.addLyrics(true)
@@ -2461,7 +2463,7 @@ Genius:  ${originalUrl}
         loadCache()
         addCss()
         if ('main' in custom) {
-          genius.iv.main = setInterval(custom.main, 2000)
+          custom.setupMain ? custom.setupMain(genius) : (genius.iv.main = setInterval(custom.main, 2000))
         }
         if ('onResize' in custom) {
           window.addEventListener('resize', custom.onResize)
