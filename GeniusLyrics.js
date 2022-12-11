@@ -819,7 +819,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
 
         // Goto lyrics
         onload.push(function () {
-          document.location.hash = '#lyrics'
+          document.getElementById('lyrics').scrollIntoView()
         })
 
         // Make expandable content buttons work
