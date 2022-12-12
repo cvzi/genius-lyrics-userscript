@@ -819,7 +819,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
 
         // Goto lyrics
         onload.push(function () {
-          document.location.hash = '#lyrics'
+          document.getElementById('lyrics').scrollIntoView()
         })
 
         // Make expandable content buttons work
@@ -1972,7 +1972,7 @@ Genius:  ${originalUrl}
     iframe.id = 'lyricsiframe'
     container.appendChild(iframe)
     iframe.style.opacity = 0.1
-    iframe.src = custom.emptyURL + '?405#html,' + encodeURIComponent('Loading...')
+    iframe.src = custom.emptyURL + '#html:post'
 
     custom.setFrameDimensions(container, iframe, bar)
 
@@ -1999,7 +1999,6 @@ Genius:  ${originalUrl}
         combineGeniusResources(song, html, annotations, function combineGeniusResourcesCb (html) {
           spinner.innerHTML = '3'
           spinnerHolder.title = 'Loading page...'
-          iframe.src = custom.emptyURL + '#html:post'
           let tv1 = null
           let tv2 = null
           const iv = setInterval(function () {
