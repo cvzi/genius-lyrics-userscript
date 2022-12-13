@@ -601,6 +601,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   const themes = {
     genius: {
       name: 'Genius (Default)',
+      themeKey: 'genius',
       scripts: function themeGeniusScripts () {
         const onload = []
 
@@ -772,6 +773,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     },
     geniusReact: {
       name: 'Genius React',
+      themeKey: 'geniusReact',
       scripts: function themeGeniusReactScripts () {
         const onload = []
 
@@ -1186,6 +1188,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
 
     cleanwhite: {
       name: 'Clean white',
+      themeKey: 'cleanwhite',
       scripts: function themeCleanWhiteScripts () {
         const onload = []
 
@@ -1498,6 +1501,7 @@ Genius:  ${originalUrl}
 
     spotify: {
       name: 'Spotify',
+      themeKey: 'spotify',
       scripts: function themeSpotifyScripts () {
         const onload = []
 
