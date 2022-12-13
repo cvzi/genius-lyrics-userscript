@@ -1928,7 +1928,7 @@ Genius:  ${originalUrl}
     hideButton.textContent = 'Hide'
     hideButton.addEventListener('click', function hideButtonClick (ev) {
       genius.option.autoShow = false // Temporarily disable showing lyrics automatically on song change
-      if(genius.iv.main > 0){
+      if (genius.iv.main > 0) {
         clearInterval(genius.iv.main)
         genius.iv.main = 0
       }
@@ -1959,7 +1959,7 @@ Genius:  ${originalUrl}
       wrongLyricsButton.textContent = 'Wrong lyrics'
       wrongLyricsButton.addEventListener('click', function wrongLyricsButtonClick (ev) {
         document.querySelectorAll('.loadingspinnerholder').forEach((spinner) => spinner.remove())
-        //forgetLyricsSelection(genius.current.title, genius.current.artists, this.dataset.hit)
+        // forgetLyricsSelection(genius.current.title, genius.current.artists, this.dataset.hit)
         forgetLyricsSelection(genius.current.title, genius.current.artists)
         custom.showSearchField(`${genius.current.artists} ${genius.current.title}`)
       })
@@ -2316,7 +2316,7 @@ Genius:  ${originalUrl}
   function toggleLyrics () {
     const isLyricsIframeExist = !!document.getElementById('lyricsiframe')
     genius.option.autoShow = false // Temporarily disable showing lyrics automatically on song change
-    if(genius.iv.main > 0){
+    if (genius.iv.main > 0) {
       clearInterval(genius.iv.main)
       genius.iv.main = 0
     }
