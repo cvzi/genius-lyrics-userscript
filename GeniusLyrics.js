@@ -2070,7 +2070,7 @@ Genius:  ${originalUrl}
                   textStatus: 'complete'
                 })
               }
-            }, 1000)
+            }, 30)
           }
           addOneMessageListener('htmlwritten', function () {
             clearInterval(iv)
