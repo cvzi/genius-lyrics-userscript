@@ -1884,6 +1884,8 @@ Genius:  ${originalUrl}
 
   function showLyrics (song, searchresultsLengths) {
     const container = custom.getCleanLyricsContainer()
+    container.className = '' // custom.getCleanLyricsContainer might forget to clear the className if the element is reused
+    container.classList.add('genius-lyrics-result-shown')
 
     if ('info' in custom.GM && 'scriptHandler' in custom.GM.info && custom.GM.info.scriptHandler === 'Greasemonkey') {
       container.innerHTML = '<h2>This script only works in <a target="_blank" href="https://addons.mozilla.org/en-US/firefox/addon/tampermonkey/">Tampermonkey</a></h2>Greasemonkey is no longer supported because of this <a target="_blank" href="https://github.com/greasemonkey/greasemonkey/issues/2574">bug greasemonkey/issues/2574</a> in Greasemonkey.'
