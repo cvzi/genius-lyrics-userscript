@@ -84,6 +84,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       getLyricsSelection,
       geniusSearch,
       searchByQuery,
+      isScrollLyricsEnabled,
       scrollLyrics,
       config
     },
@@ -2055,11 +2056,18 @@ Genius:  ${originalUrl}
     })
   }
 
-  function scrollLyrics (positionFraction) {
+  function isScrollLyricsEnabled () {
     if (!autoScrollEnabled) {
-      return
+      return false
     }
     if (!('scrollLyrics' in theme)) {
+      return false
+    }
+    return true
+  }
+
+  function scrollLyrics (positionFraction) {
+    if (isScrollLyricsEnabled() === false) {
       return
     }
     // Relay the event to the iframe
@@ -2132,7 +2140,7 @@ Genius:  ${originalUrl}
 
     // Select: Theme
     div = win.appendChild(document.createElement('div'))
-    div.appendChild(document.createTextNode('Theme: '))
+    div.textContent = 'Theme: '
     const selectTheme = div.appendChild(document.createElement('select'))
     if (genius.option.themeKey.endsWith('React')) {
       genius.option.themeKey = genius.option.themeKey.substring(0, genius.option.themeKey.length - 5)
