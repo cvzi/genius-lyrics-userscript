@@ -346,6 +346,12 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
 
   function rememberLyricsSelection (title, artists, jsonHit) {
     const cachekey = title + '--' + artists
+    if (typeof jsonHit === 'object') {
+      jsonHit = JSON.stringify(jsonHit)
+    }
+    if (typeof jsonHit !== 'string') {
+      return
+    }
     selectionCache[cachekey] = jsonHit
     custom.GM.setValue('selectioncache', JSON.stringify(selectionCache))
   }
@@ -1916,13 +1922,16 @@ Genius:  ${originalUrl}
     }
 
     // Hide button
-    const hideButton = document.createElement('a')
-    hideButton.href = '#'
+    const hideButton = document.createElement('span')
+    hideButton.classList.add('youtube-genius-hide-button')
+    hideButton.style.cursor = 'pointer'
     hideButton.textContent = 'Hide'
     hideButton.addEventListener('click', function hideButtonClick (ev) {
-      ev.preventDefault()
       genius.option.autoShow = false // Temporarily disable showing lyrics automatically on song change
-      clearInterval(genius.iv.main)
+      if(genius.iv.main > 0){
+        clearInterval(genius.iv.main)
+        genius.iv.main = 0
+      }
       custom.hideLyrics()
     })
     bar.appendChild(hideButton)
@@ -1930,11 +1939,11 @@ Genius:  ${originalUrl}
     bar.appendChild(separator.cloneNode(true))
 
     // Config button
-    const configButton = document.createElement('a')
-    configButton.href = '#'
+    const configButton = document.createElement('span')
+    configButton.classList.add('youtube-genius-config-button')
+    configButton.style.cursor = 'pointer'
     configButton.textContent = 'Options'
     configButton.addEventListener('click', function configButtonClick (ev) {
-      ev.preventDefault()
       config()
     })
     bar.appendChild(configButton)
@@ -1943,13 +1952,15 @@ Genius:  ${originalUrl}
       // Wrong lyrics button
       bar.appendChild(separator.cloneNode(true))
 
-      const wrongLyricsButton = document.createElement('a')
+      const wrongLyricsButton = document.createElement('span')
+      wrongLyricsButton.classList.add('youtube-genius-wronglyrics-button')
+      wrongLyricsButton.style.cursor = 'pointer'
       wrongLyricsButton.href = '#'
       wrongLyricsButton.textContent = 'Wrong lyrics'
       wrongLyricsButton.addEventListener('click', function wrongLyricsButtonClick (ev) {
-        ev.preventDefault()
         document.querySelectorAll('.loadingspinnerholder').forEach((spinner) => spinner.remove())
-        forgetLyricsSelection(genius.current.title, genius.current.artists, this.dataset.hit)
+        //forgetLyricsSelection(genius.current.title, genius.current.artists, this.dataset.hit)
+        forgetLyricsSelection(genius.current.title, genius.current.artists)
         custom.showSearchField(`${genius.current.artists} ${genius.current.title}`)
       })
       bar.appendChild(wrongLyricsButton)
@@ -2094,7 +2105,7 @@ Genius:  ${originalUrl}
     loadCache()
 
     // Blur background
-    document.querySelectorAll('body>*').forEach(function (e) {
+    document.querySelectorAll('body > *').forEach(function (e) {
       e.style.filter = 'blur(4px)'
     })
     if (document.getElementById('lyricscontainer')) {
@@ -2221,7 +2232,7 @@ Genius:  ${originalUrl}
     closeButton.addEventListener('click', function onCloseButtonClick () {
       win.parentNode.removeChild(win)
       // Un-blur background
-      document.querySelectorAll('body>*,#lyricscontainer').forEach(function (e) {
+      document.querySelectorAll('body > *, #lyricscontainer').forEach(function (e) {
         e.style.filter = ''
       })
     })
@@ -2303,9 +2314,13 @@ Genius:  ${originalUrl}
   }
 
   function toggleLyrics () {
-    if (!document.getElementById('lyricsiframe')) {
-      genius.option.autoShow = true // Temporarily enable showing lyrics automatically on song change
+    const isLyricsIframeExist = !!document.getElementById('lyricsiframe')
+    genius.option.autoShow = false // Temporarily disable showing lyrics automatically on song change
+    if(genius.iv.main > 0){
       clearInterval(genius.iv.main)
+      genius.iv.main = 0
+    }
+    if (!isLyricsIframeExist) {
       if ('main' in custom) {
         custom.setupMain ? custom.setupMain(genius) : (genius.iv.main = setInterval(custom.main, 2000))
       }
@@ -2313,8 +2328,6 @@ Genius:  ${originalUrl}
         custom.addLyrics(true)
       }
     } else {
-      genius.option.autoShow = false // Temporarily disable showing lyrics automatically on song change
-      clearInterval(genius.iv.main)
       if ('hideLyrics' in custom) {
         custom.hideLyrics()
       }
