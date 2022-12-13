@@ -2003,41 +2003,51 @@ Genius:  ${originalUrl}
       spinner.classList.add('loadingspinner')
     }
     spinner.innerHTML = '5'
-    if ('notifyGeniusLoading' in custom) custom.notifyGeniusLoading({
-      status: 0,
-      textStatus: 'start'
-    })
+    if ('notifyGeniusLoading' in custom) {
+      custom.notifyGeniusLoading({
+        status: 0,
+        textStatus: 'start'
+      })
+    }
 
     loadGeniusSong(song, function loadGeniusSongCb (html) {
       spinner.innerHTML = '4'
       spinnerHolder.title = 'Downloading annotations...'
-      if ('notifyGeniusLoading' in custom) custom.notifyGeniusLoading({
-        status: 100,
-        textStatus: 'donwloading'
-      })
+      if ('notifyGeniusLoading' in custom) {
+        custom.notifyGeniusLoading({
+          status: 100,
+          textStatus: 'donwloading'
+        })
+      }
       loadGeniusAnnotations(song, html, annotationsEnabled, function loadGeniusAnnotationsCb (song, html, annotations) {
         spinner.innerHTML = '3'
         spinnerHolder.title = 'Composing page...'
-        if ('notifyGeniusLoading' in custom) custom.notifyGeniusLoading({
-          status: 200,
-          textStatus: 'pageComposing'
-        })
+        if ('notifyGeniusLoading' in custom) {
+          custom.notifyGeniusLoading({
+            status: 200,
+            textStatus: 'pageComposing'
+          })
+        }
         combineGeniusResources(song, html, annotations, function combineGeniusResourcesCb (html) {
           spinner.innerHTML = '3'
           spinnerHolder.title = 'Loading page...'
-          if ('notifyGeniusLoading' in custom) custom.notifyGeniusLoading({
-            status: 300,
-            textStatus: 'pageLoading'
-          })
+          if ('notifyGeniusLoading' in custom) {
+            custom.notifyGeniusLoading({
+              status: 300,
+              textStatus: 'pageLoading'
+            })
+          }
           let tv1 = null
           let tv2 = null
           const iv = setInterval(function () {
             spinner.innerHTML = '2'
             spinnerHolder.title = 'Rendering...'
-            if ('notifyGeniusLoading' in custom) custom.notifyGeniusLoading({
-              status: 301,
-              textStatus: 'pageRendering'
-            })
+            if ('notifyGeniusLoading' in custom) {
+              custom.notifyGeniusLoading({
+                status: 301,
+                textStatus: 'pageRendering'
+              })
+            }
             if (iframe.contentWindow && iframe.contentWindow.postMessage) {
               iframe.contentWindow.postMessage({ iAm: custom.scriptName, type: 'writehtml', html, themeKey: genius.option.themeKey }, '*')
             } else {
@@ -2054,20 +2064,24 @@ Genius:  ${originalUrl}
             setTimeout(function () {
               iframe.style.opacity = 1.0
               spinnerHolder.remove()
-              if ('notifyGeniusLoading' in custom) custom.notifyGeniusLoading({
-                status: 900,
-                textStatus: 'complete'
-              })
+              if ('notifyGeniusLoading' in custom) {
+                custom.notifyGeniusLoading({
+                  status: 900,
+                  textStatus: 'complete'
+                })
+              }
             }, 1000)
           }
           addOneMessageListener('htmlwritten', function () {
             clearInterval(iv)
             spinner.innerHTML = '1'
             spinnerHolder.title = 'Calculating...'
-            if ('notifyGeniusLoading' in custom) custom.notifyGeniusLoading({
-              status: 302,
-              textStatus: 'htmlwritten'
-            })
+            if ('notifyGeniusLoading' in custom) {
+              custom.notifyGeniusLoading({
+                status: 302,
+                textStatus: 'htmlwritten'
+              })
+            }
           })
           addOneMessageListener('pageready', clear)
 
