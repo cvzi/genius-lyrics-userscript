@@ -346,6 +346,12 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
 
   function rememberLyricsSelection (title, artists, jsonHit) {
     const cachekey = title + '--' + artists
+    if (typeof jsonHit === 'object') {
+      jsonHit = JSON.stringify(jsonHit)
+    }
+    if (typeof jsonHit !== 'string') {
+      return
+    }
     selectionCache[cachekey] = jsonHit
     custom.GM.setValue('selectioncache', JSON.stringify(selectionCache))
   }
@@ -595,6 +601,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   const themes = {
     genius: {
       name: 'Genius (Default)',
+      themeKey: 'genius',
       scripts: function themeGeniusScripts () {
         const onload = []
 
@@ -766,6 +773,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     },
     geniusReact: {
       name: 'Genius React',
+      themeKey: 'geniusReact',
       scripts: function themeGeniusReactScripts () {
         const onload = []
 
@@ -1180,6 +1188,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
 
     cleanwhite: {
       name: 'Clean white',
+      themeKey: 'cleanwhite',
       scripts: function themeCleanWhiteScripts () {
         const onload = []
 
@@ -1492,6 +1501,7 @@ Genius:  ${originalUrl}
 
     spotify: {
       name: 'Spotify',
+      themeKey: 'spotify',
       scripts: function themeSpotifyScripts () {
         const onload = []
 
@@ -1916,13 +1926,16 @@ Genius:  ${originalUrl}
     }
 
     // Hide button
-    const hideButton = document.createElement('a')
-    hideButton.href = '#'
+    const hideButton = document.createElement('span')
+    hideButton.classList.add('genius-lyrics-hide-button')
+    hideButton.style.cursor = 'pointer'
     hideButton.textContent = 'Hide'
     hideButton.addEventListener('click', function hideButtonClick (ev) {
-      ev.preventDefault()
       genius.option.autoShow = false // Temporarily disable showing lyrics automatically on song change
-      clearInterval(genius.iv.main)
+      if (genius.iv.main > 0) {
+        clearInterval(genius.iv.main)
+        genius.iv.main = 0
+      }
       custom.hideLyrics()
     })
     bar.appendChild(hideButton)
@@ -1930,11 +1943,11 @@ Genius:  ${originalUrl}
     bar.appendChild(separator.cloneNode(true))
 
     // Config button
-    const configButton = document.createElement('a')
-    configButton.href = '#'
+    const configButton = document.createElement('span')
+    configButton.classList.add('genius-lyrics-config-button')
+    configButton.style.cursor = 'pointer'
     configButton.textContent = 'Options'
     configButton.addEventListener('click', function configButtonClick (ev) {
-      ev.preventDefault()
       config()
     })
     bar.appendChild(configButton)
@@ -1943,13 +1956,15 @@ Genius:  ${originalUrl}
       // Wrong lyrics button
       bar.appendChild(separator.cloneNode(true))
 
-      const wrongLyricsButton = document.createElement('a')
+      const wrongLyricsButton = document.createElement('span')
+      wrongLyricsButton.classList.add('genius-lyrics-wronglyrics-button')
+      wrongLyricsButton.style.cursor = 'pointer'
       wrongLyricsButton.href = '#'
       wrongLyricsButton.textContent = 'Wrong lyrics'
       wrongLyricsButton.addEventListener('click', function wrongLyricsButtonClick (ev) {
-        ev.preventDefault()
         document.querySelectorAll('.loadingspinnerholder').forEach((spinner) => spinner.remove())
-        forgetLyricsSelection(genius.current.title, genius.current.artists, this.dataset.hit)
+        // forgetLyricsSelection(genius.current.title, genius.current.artists, this.dataset.hit)
+        forgetLyricsSelection(genius.current.title, genius.current.artists)
         custom.showSearchField(`${genius.current.artists} ${genius.current.title}`)
       })
       bar.appendChild(wrongLyricsButton)
@@ -1957,15 +1972,15 @@ Genius:  ${originalUrl}
       // Back button
       bar.appendChild(separator.cloneNode(true))
 
-      const backbutton = document.createElement('a')
-      backbutton.href = '#'
+      const backbutton = document.createElement('span')
+      backbutton.classList.add('genius-lyrics-back-button')
+      backbutton.style.cursor = 'pointer'
       if (searchresultsLengths === true) {
         backbutton.textContent = 'Back to search results'
       } else {
-        backbutton.textContent = 'Back to search (' + (searchresultsLengths - 1) + ' other result' + (searchresultsLengths === 2 ? '' : 's') + ')'
+        backbutton.textContent = `Back to search (${searchresultsLengths - 1} other result${searchresultsLengths === 2 ? '' : 's'})`
       }
       backbutton.addEventListener('click', function backbuttonClick (ev) {
-        ev.preventDefault()
         custom.showSearchField(genius.current.artists + ' ' + genius.current.title)
       })
       bar.appendChild(backbutton)
@@ -1992,21 +2007,51 @@ Genius:  ${originalUrl}
       spinner.classList.add('loadingspinner')
     }
     spinner.innerHTML = '5'
+    if ('notifyGeniusLoading' in custom) {
+      custom.notifyGeniusLoading({
+        status: 0,
+        textStatus: 'start'
+      })
+    }
 
     loadGeniusSong(song, function loadGeniusSongCb (html) {
       spinner.innerHTML = '4'
       spinnerHolder.title = 'Downloading annotations...'
+      if ('notifyGeniusLoading' in custom) {
+        custom.notifyGeniusLoading({
+          status: 100,
+          textStatus: 'donwloading'
+        })
+      }
       loadGeniusAnnotations(song, html, annotationsEnabled, function loadGeniusAnnotationsCb (song, html, annotations) {
         spinner.innerHTML = '3'
         spinnerHolder.title = 'Composing page...'
+        if ('notifyGeniusLoading' in custom) {
+          custom.notifyGeniusLoading({
+            status: 200,
+            textStatus: 'pageComposing'
+          })
+        }
         combineGeniusResources(song, html, annotations, function combineGeniusResourcesCb (html) {
           spinner.innerHTML = '3'
           spinnerHolder.title = 'Loading page...'
+          if ('notifyGeniusLoading' in custom) {
+            custom.notifyGeniusLoading({
+              status: 300,
+              textStatus: 'pageLoading'
+            })
+          }
           let tv1 = null
           let tv2 = null
           const iv = setInterval(function () {
             spinner.innerHTML = '2'
             spinnerHolder.title = 'Rendering...'
+            if ('notifyGeniusLoading' in custom) {
+              custom.notifyGeniusLoading({
+                status: 301,
+                textStatus: 'pageRendering'
+              })
+            }
             if (iframe.contentWindow && iframe.contentWindow.postMessage) {
               iframe.contentWindow.postMessage({ iAm: custom.scriptName, type: 'writehtml', html, themeKey: genius.option.themeKey }, '*')
             } else {
@@ -2023,12 +2068,24 @@ Genius:  ${originalUrl}
             setTimeout(function () {
               iframe.style.opacity = 1.0
               spinnerHolder.remove()
-            }, 1000)
+              if ('notifyGeniusLoading' in custom) {
+                custom.notifyGeniusLoading({
+                  status: 900,
+                  textStatus: 'complete'
+                })
+              }
+            }, 30)
           }
           addOneMessageListener('htmlwritten', function () {
             clearInterval(iv)
             spinner.innerHTML = '1'
             spinnerHolder.title = 'Calculating...'
+            if ('notifyGeniusLoading' in custom) {
+              custom.notifyGeniusLoading({
+                status: 302,
+                textStatus: 'htmlwritten'
+              })
+            }
           })
           addOneMessageListener('pageready', clear)
 
@@ -2094,7 +2151,7 @@ Genius:  ${originalUrl}
     loadCache()
 
     // Blur background
-    document.querySelectorAll('body>*').forEach(function (e) {
+    document.querySelectorAll('body > *').forEach(function (e) {
       e.style.filter = 'blur(4px)'
     })
     if (document.getElementById('lyricscontainer')) {
@@ -2221,7 +2278,7 @@ Genius:  ${originalUrl}
     closeButton.addEventListener('click', function onCloseButtonClick () {
       win.parentNode.removeChild(win)
       // Un-blur background
-      document.querySelectorAll('body>*,#lyricscontainer').forEach(function (e) {
+      document.querySelectorAll('body > *, #lyricscontainer').forEach(function (e) {
         e.style.filter = ''
       })
     })
@@ -2303,9 +2360,13 @@ Genius:  ${originalUrl}
   }
 
   function toggleLyrics () {
-    if (!document.getElementById('lyricsiframe')) {
-      genius.option.autoShow = true // Temporarily enable showing lyrics automatically on song change
+    const isLyricsIframeExist = !!document.getElementById('lyricsiframe')
+    if (genius.iv.main > 0) {
       clearInterval(genius.iv.main)
+      genius.iv.main = 0
+    }
+    if (!isLyricsIframeExist) {
+      genius.option.autoShow = true // Temporarily enable showing lyrics automatically on song change
       if ('main' in custom) {
         custom.setupMain ? custom.setupMain(genius) : (genius.iv.main = setInterval(custom.main, 2000))
       }
@@ -2314,7 +2375,6 @@ Genius:  ${originalUrl}
       }
     } else {
       genius.option.autoShow = false // Temporarily disable showing lyrics automatically on song change
-      clearInterval(genius.iv.main)
       if ('hideLyrics' in custom) {
         custom.hideLyrics()
       }
@@ -2443,6 +2503,10 @@ Genius:  ${originalUrl}
           e.source.postMessage({ iAm: custom.scriptName, type: 'htmlwritten' }, '*')
           setTimeout(function () {
             const onload = theme.scripts()
+            if ('iframeLoadedCallback1' in custom) {
+              // before all onload functions and allow modification of theme and onload from external
+              custom.iframeLoadedCallback1({ document, theme, onload })
+            }
             onload.forEach(function (func) {
               try {
                 func()
@@ -2463,6 +2527,10 @@ Genius:  ${originalUrl}
               addKeyboardShortcutInFrame(custom.toggleLyricsKey)
             }
             e.source.postMessage({ iAm: custom.scriptName, type: 'pageready' }, '*')
+            if ('iframeLoadedCallback2' in custom) {
+              // after all onload functions
+              custom.iframeLoadedCallback2({ document, theme, onload })
+            }
           }, 500)
         })
       } else if (document.location.href.startsWith(custom.emptyURL + '?405#html,')) {
