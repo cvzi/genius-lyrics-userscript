@@ -2499,6 +2499,10 @@ Genius:  ${originalUrl}
           e.source.postMessage({ iAm: custom.scriptName, type: 'htmlwritten' }, '*')
           setTimeout(function () {
             const onload = theme.scripts()
+            if ('iframeLoadedCallback1' in custom) {
+              // before all onload functions and allow modification of theme and onload from external
+              custom.iframeLoadedCallback1({ document, theme, onload })
+            }
             onload.forEach(function (func) {
               try {
                 func()
@@ -2519,6 +2523,10 @@ Genius:  ${originalUrl}
               addKeyboardShortcutInFrame(custom.toggleLyricsKey)
             }
             e.source.postMessage({ iAm: custom.scriptName, type: 'pageready' }, '*')
+            if ('iframeLoadedCallback2' in custom) {
+              // after all onload functions
+              custom.iframeLoadedCallback2({ document, theme, onload })
+            }
           }, 500)
         })
       } else if (document.location.href.startsWith(custom.emptyURL + '?405#html,')) {
