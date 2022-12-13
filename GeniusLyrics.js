@@ -1968,15 +1968,15 @@ Genius:  ${originalUrl}
       // Back button
       bar.appendChild(separator.cloneNode(true))
 
-      const backbutton = document.createElement('a')
-      backbutton.href = '#'
+      const backbutton = document.createElement('span')
+      backbutton.classList.add('youtube-genius-back-button')
+      backbutton.style.cursor = 'pointer'
       if (searchresultsLengths === true) {
         backbutton.textContent = 'Back to search results'
       } else {
-        backbutton.textContent = 'Back to search (' + (searchresultsLengths - 1) + ' other result' + (searchresultsLengths === 2 ? '' : 's') + ')'
+        backbutton.textContent = `Back to search (${searchresultsLengths - 1} other result${searchresultsLengths === 2 ? '' : 's'})`
       }
       backbutton.addEventListener('click', function backbuttonClick (ev) {
-        ev.preventDefault()
         custom.showSearchField(genius.current.artists + ' ' + genius.current.title)
       })
       bar.appendChild(backbutton)
