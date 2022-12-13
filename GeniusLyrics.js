@@ -2315,12 +2315,12 @@ Genius:  ${originalUrl}
 
   function toggleLyrics () {
     const isLyricsIframeExist = !!document.getElementById('lyricsiframe')
-    genius.option.autoShow = false // Temporarily disable showing lyrics automatically on song change
     if (genius.iv.main > 0) {
       clearInterval(genius.iv.main)
       genius.iv.main = 0
     }
     if (!isLyricsIframeExist) {
+      genius.option.autoShow = true // Temporarily enable showing lyrics automatically on song change
       if ('main' in custom) {
         custom.setupMain ? custom.setupMain(genius) : (genius.iv.main = setInterval(custom.main, 2000))
       }
@@ -2328,6 +2328,7 @@ Genius:  ${originalUrl}
         custom.addLyrics(true)
       }
     } else {
+      genius.option.autoShow = false // Temporarily disable showing lyrics automatically on song change
       if ('hideLyrics' in custom) {
         custom.hideLyrics()
       }
