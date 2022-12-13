@@ -2533,8 +2533,6 @@ Genius:  ${originalUrl}
             }
           }, 500)
         })
-      } else if (document.location.href.startsWith(custom.emptyURL + '?405#html,')) {
-        document.documentElement.innerHTML = decodeURIComponent(document.location.hash.split('#html,')[1])
       } else {
         listenToMessages()
         loadCache()
