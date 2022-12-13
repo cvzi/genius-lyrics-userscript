@@ -1923,7 +1923,7 @@ Genius:  ${originalUrl}
 
     // Hide button
     const hideButton = document.createElement('span')
-    hideButton.classList.add('youtube-genius-hide-button')
+    hideButton.classList.add('genius-lyrics-hide-button')
     hideButton.style.cursor = 'pointer'
     hideButton.textContent = 'Hide'
     hideButton.addEventListener('click', function hideButtonClick (ev) {
@@ -1940,7 +1940,7 @@ Genius:  ${originalUrl}
 
     // Config button
     const configButton = document.createElement('span')
-    configButton.classList.add('youtube-genius-config-button')
+    configButton.classList.add('genius-lyrics-config-button')
     configButton.style.cursor = 'pointer'
     configButton.textContent = 'Options'
     configButton.addEventListener('click', function configButtonClick (ev) {
@@ -1953,7 +1953,7 @@ Genius:  ${originalUrl}
       bar.appendChild(separator.cloneNode(true))
 
       const wrongLyricsButton = document.createElement('span')
-      wrongLyricsButton.classList.add('youtube-genius-wronglyrics-button')
+      wrongLyricsButton.classList.add('genius-lyrics-wronglyrics-button')
       wrongLyricsButton.style.cursor = 'pointer'
       wrongLyricsButton.href = '#'
       wrongLyricsButton.textContent = 'Wrong lyrics'
@@ -1969,7 +1969,7 @@ Genius:  ${originalUrl}
       bar.appendChild(separator.cloneNode(true))
 
       const backbutton = document.createElement('span')
-      backbutton.classList.add('youtube-genius-back-button')
+      backbutton.classList.add('genius-lyrics-back-button')
       backbutton.style.cursor = 'pointer'
       if (searchresultsLengths === true) {
         backbutton.textContent = 'Back to search results'
