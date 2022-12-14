@@ -628,8 +628,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       }
     }
 
-    m = m.map((s) => s.match(/\d+/)[0])
-    const ids = m.map((id) => 'ids[]=' + id)
+    const ids = m.map((s) => `ids[]=${s.match(/\d+/)[0]}`)
 
     const apiurl = 'https://genius.com/api/referents/multi?text_format=html%2Cplain&' + ids.join('&')
 
