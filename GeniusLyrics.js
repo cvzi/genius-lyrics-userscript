@@ -106,79 +106,57 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   let autoScrollEnabled = false
   const onMessage = []
 
-  let cleanWindow = null
+  let nativeFNs = null
 
-  function freshWindowFromIframe () {
-    const iframe = document.body.appendChild(document.createElement('iframe'))
+  function makeOriginalFNsAsNative (win) {
+    const { setTimeout, setInterval, clearTimeout, clearInterval } = win
+    nativeFNs = { setTimeout, setInterval, clearTimeout, clearInterval }
+  }
+  function makeNativeFNsFromIframe () {
+    const iframe = document.createElement('iframe')
+    iframe.style.position = 'fixed'
     iframe.style.display = 'none'
-    return iframe.contentWindow
+    document.body.appendChild(iframe)
+    const { setTimeout, setInterval, clearTimeout, clearInterval } = iframe.contentWindow
+    iframe.remove()
+    iframe = null
+    nativeFNs = { setTimeout, setInterval, clearTimeout, clearInterval }
   }
-  const setTimeout = function (a, b) {
-    if (window.setTimeout.toString().indexOf('[native code]') !== -1) {
-      return window.setTimeout(a, b)
-    }
-    if (top.setTimeout.toString().indexOf('[native code]') !== -1) {
-      return top.setTimeout(a, b)
-    }
-    if (!cleanWindow && document.body) {
-      cleanWindow = freshWindowFromIframe()
-    }
-    if (cleanWindow) {
-      return cleanWindow.setTimeout(a, b)
-    } else {
-      return window.setTimeout(a, b)
-    }
-  }
-  const setInterval = function (a, b) {
-    if (window.setInterval.toString().indexOf('[native code]') !== -1) {
-      return window.setInterval(a, b)
-    }
-    if (top.setInterval.toString().indexOf('[native code]') !== -1) {
-      return top.setInterval(a, b)
-    }
-    if (!cleanWindow && document.body) {
-      cleanWindow = freshWindowFromIframe()
-    }
-    if (cleanWindow) {
-      return cleanWindow.setInterval(a, b)
-    } else {
-      return window.setInterval(a, b)
+  function setupNativeFNs(iframeWin) {
+    if (nativeFNs === null) {
+      if (window.setTimeout.name === 'setTimeout') {
+        makeOriginalFNsAsNative(window)
+      } else if (iframeWin !== null) {
+        makeOriginalFNsAsNative(iframeWin)
+      } else {
+        makeNativeFNsFromIframe()
+      }
     }
   }
-  const clearTimeout = function (a, b) {
-    if (window.clearTimeout.toString().indexOf('[native code]') !== -1) {
-      return window.clearTimeout(a, b)
-    }
-    if (top.clearTimeout.toString().indexOf('[native code]') !== -1) {
-      return top.clearTimeout(a, b)
-    }
-    if (!cleanWindow && document.body) {
-      cleanWindow = freshWindowFromIframe()
-    }
-    if (cleanWindow) {
-      return cleanWindow.clearTimeout(a, b)
-    } else {
-      return window.clearTimeout(a, b)
-    }
+  const setTimeout = function () {
+    setupNativeFNs(null)
+    return nativeFNs.setTimeout.call(window, ...arguments)
   }
-  const clearInterval = function (a, b) {
-    if (window.clearInterval.toString().indexOf('[native code]') !== -1) {
-      return window.clearInterval(a, b)
-    }
-    if (top.clearInterval.toString().indexOf('[native code]') !== -1) {
-      return top.clearInterval(a, b)
-    }
-    if (!cleanWindow && document.body) {
-      cleanWindow = freshWindowFromIframe()
-    }
-    if (cleanWindow) {
-      return cleanWindow.clearInterval(a, b)
-    } else {
-      return window.clearInterval(a, b)
-    }
+  const setInterval = function () {
+    setupNativeFNs(null)
+    return nativeFNs.setInterval.call(window, ...arguments)
+  }
+  const clearTimeout = function () {
+    setupNativeFNs(null)
+    return nativeFNs.clearTimeout.call(window, ...arguments)
+  }
+  const clearInterval = function () {
+    setupNativeFNs(null)
+    return nativeFNs.clearInterval.call(window, ...arguments)
   }
 
   function getHostname (url) {
+    // absolute path
+    if (typeof url === 'string' && url.startsWith('http')) {
+      const query = new URL(url)
+      return query.hostname
+    }
+    // relative path - use <a> or new URL(url, document.baseURI)
     const a = document.createElement('a')
     a.href = url
     return a.hostname
@@ -191,11 +169,12 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   }
 
   function removeTagsKeepText (node) {
-    while (node.firstChild) {
-      if ('tagName' in node.firstChild && node.firstChild.tagName !== 'BR') {
-        removeTagsKeepText(node.firstChild)
+    let tmpNode = null
+    while (tmpNode = node.firstChild) {
+      if ('tagName' in tmpNode && tmpNode.tagName !== 'BR') {
+        removeTagsKeepText(tmpNode)
       } else {
-        node.parentNode.insertBefore(node.firstChild, node)
+        node.parentNode.insertBefore(tmpNode, node)
       }
     }
     node.remove()
@@ -1892,6 +1871,16 @@ Genius:  ${originalUrl}
     }
   }
 
+  function appendElements (target, elements) {
+    if (typeof target.append === 'function') {
+      target.append(...elements)
+    } else {
+      for (const element of elements) {
+        target.appendChild(element)
+      }
+    }
+  }
+
   function showLyrics (song, searchresultsLengths) {
     const container = custom.getCleanLyricsContainer()
     container.className = '' // custom.getCleanLyricsContainer might forget to clear the className if the element is reused
@@ -1902,7 +1891,9 @@ Genius:  ${originalUrl}
       return
     }
 
-    const separator = document.createElement('span')
+    let elementsToBeAppended = []
+
+    let separator = document.createElement('span')
     separator.setAttribute('class', 'second-line-separator')
     separator.setAttribute('style', 'padding:0px 3px')
     separator.textContent = '•'
@@ -1911,7 +1902,6 @@ Genius:  ${originalUrl}
     bar.setAttribute('class', 'lyricsnavbar')
     bar.style.fontSize = '0.7em'
     bar.style.userSelect = 'none'
-    container.appendChild(bar)
 
     // Resize button
     if ('initResize' in custom) {
@@ -1920,9 +1910,7 @@ Genius:  ${originalUrl}
       resizeButton.style.cursor = 'ew-resize'
       resizeButton.textContent = '⇹'
       resizeButton.addEventListener('mousedown', custom.initResize)
-      bar.appendChild(resizeButton)
-
-      bar.appendChild(separator.cloneNode(true))
+      elementsToBeAppended.push(resizeButton, separator.cloneNode(true))
     }
 
     // Hide button
@@ -1938,9 +1926,7 @@ Genius:  ${originalUrl}
       }
       custom.hideLyrics()
     })
-    bar.appendChild(hideButton)
-
-    bar.appendChild(separator.cloneNode(true))
+    elementsToBeAppended.push(hideButton, separator.cloneNode(true))
 
     // Config button
     const configButton = document.createElement('span')
@@ -1950,12 +1936,10 @@ Genius:  ${originalUrl}
     configButton.addEventListener('click', function configButtonClick (ev) {
       config()
     })
-    bar.appendChild(configButton)
+    elementsToBeAppended.push(configButton)
 
     if (searchresultsLengths === 1) {
       // Wrong lyrics button
-      bar.appendChild(separator.cloneNode(true))
-
       const wrongLyricsButton = document.createElement('span')
       wrongLyricsButton.classList.add('genius-lyrics-wronglyrics-button')
       wrongLyricsButton.style.cursor = 'pointer'
@@ -1967,11 +1951,9 @@ Genius:  ${originalUrl}
         forgetLyricsSelection(genius.current.title, genius.current.artists)
         custom.showSearchField(`${genius.current.artists} ${genius.current.title}`)
       })
-      bar.appendChild(wrongLyricsButton)
+      elementsToBeAppended.push(separator.cloneNode(true), wrongLyricsButton)
     } else if (searchresultsLengths > 1) {
       // Back button
-      bar.appendChild(separator.cloneNode(true))
-
       const backbutton = document.createElement('span')
       backbutton.classList.add('genius-lyrics-back-button')
       backbutton.style.cursor = 'pointer'
@@ -1983,16 +1965,32 @@ Genius:  ${originalUrl}
       backbutton.addEventListener('click', function backbuttonClick (ev) {
         custom.showSearchField(genius.current.artists + ' ' + genius.current.title)
       })
-      bar.appendChild(backbutton)
+      elementsToBeAppended.push(separator.cloneNode(true), backbutton)
     }
 
     const iframe = document.createElement('iframe')
     iframe.id = 'lyricsiframe'
-    container.appendChild(iframe)
     iframe.style.opacity = 0.1
+
+    // clean up
+    separator = null
+
+    // flush to DOM tree
+    appendElements(bar, elementsToBeAppended)
+    appendElements(container, [bar, iframe])
+    if (nativeFNs === null) {
+      const win = iframe.contentWindow
+      if (win !== null) {
+        setupNativeFNs(win)
+      }
+    }
     iframe.src = custom.emptyURL + '#html:post'
 
     custom.setFrameDimensions(container, iframe, bar)
+
+    // clean up
+    elementsToBeAppended.length = 0
+    elementsToBeAppended = null
 
     const spinnerHolder = document.body.appendChild(document.createElement('div'))
     spinnerHolder.classList.add('loadingspinnerholder')
@@ -2131,8 +2129,9 @@ Genius:  ${originalUrl}
     }
     // Relay the event to the iframe
     const iframe = document.getElementById('lyricsiframe')
-    if (iframe && iframe.contentWindow && iframe.contentWindow.postMessage) {
-      iframe.contentWindow.postMessage({ iAm: custom.scriptName, type: 'scrollLyrics', position: positionFraction }, '*')
+    const contentWindow = (iframe || 0).contentWindow
+    if (contentWindow && typeof contentWindow.postMessage === 'function') {
+      contentWindow.postMessage({ iAm: custom.scriptName, type: 'scrollLyrics', position: positionFraction }, '*')
     }
   }
 
@@ -2154,8 +2153,9 @@ Genius:  ${originalUrl}
     document.querySelectorAll('body > *').forEach(function (e) {
       e.style.filter = 'blur(4px)'
     })
-    if (document.getElementById('lyricscontainer')) {
-      document.getElementById('lyricscontainer').style.filter = 'blur(1px)'
+    const lyricscontainer = document.getElementById('lyricscontainer')
+    if (lyricscontainer) {
+      lyricscontainer.style.filter = 'blur(1px)'
     }
 
     const win = document.body.appendChild(document.createElement('div'))
