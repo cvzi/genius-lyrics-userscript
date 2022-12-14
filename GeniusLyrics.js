@@ -146,22 +146,23 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   setupNativeFNs()
 
   /*
-  const setTimeout = function () {
-    setupNativeFNs(null)
-    return nativeFNs.setTimeout.call(window, ...arguments)
-  }
-  const setInterval = function () {
-    setupNativeFNs(null)
-    return nativeFNs.setInterval.call(window, ...arguments)
-  }
-  const clearTimeout = function () {
-    setupNativeFNs(null)
-    return nativeFNs.clearTimeout.call(window, ...arguments)
-  }
-  const clearInterval = function () {
-    setupNativeFNs(null)
-    return nativeFNs.clearInterval.call(window, ...arguments)
-  }*/
+    const setTimeout = function () {
+      setupNativeFNs(null)
+      return nativeFNs.setTimeout.call(window, ...arguments)
+    }
+    const setInterval = function () {
+      setupNativeFNs(null)
+      return nativeFNs.setInterval.call(window, ...arguments)
+    }
+    const clearTimeout = function () {
+      setupNativeFNs(null)
+      return nativeFNs.clearTimeout.call(window, ...arguments)
+    }
+    const clearInterval = function () {
+      setupNativeFNs(null)
+      return nativeFNs.clearInterval.call(window, ...arguments)
+    }
+  */
 
   function freshWindowFromIframe () {
     const iframe = document.body.appendChild(document.createElement('iframe'))
@@ -612,9 +613,10 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   }
 
   function loadGeniusAnnotations (song, html, annotationsEnabled, cb) {
+    let annotations = {}
     if (!annotationsEnabled) {
       // return cb(song, html, {})
-      return cb({})
+      return cb(annotations)
     }
     let m = html.match(/annotation-fragment="\d+"/g)
     if (!m) {
@@ -622,7 +624,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       if (!m) {
         // No annotations in source -> skip loading annotations from API
         // return cb(song, html, {})
-        return cb({})
+        return cb(annotations)
       }
     }
 
@@ -638,11 +640,11 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       },
       error: function loadGeniusAnnotationsOnError (response) {
         window.alert(custom.scriptName + '\n\nError loadGeniusAnnotations(' + JSON.stringify(song) + ', cb):\n' + response)
-        cb(song, html, {})
+        cb(annotations)
       },
       load: function loadGeniusAnnotationsOnLoad (response) {
         const r = JSON.parse(response.responseText).response
-        const annotations = {}
+        annotations = {}
         if (typeof r.referents.length === 'number') {
           for (const referent of r.referents) {
             for (const annotation of referent.annotations) {
@@ -672,16 +674,16 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   }
 
   const themeCommon = {
-    annotationsRemoveAll() {
+    annotationsRemoveAll () {
       for (const a of document.querySelectorAll('.song_body-lyrics .referent,.song_body-lyrics a[class*="referent"]')) {
         let tmpElement
         while ((tmpElement = a.firstChild) !== null) {
           a.parentNode.insertBefore(tmpElement, a)
         }
         a.remove()
-      } 
+      }
     },
-    annotationsRemoveAll2() {
+    annotationsRemoveAll2 () {
       const referents = document.querySelectorAll('.song_body-lyrics .referent')
       for (const a of referents) {
         let tmpElement
@@ -916,7 +918,11 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
           for (const div of divs) {
             removals.push(div.parentNode)
           }
-          if(removals.length>0) removeElements(removals)
+          if (removals.length > 0) {
+            removeElements(removals)
+          }
+          removals.length = 0
+          removals = null
         }
 
         // Make song title clickable
@@ -1231,7 +1237,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
               if (e.target.closest('#annotationcontainer958') === null) {
                 annotationcontainer.style.display = 'none'
                 annotationcontainer.style.opacity = 0.0
-                for(const e of document.querySelectorAll('.annotated.highlighted')){
+                for (const e of document.querySelectorAll('.annotated.highlighted')) {
                   e.classList.remove('highlighted')
                 }
               }
@@ -2516,7 +2522,7 @@ Genius:  ${originalUrl}
 
   async function mainRunner () {
     // get values from GM
-    let values = await Promise.all([
+    const values = await Promise.all([
       custom.GM.getValue('debug', genius.debug),
       custom.GM.getValue('theme', genius.option.themeKey),
       custom.GM.getValue('annotationsenabled', annotationsEnabled),
