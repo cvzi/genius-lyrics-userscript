@@ -105,14 +105,18 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   let annotationsEnabled = true
   let autoScrollEnabled = false
   const onMessage = []
-
+  
+  let cleanWindow = null
   let nativeFNs = null
 
   function makeOriginalFNsAsNative (win) {
+    /*
     const { setTimeout, setInterval, clearTimeout, clearInterval } = win
     nativeFNs = { setTimeout, setInterval, clearTimeout, clearInterval }
+    */
   }
   function makeNativeFNsFromIframe () {
+    /*
     let iframe = document.createElement('iframe')
     iframe.style.position = 'fixed'
     iframe.style.display = 'none'
@@ -121,8 +125,10 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     iframe.remove()
     iframe = null
     nativeFNs = { setTimeout, setInterval, clearTimeout, clearInterval }
+    */
   }
   function setupNativeFNs (iframeWin) {
+    /*
     if (nativeFNs === null) {
       if (window.setTimeout.name === 'setTimeout') {
         makeOriginalFNsAsNative(window)
@@ -132,7 +138,9 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         makeNativeFNsFromIframe()
       }
     }
+    */
   }
+  /*
   const setTimeout = function () {
     setupNativeFNs(null)
     return nativeFNs.setTimeout.call(window, ...arguments)
@@ -148,6 +156,75 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   const clearInterval = function () {
     setupNativeFNs(null)
     return nativeFNs.clearInterval.call(window, ...arguments)
+  }*/
+  function freshWindowFromIframe () {
+    const iframe = document.body.appendChild(document.createElement('iframe'))
+    iframe.style.display = 'none'
+    return iframe.contentWindow
+  }
+  const setTimeout = function (a, b) {
+    if (window.setTimeout.toString().indexOf('[native code]') !== -1) {
+      return window.setTimeout(a, b)
+    }
+    if (top.setTimeout.toString().indexOf('[native code]') !== -1) {
+      return top.setTimeout(a, b)
+    }
+    if (!cleanWindow && document.body) {
+      cleanWindow = freshWindowFromIframe()
+    }
+    if (cleanWindow) {
+      return cleanWindow.setTimeout(a, b)
+    } else {
+      return window.setTimeout(a, b)
+    }
+  }
+  const setInterval = function (a, b) {
+    if (window.setInterval.toString().indexOf('[native code]') !== -1) {
+      return window.setInterval(a, b)
+    }
+    if (top.setInterval.toString().indexOf('[native code]') !== -1) {
+      return top.setInterval(a, b)
+    }
+    if (!cleanWindow && document.body) {
+      cleanWindow = freshWindowFromIframe()
+    }
+    if (cleanWindow) {
+      return cleanWindow.setInterval(a, b)
+    } else {
+      return window.setInterval(a, b)
+    }
+  }
+  const clearTimeout = function (a, b) {
+    if (window.clearTimeout.toString().indexOf('[native code]') !== -1) {
+      return window.clearTimeout(a, b)
+    }
+    if (top.clearTimeout.toString().indexOf('[native code]') !== -1) {
+      return top.clearTimeout(a, b)
+    }
+    if (!cleanWindow && document.body) {
+      cleanWindow = freshWindowFromIframe()
+    }
+    if (cleanWindow) {
+      return cleanWindow.clearTimeout(a, b)
+    } else {
+      return window.clearTimeout(a, b)
+    }
+  }
+  const clearInterval = function (a, b) {
+    if (window.clearInterval.toString().indexOf('[native code]') !== -1) {
+      return window.clearInterval(a, b)
+    }
+    if (top.clearInterval.toString().indexOf('[native code]') !== -1) {
+      return top.clearInterval(a, b)
+    }
+    if (!cleanWindow && document.body) {
+      cleanWindow = freshWindowFromIframe()
+    }
+    if (cleanWindow) {
+      return cleanWindow.clearInterval(a, b)
+    } else {
+      return window.clearInterval(a, b)
+    }
   }
 
   function getHostname (url) {
@@ -167,6 +244,15 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       e.remove()
     }
   }
+  const removeElements = (typeof window.DocumentFragment.prototype.append === 'function')
+    ? function (elements) {
+      document.createDocumentFragment().append(...elements)
+    }
+    : function (elements) {
+      for (const element of elements) {
+        element.remove()
+      }
+    }
 
   function removeTagsKeepText (node) {
     let tmpNode = null
@@ -220,7 +306,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   function parsePreloadedStateData (obj, parent) {
   // Convert genius' JSON represenation of lyrics to DOM object
     if ('children' in obj) {
-      obj.children.forEach(function (child) {
+      for (const child of obj.children) {
         if (typeof (child) === 'string') {
           if (child) {
             parent.appendChild(document.createTextNode(child))
@@ -243,7 +329,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
           }
           parsePreloadedStateData(child, node)
         }
-      })
+      }
     }
     return parent
   }
@@ -423,8 +509,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
             arrowUpDown.style.borderLeft = '9px inset transparent'
           }
           resumeButton.addEventListener('click', function resumeAutoScroll () {
-            resumeButton.remove()
-            resumeButtonFromHere.remove()
+            removeElements([resumeButton, resumeButtonFromHere])
             window.lastScrollTopPosition = null
             // Resume auto scrolling
             document.scrollingElement.scrollTo({
@@ -439,10 +524,11 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
           const arrowRight = resumeButtonFromHere.appendChild(document.createElement('div'))
           arrowRight.style = 'width: 0;height: 0;border-top: 9px inset transparent;border-bottom: 9px inset transparent;border-left: 15px solid #222;margin-left: 2px;'
           resumeButtonFromHere.addEventListener('click', function resumeAutoScrollFromHere () {
-            resumeButton.remove()
-            resumeButtonFromHere.remove()
+            removeElements([resumeButton, resumeButtonFromHere])
             // Resume auto scrolling from current position
-            document.querySelectorAll('.scrolllabel').forEach((e) => e.remove())
+            for (const e of document.querySelectorAll('.scrolllabel')) {
+              e.remove()
+            }
             window.first = false
             window.lastScrollTopPosition = null
             window.staticOffsetTop += document.scrollingElement.scrollTop - window.newScrollTopPosition
@@ -521,15 +607,16 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
 
   function loadGeniusAnnotations (song, html, annotationsEnabled, cb) {
     if (!annotationsEnabled) {
-      return cb(song, html, {})
+      // return cb(song, html, {})
+      return cb({})
     }
-    const regex = /annotation-fragment="\d+"/g
-    let m = html.match(regex)
+    let m = html.match(/annotation-fragment="\d+"/g)
     if (!m) {
       m = html.match(/href="\/\d+\//g)
       if (!m) {
-      // No annotations in source -> skip loading annotations from API
-        return cb(song, html, {})
+        // No annotations in source -> skip loading annotations from API
+        // return cb(song, html, {})
+        return cb({})
       }
     }
 
@@ -550,31 +637,115 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       load: function loadGeniusAnnotationsOnLoad (response) {
         const r = JSON.parse(response.responseText).response
         const annotations = {}
-        if (r.referents.forEach) {
-          r.referents.forEach(function forEachReferent (referent) {
-            referent.annotations.forEach(function forEachAnnotation (annotation) {
+        if (typeof r.referents.length === 'number') {
+          for (const referent of r.referents) {
+            for (const annotation of referent.annotations) {
               if (annotation.referent_id in annotations) {
                 annotations[annotation.referent_id].push(annotation)
               } else {
                 annotations[annotation.referent_id] = [annotation]
               }
-            })
-          })
+            }
+          }
         } else {
           for (const refId in r.referents) {
             const referent = r.referents[refId]
-            referent.annotations.forEach(function forEachAnnotation (annotation) {
+            for (const annotation of referent.annotations) {
               if (annotation.referent_id in annotations) {
                 annotations[annotation.referent_id].push(annotation)
               } else {
                 annotations[annotation.referent_id] = [annotation]
               }
-            })
+            }
           }
         }
-        cb(song, html, annotations)
+        // cb(song, html, annotations)
+        cb(annotations)
       }
     })
+  }
+
+  const themeCommon = {
+    annotationsAddHandler () {
+      for (const a of document.querySelectorAll('*[data-annotationid]')) {
+        a.addEventListener('click', showAnnotation1234)
+      }
+    },
+    annotationsRemoveAll() {
+      for (const a of document.querySelectorAll('.song_body-lyrics .referent,.song_body-lyrics a[class*="referent"]')) {
+        let tmpElement
+        while ((tmpElement = a.firstChild) !== null) {
+          a.parentNode.insertBefore(tmpElement, a)
+        }
+        a.remove()
+      } 
+    },
+    annotationsRemoveAll2() {
+      const referents = document.querySelectorAll('.song_body-lyrics .referent')
+      for (const a of referents) {
+        let tmpElement
+        while ((tmpElement = a.firstChild) !== null) {
+          a.parentNode.insertBefore(tmpElement, a)
+        }
+        a.remove()
+      }
+      // Remove right column
+      document.querySelector('.song_body.column_layout .column_layout-column_span--secondary').remove()
+      document.querySelector('.song_body.column_layout .column_layout-column_span--primary').style.width = '100%'
+    },
+    // Hide footer
+    hideFooter895 () {
+      const f = document.querySelectorAll('.footer div')
+      if (f.length) {
+        removeIfExists(f[0])
+        removeIfExists(f[1])
+      }
+    },
+    hideSecondaryFooter895 () {
+      removeIfExists(document.querySelector('.footer.footer--secondary'))
+    },
+    // Hide other stuff
+    hideStuff235 () {
+      const grayBox = document.querySelector('.column_layout-column_span-initial_content>.dfp_unit.u-x_large_bottom_margin.dfp_unit--in_read')
+      removeIfExists(grayBox)
+      removeIfExists(document.querySelector('.header .header-expand_nav_menu'))
+    },
+    showAnnotation1234A (t) {
+      const es = document.querySelectorAll('.song_body-lyrics .referent--yellow.referent--highlighted')
+      for (const e of es) {
+        e.classList.remove('referent--yellow', 'referent--highlighted')
+      }
+      t.classList.add('referent--yellow', 'referent--highlighted')
+      if (!('annotations1234' in window)) {
+        if (document.getElementById('annotationsdata1234')) {
+          window.annotations1234 = JSON.parse(document.getElementById('annotationsdata1234').innerHTML)
+        } else {
+          window.annotations1234 = {}
+          console.warn('No annotation data found #annotationsdata1234')
+        }
+      }
+    },
+    // Change links to target=_blank
+    targetBlankLinks145A () {
+      const as = document.querySelectorAll('body a:not([href|="#"]):not([target="_blank"])')
+      for (const a of as) {
+        a.target = '_blank'
+      }
+    },
+    targetBlankLinks145B () {
+      const as = document.querySelectorAll('body a[href]:not([href|="#"]):not([target="_blank"])')
+      for (const a of as) {
+        const href = a.getAttribute('href')
+        if (!href.startsWith('#')) {
+          a.target = '_blank'
+          if (!href.startsWith('http')) {
+            a.href = 'https://genius.com' + href
+          } else if (href.startsWith(custom.domain)) {
+            a.href = href.replace(custom.domain, 'https://genius.com')
+          }
+        }
+      }
+    }
   }
 
   const themes = {
@@ -584,30 +755,9 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       scripts: function themeGeniusScripts () {
         const onload = []
 
-        // Hide footer
-        function hideFooter895 () {
-          const f = document.querySelectorAll('.footer div')
-          if (f.length) {
-            removeIfExists(f[0])
-            removeIfExists(f[1])
-          }
-        }
-        function hideSecondaryFooter895 () {
-          if (document.querySelector('.footer.footer--secondary')) {
-            document.querySelector('.footer.footer--secondary').parentNode.removeChild(document.querySelector('.footer.footer--secondary'))
-          }
-        }
-
-        onload.push(hideFooter895)
-        onload.push(hideSecondaryFooter895)
-
-        // Hide other stuff
-        function hideStuff235 () {
-          const grayBox = document.querySelector('.column_layout-column_span-initial_content>.dfp_unit.u-x_large_bottom_margin.dfp_unit--in_read')
-          removeIfExists(grayBox)
-          removeIfExists(document.querySelector('.header .header-expand_nav_menu'))
-        }
-        onload.push(hideStuff235)
+        onload.push(themeCommon.hideFooter895)
+        onload.push(themeCommon.hideSecondaryFooter895)
+        onload.push(themeCommon.hideStuff235)
 
         // Maked header wider
         onload.push(function () {
@@ -628,18 +778,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         function showAnnotation1234 (ev) {
           ev.preventDefault()
           const id = this.dataset.annotationid
-          document.querySelectorAll('.song_body-lyrics .referent--yellow.referent--highlighted').forEach(function (e) {
-            e.className = e.className.replace(/\breferent--yellow\b/, '').replace(/\breferent--highlighted\b/, '')
-          })
-          this.className += ' referent--yellow referent--highlighted'
-          if (!('annotations1234' in window)) {
-            if (document.getElementById('annotationsdata1234')) {
-              window.annotations1234 = JSON.parse(document.getElementById('annotationsdata1234').innerHTML)
-            } else {
-              window.annotations1234 = {}
-              console.warn('No annotation data found #annotationsdata1234')
-            }
-          }
+          themeCommon.showAnnotation1234A(this)
           if (id in window.annotations1234) {
             const annotation = window.annotations1234[id][0]
             const main = document.querySelector('.song_body.column_layout .column_layout-column_span.column_layout-column_span--secondary')
@@ -677,32 +816,18 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         }
         onload.push(clickableTitle037)
 
-        // Change links to target=_blank
-        function targetBlankLinks145 () {
-          const as = document.querySelectorAll('body a:not([href|="#"]):not([target=_blank])')
-          as.forEach(function (a) {
-            a.target = '_blank'
-          })
-        }
-        onload.push(targetBlankLinks145)
-        onload.push(() => setTimeout(targetBlankLinks145, 1000))
+        onload.push(themeCommon.targetBlankLinks145A)
+        onload.push(() => setTimeout(themeCommon.targetBlankLinks145A, 1000))
 
         if (!annotationsEnabled) {
-        // Remove all annotations
-          onload.push(function removeAnnotations135 () {
-            document.querySelectorAll('.song_body-lyrics .referent').forEach(function (a) {
-              while (a.firstChild) {
-                a.parentNode.insertBefore(a.firstChild, a)
-              }
-              a.remove()
-            })
-            // Remove right column
-            document.querySelector('.song_body.column_layout .column_layout-column_span--secondary').remove()
-            document.querySelector('.song_body.column_layout .column_layout-column_span--primary').style.width = '100%'
-          })
+          // Remove all annotations
+          onload.push(themeCommon.annotationsRemoveAll2)
         } else {
-        // Add click handler to annotations
-          document.querySelectorAll('*[data-annotationid]').forEach((a) => a.addEventListener('click', showAnnotation1234))
+          // Add click handler to annotations
+          // for(const a of document.querySelectorAll('*[data-annotationid]')){
+          //   a.addEventListener('click', showAnnotation1234)
+          // }
+          themeCommon.annotationsAddHandler()
         }
 
         // Open real page if not in frame
@@ -717,8 +842,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         let headhtml = ''
 
         // Make annotations clickable
-        const regex = /annotation-fragment="(\d+)"/g
-        html = html.replace(regex, '$0 data-annotationid="$1"')
+        html = html.replace(/annotation-fragment="(\d+)"/g, '$0 data-annotationid="$1"')
 
         // Change design
         html = html.split('<div class="leaderboard_ad_container">').join('<div class="leaderboard_ad_container" style="width:0px;height:0px">')
@@ -756,33 +880,43 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       scripts: function themeGeniusReactScripts () {
         const onload = []
 
+        function pushIfAny(arr, element){
+          if(element) {
+            arr.push(element)
+          }
+        }
+
         function hideStuff () {
+          let removals = [];
           // Hide "Manage Lyrics" and "Click here to go to the old song page"
-          removeIfExists(document.querySelector('div[class^="LyricsControls_"]'))
+          pushIfAny(removals, document.querySelector('div[class^="LyricsControls_"]'))
           // Hide "This is a work in progress"
-          removeIfExists(document.getElementById('top'))
+          pushIfAny(removals, document.getElementById('top'))
           // Header leaderboard/nav
-          removeIfExists(document.querySelector('div[class^="Leaderboard"]'))
-          removeIfExists(document.querySelector('div[class^="StickyNav"]'))
+          pushIfAny(removals, document.querySelector('div[class^="Leaderboard"]'))
+          pushIfAny(removals, document.querySelector('div[class^="StickyNav"]'))
           // Footer except copyright hint
-          let not = false
-          document.querySelectorAll('div[class^="PageGriddesktop"] div[class^="PageFooterdesktop"]').forEach(function (div) {
-            if (!not && div.innerHTML.indexOf('©') === -1) {
-              div.remove()
-            } else {
-              not = true
+          let divs
+          divs = document.querySelectorAll('div[class^="PageGriddesktop"] div[class^="PageFooterdesktop"]')
+          for (const div of divs) {
+            if (div.innerHTML.indexOf('©') === -1) {
+              removals.push(div)
             }
-          })
-          document.querySelectorAll('div[class^="PageGriddesktop"]').forEach(function (div) {
+          }
+          divs = document.querySelectorAll('div[class^="PageGriddesktop"]')
+          for (const div of divs) {
             div.className = ''
-          })
+          }
           // Ads
-          document.querySelectorAll('div[class^="InreadAd__Container"],div[class^="InreadAddesktop__Container"]').forEach(function (div) {
-            div.remove()
-          })
-          document.querySelectorAll('div[class^="SidebarAd__Container"]').forEach(function (div) {
-            div.parentNode.remove()
-          })
+          divs = document.querySelectorAll('div[class^="InreadAd__Container"],div[class^="InreadAddesktop__Container"]')
+          for (const div of divs) {
+            removals.push(div)
+          }
+          divs = document.querySelectorAll('div[class^="SidebarAd__Container"]')
+          for (const div of divs) {
+            removals.push(div.parentNode)
+          }
+          if(removals.length>0) removeElements(removals)
         }
 
         // Make song title clickable
@@ -797,11 +931,13 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
 
         // Show artwork
         onload.push(function showArtwork () {
-          document.querySelectorAll('div[class^="SizedImage__Container"] noscript').forEach(function noScriptImage (noscript) {
+          const noscripts = document.querySelectorAll('div[class^="SizedImage__Container"] noscript')
+          // noScriptImage
+          for (const noscript of noscripts) {
             const div = noscript.parentNode
             div.innerHTML = noscript.innerHTML
             div.querySelector('img').style.left = '0px'
-          })
+          }
         })
         onload.push(hideStuff)
 
@@ -814,20 +950,21 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         function expandContent () {
           const button = this
           const content = button.parentNode.querySelector('div[class*="__Content"]') || button.parentNode.parentNode.querySelector('div[class*="__Expandable"]')
-          content.classList.forEach(function (className) {
+          for (const className of content.classList) {
             if (className.indexOf('__Content') === -1 && className.indexOf('__Expandable') === -1) {
               content.classList.remove(className)
             }
-          })
+          }
           button.remove()
         }
         onload.push(function makeExpandablesWork () {
-          document.querySelectorAll('div[class*="__Container"]').forEach(function (div) {
+          const divs = document.querySelectorAll('div[class*="__Container"]')
+          for (const div of divs) {
             const button = div.querySelector('button[class^="Button"]')
             if (button) {
               button.addEventListener('click', expandContent)
             }
-          })
+          }
         })
 
         // Show annotations function
@@ -935,8 +1072,10 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         }
         function switchTab (ev) {
           const id = this.dataset.annotid
-          document.querySelectorAll('#annotationcontainer958 .annotationtabbar .tabbutton').forEach((e) => e.classList.remove('selected'))
-          document.querySelectorAll('#annotationcontainer958 .annotationtab').forEach((e) => e.classList.remove('selected'))
+          const selectedElements = document.querySelectorAll('#annotationcontainer958 .annotationtabbar .tabbutton.selected, #annotationcontainer958 .annotationtab.selected')
+          for (const e of selectedElements) {
+            e.classList.remove('selected')
+          }
           this.classList.add('selected')
           document.querySelector(`#annotationcontainer958 .annotationtab[id="annottab_${id}"]`).classList.add('selected')
         }
@@ -951,7 +1090,10 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
           const id = m[1]
 
           // Highlight
-          document.querySelectorAll('.annotated').forEach((e) => e.classList.remove('highlighted'))
+          const highlightedElements = document.querySelectorAll('.annotated.highlighted')
+          for (const e of highlightedElements) {
+            e.classList.remove('highlighted')
+          }
           this.classList.add('highlighted')
 
           // Load all annotations
@@ -966,8 +1108,9 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
 
           if (id in window.annotations1234) {
             const [annotationTabBar, annotationContent] = getAnnotationsContainer(this)
-            window.annotations1234[id].forEach(function (annotation) {
-            // Example for multiple annotations: https://genius.com/72796/
+            let innerHTMLAddition = ''
+            for (const annotation of window.annotations1234[id]) {
+              // Example for multiple annotations: https://genius.com/72796/
               const tabButton = annotationTabBar.appendChild(document.createElement('div'))
               tabButton.dataset.annotid = annotation.id
               tabButton.classList.add('tabbutton')
@@ -1033,14 +1176,16 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
                 }
               }
 
-              annotationContent.innerHTML += `
-            <div class="annotationtab" id="annottab_${annotation.id}">
-              ${hint}
-              ${header}
-              ${body}
-              ${footer}
-            </div>`
-            })
+              innerHTMLAddition += `
+              <div class="annotationtab" id="annottab_${annotation.id}">
+                ${hint}
+                ${header}
+                ${body}
+                ${footer}
+              </div>`
+            }
+            annotationContent.innerHTML += innerHTMLAddition
+
             annotationTabBar.appendChild(document.createElement('br')).style.clear = 'left'
             if (window.annotations1234[id].length === 1) {
               annotationTabBar.style.display = 'none'
@@ -1051,9 +1196,10 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
             // Resize iframes and images in frame
             setTimeout(function () {
               const maxWidth = (document.body.clientWidth - 40) + 'px'
-              annotationContent.querySelectorAll('iframe,img').forEach(function (e) {
+              const elements = annotationContent.querySelectorAll('iframe,img')
+              for (const e of elements) {
                 e.style.maxWidth = maxWidth
-              })
+              }
               targetBlankLinks145() // Change link target to _blank
             }, 100)
           }
@@ -1064,38 +1210,20 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
           }
         })
 
-        // Change links to target=_blank
-        function targetBlankLinks145 () {
-          const as = document.querySelectorAll('body a:not([href|="#"]):not([target=_blank])')
-          as.forEach(function (a) {
-            const href = a.getAttribute('href')
-            if (!href) {
-              return
-            }
-            if (!href.startsWith('#')) {
-              a.target = '_blank'
-              if (!href.startsWith('http')) {
-                a.href = 'https://genius.com' + href
-              } else if (href.startsWith(custom.domain)) {
-                a.href = href.replace(custom.domain, 'https://genius.com')
-              }
-            }
-          })
-        }
-        onload.push(targetBlankLinks145)
-        onload.push(() => setTimeout(targetBlankLinks145, 1000))
+        onload.push(themeCommon.targetBlankLinks145B)
+        onload.push(() => setTimeout(themeCommon.targetBlankLinks145B, 1000))
 
         if (!annotationsEnabled) {
-        // Remove all annotations
+          // Remove all annotations
           onload.push(function removeAnnotations135 () {
             document.querySelectorAll('div[class^="SongPage__Section"] a[class^="ReferentFragment"]').forEach(removeTagsKeepText)
           })
         } else {
-        // Add click handler to annotations
-          document.querySelectorAll('div[class^="SongPage__Section"] a[class^="ReferentFragment"]').forEach(function (a) {
+          // Add click handler to annotations
+          for (const a of document.querySelectorAll('div[class^="SongPage__Section"] a[class^="ReferentFragment"]')) {
             a.classList.add('annotated')
             a.addEventListener('click', showAnnotation4956)
-          })
+          }
           document.body.addEventListener('click', function (e) {
           // Hide annotation container on click outside of it
             const annotationcontainer = document.getElementById('annotationcontainer958')
@@ -1103,7 +1231,9 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
               if (e.target.closest('#annotationcontainer958') === null) {
                 annotationcontainer.style.display = 'none'
                 annotationcontainer.style.opacity = 0.0
-                document.querySelectorAll('.annotated').forEach((e) => e.classList.remove('highlighted'))
+                for(const e of document.querySelectorAll('.annotated.highlighted')){
+                  e.classList.remove('highlighted')
+                }
               }
             }
           })
@@ -1128,8 +1258,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         let headhtml = ''
 
         // Make annotations clickable
-        const regex = /annotation-fragment="(\d+)"/g
-        html = html.replace(regex, '$0 data-annotationid="$1"')
+        html = html.replace(/annotation-fragment="(\d+)"/g, '$0 data-annotationid="$1"')
 
         // Change design
         html = html.split('<div class="leaderboard_ad_container">').join('<div class="leaderboard_ad_container" style="width:0px;height:0px">')
@@ -1176,47 +1305,30 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         // function hideCookieBox458 () {if(document.querySelector(".optanon-allow-all")){document.querySelector(".optanon-allow-all").click(); clearInterval(iv458)}}
         // onload.push(function() { iv458 = setInterval(hideCookieBox458, 500) }
 
-        // Hide footer
-        function hideFooter895 () {
-          const f = document.querySelectorAll('.footer div')
-          if (f.length) {
-            removeIfExists(f[0])
-            removeIfExists(f[1])
+        onload.push(themeCommon.hideFooter895)
+        onload.push(themeCommon.hideSecondaryFooter895)
+        onload.push(themeCommon.hideStuff235)
+
+        function showAnnotation1234A (t) {
+          const es = document.querySelectorAll('.song_body-lyrics .referent--yellow.referent--highlighted')
+          for (const e of es) {
+            e.classList.remove('referent--yellow', 'referent--highlighted')
           }
-        }
-        function hideSecondaryFooter895 () {
-          if (document.querySelector('.footer.footer--secondary')) {
-            document.querySelector('.footer.footer--secondary').parentNode.removeChild(document.querySelector('.footer.footer--secondary'))
-          }
-        }
-
-        onload.push(hideFooter895)
-        onload.push(hideSecondaryFooter895)
-
-        // Hide other stuff
-        function hideStuff235 () {
-          const grayBox = document.querySelector('.column_layout-column_span-initial_content>.dfp_unit.u-x_large_bottom_margin.dfp_unit--in_read')
-          removeIfExists(grayBox)
-          removeIfExists(document.querySelector('.header .header-expand_nav_menu'))
-        }
-        onload.push(hideStuff235)
-
-        // Show annotations function
-        function showAnnotation1234 (ev) {
-          ev.preventDefault()
-          const id = this.dataset.annotationid
-          document.querySelectorAll('.song_body-lyrics .referent--yellow.referent--highlighted').forEach(function (e) {
-            e.className = e.className.replace(/\breferent--yellow\b/, '').replace(/\breferent--highlighted\b/, '')
-          })
-          this.className += ' referent--yellow referent--highlighted'
+          t.classList.add('referent--yellow', 'referent--highlighted')
           if (!('annotations1234' in window)) {
             if (document.getElementById('annotationsdata1234')) {
               window.annotations1234 = JSON.parse(document.getElementById('annotationsdata1234').innerHTML)
             } else {
               window.annotations1234 = {}
-              console.log('No annotation data found #annotationsdata1234')
+              console.warn('No annotation data found #annotationsdata1234')
             }
           }
+        }
+        // Show annotations function
+        function showAnnotation1234 (ev) {
+          ev.preventDefault()
+          const id = this.dataset.annotationid
+          themeCommon.showAnnotation1234A(this)
           if (id in window.annotations1234) {
             const annotation = window.annotations1234[id][0]
             const main = document.querySelector('.annotationbox')
@@ -1239,9 +1351,10 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
             }, 100)
             setTimeout(function () { // Resize iframes and images in frame
               const maxWidth = (document.body.clientWidth - 40) + 'px'
-              main.querySelectorAll('iframe,img').forEach(function (e) {
+              const elements = main.querySelectorAll('iframe,img')
+              for (const e of elements) {
                 e.style.maxWidth = maxWidth
-              })
+              }
             }, 100)
           }
         }
@@ -1272,13 +1385,15 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
           h1.innerHTML = '<a target="_blank" href="' + url + '">' + h1.innerHTML + '</a>'
           // Featuring and album name
           const h2 = document.querySelector('.header_with_cover_art-primary_info-primary_artist').parentNode
-          document.querySelectorAll('.metadata_unit-label').forEach(function (el) {
+          for (const el of document.querySelectorAll('.metadata_unit-label')) {
             if (el.innerText.toLowerCase().indexOf('feat') !== -1) {
-              h1.innerHTML += ' ' + el.parentNode.innerText.trim()
+              s1 += ' ' + el.parentNode.innerText.trim()
             } else if (el.innerText.toLowerCase().indexOf('album') !== -1) {
-              h2.innerHTML = h2.innerHTML + ' \u2022 ' + el.parentNode.querySelector('a').parentNode.innerHTML.trim()
+              s2 += ' \u2022 ' + el.parentNode.querySelector('a').parentNode.innerHTML.trim()
             }
-          })
+          }
+          h1.innerHTML += s1
+          h2.innerHTML += s2
           // Remove other meta like Producer
           while (document.querySelector('h3')) {
             document.querySelector('h3').remove()
@@ -1286,29 +1401,18 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         }
         onload.push(clickableTitle037)
 
-        // Change links to target=_blank
-        function targetBlankLinks145 () {
-          const as = document.querySelectorAll('body a:not([href|="#"]):not([target=_blank])')
-          as.forEach(function (a) {
-            a.target = '_blank'
-          })
-        }
-        onload.push(targetBlankLinks145)
-        onload.push(() => setTimeout(targetBlankLinks145, 500))
+        onload.push(themeCommon.targetBlankLinks145A)
+        onload.push(() => setTimeout(themeCommon.targetBlankLinks145A, 500))
 
         if (!annotationsEnabled) {
-        // Remove all annotations
-          onload.push(function removeAnnotations135 () {
-            document.querySelectorAll('.song_body-lyrics .referent,.song_body-lyrics a[class*=referent]').forEach(function (a) {
-              while (a.firstChild) {
-                a.parentNode.insertBefore(a.firstChild, a)
-              }
-              a.remove()
-            })
-          })
+          // Remove all annotations 
+          onload.push(themeCommon.annotationsRemoveAll)
         } else {
-        // Add click handler to annotations
-          document.querySelectorAll('*[data-annotationid]').forEach((a) => a.addEventListener('click', showAnnotation1234))
+          // Add click handler to annotations
+          // for(const a of document.querySelectorAll('*[data-annotationid]')){
+          //   a.addEventListener('click', showAnnotation1234)
+          // }
+          themeCommon.annotationsAddHandler()
         }
 
         // Open real page if not in frame
@@ -1335,10 +1439,10 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
             const root = parsePreloadedStateData(jData.songPage.lyricsData.body, document.createElement('div'))
 
             // Annotations
-            root.querySelectorAll('a[data-id]').forEach(function (a) {
+            for (const a of root.querySelectorAll('a[data-id]')) {
               a.dataset.annotationid = a.dataset.id
               a.classList.add('referent--yellow')
-            })
+            }
 
             const lyricshtml = root.innerHTML
 
@@ -1489,37 +1593,16 @@ Genius:  ${originalUrl}
         // function hideCookieBox458 () {if(document.querySelector(".optanon-allow-all")){document.querySelector(".optanon-allow-all").click(); clearInterval(iv458)}}
         // onload.push(function() { iv458 = setInterval(hideCookieBox458, 500) })
 
-        // Hide footer
-        function hideFooter895 () { const f = document.querySelectorAll('.footer div'); if (f.length) { removeIfExists(f[0]); removeIfExists(f[1]) } }
-        function hideSecondaryFooter895 () { if (document.querySelector('.footer.footer--secondary')) { document.querySelector('.footer.footer--secondary').parentNode.removeChild(document.querySelector('.footer.footer--secondary')) } }
+        onload.push(themeCommon.hideFooter895)
+        onload.push(themeCommon.hideSecondaryFooter895)
+        onload.push(themeCommon.hideStuff235)
 
-        onload.push(hideFooter895)
-        onload.push(hideSecondaryFooter895)
-
-        // Hide other stuff
-        function hideStuff235 () {
-          const grayBox = document.querySelector('.column_layout-column_span-initial_content>.dfp_unit.u-x_large_bottom_margin.dfp_unit--in_read')
-          removeIfExists(grayBox)
-          removeIfExists(document.querySelector('.header .header-expand_nav_menu'))
-        }
-        onload.push(hideStuff235)
-
+        
         // Show annotations function
         function showAnnotation1234 (ev) {
           ev.preventDefault()
           const id = this.dataset.annotationid
-          document.querySelectorAll('.song_body-lyrics .referent--yellow.referent--highlighted').forEach(function (e) {
-            e.className = e.className.replace(/\breferent--yellow\b/, '').replace(/\breferent--highlighted\b/, '')
-          })
-          this.className += ' referent--yellow referent--highlighted'
-          if (!('annotations1234' in window)) {
-            if (document.getElementById('annotationsdata1234')) {
-              window.annotations1234 = JSON.parse(document.getElementById('annotationsdata1234').innerHTML)
-            } else {
-              window.nnotations1234 = {}
-              console.log('No annotation data found #annotationsdata1234')
-            }
-          }
+          themeCommon.showAnnotation1234A(this)
           if (id in window.annotations1234) {
             const annotation = window.annotations1234[id][0]
             const main = document.querySelector('.annotationbox')
@@ -1573,13 +1656,17 @@ Genius:  ${originalUrl}
           h1.innerHTML = '<a target="_blank" href="' + url + '">' + h1.innerHTML + '</a>'
           // Featuring and album name
           const h2 = document.querySelector('.header_with_cover_art-primary_info-primary_artist').parentNode
-          document.querySelectorAll('.metadata_unit-label').forEach(function (el) {
+          let s1 = ''
+          let s2 = ''
+          for (const el of document.querySelectorAll('.metadata_unit-label')) {
             if (el.innerText.toLowerCase().indexOf('feat') !== -1) {
-              h1.innerHTML += ' ' + el.parentNode.innerText.trim()
+              s1 += ' ' + el.parentNode.innerText.trim()
             } else if (el.innerText.toLowerCase().indexOf('album') !== -1) {
-              h2.innerHTML = h2.innerHTML + ' \u2022 ' + el.parentNode.querySelector('a').parentNode.innerHTML.trim()
+              s2 += ' \u2022 ' + el.parentNode.querySelector('a').parentNode.innerHTML.trim()
             }
-          })
+          }
+          h1.innerHTML += s1
+          h2.innerHTML += s2
           // Remove other meta like Producer
           while (document.querySelector('h3')) {
             document.querySelector('h3').remove()
@@ -1587,28 +1674,17 @@ Genius:  ${originalUrl}
         }
         onload.push(clickableTitle037)
 
-        // Change links to target=_blank
-        function targetBlankLinks145 () {
-          const as = document.querySelectorAll('body a:not([href|="#"]):not([target=_blank])')
-          as.forEach(function (a) {
-            a.target = '_blank'
-          })
-        }
         onload.push(() => setTimeout(targetBlankLinks145, 1000))
 
         if (!annotationsEnabled) {
-        // Remove all annotations
-          onload.push(function removeAnnotations135 () {
-            document.querySelectorAll('.song_body-lyrics .referent,.song_body-lyrics a[class*=referent]').forEach(function (a) {
-              while (a.firstChild) {
-                a.parentNode.insertBefore(a.firstChild, a)
-              }
-              a.remove()
-            })
-          })
+          // Remove all annotations
+          onload.push(themeCommon.annotationsRemoveAll)
         } else {
-        // Add click handler to annotations
-          document.querySelectorAll('*[data-annotationid]').forEach((a) => a.addEventListener('click', showAnnotation1234))
+          // Add click handler to annotations
+          // for(const a of document.querySelectorAll('*[data-annotationid]')){
+          //   a.addEventListener('click', showAnnotation1234)
+          // }
+          themeCommon.annotationsAddHandler()
         }
 
         // Open real page if not in frame
@@ -1635,10 +1711,10 @@ Genius:  ${originalUrl}
             const root = parsePreloadedStateData(jData.songPage.lyricsData.body, document.createElement('div'))
 
             // Annotations
-            root.querySelectorAll('a[data-id]').forEach(function (a) {
+            for (const a of root.querySelectorAll('a[data-id]')) {
               a.dataset.annotationid = a.dataset.id
               a.classList.add('referent--yellow')
-            })
+            }
 
             const lyricshtml = root.innerHTML
 
@@ -1881,12 +1957,17 @@ Genius:  ${originalUrl}
     }
   }
 
-  function showLyrics (song, searchresultsLengths) {
+  function isGreasemonkey () {
+    return 'info' in custom.GM && 'scriptHandler' in custom.GM.info && custom.GM.info.scriptHandler === 'Greasemonkey'
+  }
+
+  function setupLyricsDisplayDOM (song, searchresultsLengths) {
+
     const container = custom.getCleanLyricsContainer()
     container.className = '' // custom.getCleanLyricsContainer might forget to clear the className if the element is reused
     container.classList.add('genius-lyrics-result-shown')
 
-    if ('info' in custom.GM && 'scriptHandler' in custom.GM.info && custom.GM.info.scriptHandler === 'Greasemonkey') {
+    if (isGreasemonkey()) {
       container.innerHTML = '<h2>This script only works in <a target="_blank" href="https://addons.mozilla.org/en-US/firefox/addon/tampermonkey/">Tampermonkey</a></h2>Greasemonkey is no longer supported because of this <a target="_blank" href="https://github.com/greasemonkey/greasemonkey/issues/2574">bug greasemonkey/issues/2574</a> in Greasemonkey.'
       return
     }
@@ -1946,7 +2027,7 @@ Genius:  ${originalUrl}
       wrongLyricsButton.href = '#'
       wrongLyricsButton.textContent = 'Wrong lyrics'
       wrongLyricsButton.addEventListener('click', function wrongLyricsButtonClick (ev) {
-        document.querySelectorAll('.loadingspinnerholder').forEach((spinner) => spinner.remove())
+        removeElements(document.querySelectorAll('.loadingspinnerholder'))
         // forgetLyricsSelection(genius.current.title, genius.current.artists, this.dataset.hit)
         forgetLyricsSelection(genius.current.title, genius.current.artists)
         custom.showSearchField(`${genius.current.artists} ${genius.current.title}`)
@@ -1978,6 +2059,24 @@ Genius:  ${originalUrl}
     // flush to DOM tree
     appendElements(bar, elementsToBeAppended)
     appendElements(container, [bar, iframe])
+
+    // clean up
+    elementsToBeAppended.length = 0
+    elementsToBeAppended = null
+
+    return {
+      container,
+      bar,
+      iframe
+    }
+  }
+
+  function showLyrics (song, searchresultsLengths) {
+    // setup DOMs
+    const { container, bar, iframe } = 'custom' in setupLyricsDisplayDOM
+      ? custom.setupLyricsDisplayDOM()
+      : setupLyricsDisplayDOM()
+
     if (nativeFNs === null) {
       const win = iframe.contentWindow
       if (win !== null) {
@@ -1987,10 +2086,6 @@ Genius:  ${originalUrl}
     iframe.src = custom.emptyURL + '#html:post'
 
     custom.setFrameDimensions(container, iframe, bar)
-
-    // clean up
-    elementsToBeAppended.length = 0
-    elementsToBeAppended = null
 
     const spinnerHolder = document.body.appendChild(document.createElement('div'))
     spinnerHolder.classList.add('loadingspinnerholder')
@@ -2004,123 +2099,92 @@ Genius:  ${originalUrl}
       spinner = spinnerHolder.appendChild(document.createElement('div'))
       spinner.classList.add('loadingspinner')
     }
-    spinner.innerHTML = '5'
-    if ('notifyGeniusLoading' in custom) {
-      custom.notifyGeniusLoading({
-        status: 0,
-        textStatus: 'start'
-      })
-    }
 
-    loadGeniusSong(song, function loadGeniusSongCb (html) {
-      spinner.innerHTML = '4'
-      spinnerHolder.title = 'Downloading annotations...'
-      if ('notifyGeniusLoading' in custom) {
+    function spinnerUpdate(text, title, status, textStatus){
+      if (typeof text === 'string') spinner.textContent = text
+      if (typeof title === 'string') spinnerHolder.title = title
+      if ('notifyGeniusLoading' in custom && arguments.length > 2) {
         custom.notifyGeniusLoading({
-          status: 100,
-          textStatus: 'donwloading'
+          status,
+          textStatus
         })
       }
-      loadGeniusAnnotations(song, html, annotationsEnabled, function loadGeniusAnnotationsCb (song, html, annotations) {
-        spinner.innerHTML = '3'
-        spinnerHolder.title = 'Composing page...'
-        if ('notifyGeniusLoading' in custom) {
-          custom.notifyGeniusLoading({
-            status: 200,
-            textStatus: 'pageComposing'
-          })
-        }
-        combineGeniusResources(song, html, annotations, function combineGeniusResourcesCb (html) {
-          spinner.innerHTML = '3'
-          spinnerHolder.title = 'Loading page...'
-          if ('notifyGeniusLoading' in custom) {
-            custom.notifyGeniusLoading({
-              status: 300,
-              textStatus: 'pageLoading'
-            })
-          }
-          let tv1 = null
-          let tv2 = null
-          const iv = setInterval(function () {
-            spinner.innerHTML = '2'
-            spinnerHolder.title = 'Rendering...'
-            if ('notifyGeniusLoading' in custom) {
-              custom.notifyGeniusLoading({
-                status: 301,
-                textStatus: 'pageRendering'
-              })
-            }
-            if (iframe.contentWindow && iframe.contentWindow.postMessage) {
-              iframe.contentWindow.postMessage({ iAm: custom.scriptName, type: 'writehtml', html, themeKey: genius.option.themeKey }, '*')
-            } else {
-              // console.debug('iframe.contentWindow is ', iframe.contentWindow)
-            }
-          }, 1500)
-          const clear = function () {
-            if ('onLyricsReady' in custom) {
-              custom.onLyricsReady(song, container)
-            }
-            clearInterval(iv)
-            clearTimeout(tv1)
-            clearTimeout(tv2)
-            setTimeout(function () {
-              iframe.style.opacity = 1.0
-              spinnerHolder.remove()
-              if ('notifyGeniusLoading' in custom) {
-                custom.notifyGeniusLoading({
-                  status: 900,
-                  textStatus: 'complete'
-                })
-              }
-            }, 30)
-          }
-          addOneMessageListener('htmlwritten', function () {
-            clearInterval(iv)
-            spinner.innerHTML = '1'
-            spinnerHolder.title = 'Calculating...'
-            if ('notifyGeniusLoading' in custom) {
-              custom.notifyGeniusLoading({
-                status: 302,
-                textStatus: 'htmlwritten'
-              })
-            }
-          })
-          addOneMessageListener('pageready', clear)
+    }
+    spinnerUpdate('5', null, 0, 'start')
 
-          // After 15 seconds, try to reload the iframe
-          tv1 = setTimeout(function () {
-            console.debug('tv1')
-            iframe.src = 'data:text/html,%3Ch1%3ELoading...%21%3C%2Fh1%3E'
-            window.setTimeout(function () {
-              iframe.src = custom.emptyURL + '#html:post'
-            }, 1000)
-          }, 15000)
-          // After 30 seconds, try again fresh (only once)
-          tv2 = setTimeout(function () {
-            console.debug('tv2')
-            clear()
-            if (!loadingFailed) {
-              console.debug('try again fresh')
-              loadingFailed = true
-              custom.hideLyrics()
-              window.setTimeout(function () {
-                custom.addLyrics(true)
-              }, 1000)
-            }
-          }, 30000)
-        })
+    async function showLyricsRunner () {
+      let html = await new Promise(resolve => loadGeniusSong(song, function loadGeniusSongCb (html) {
+        resolve(html)
+      }))
+      spinnerUpdate('4', 'Downloading annotations...', 100, 'donwloading')
+      let annotations = await new Promise(resolve => loadGeniusAnnotations(song, html, annotationsEnabled, function loadGeniusAnnotationsCb (annotations) {
+        resolve(annotations)
+      }))
+      spinnerUpdate('3', 'Composing page...', 200, 'pageComposing')
+      html = await new Promise(resolve => combineGeniusResources(song, html, annotations, function combineGeniusResourcesCb (html) {
+        resolve(html)
+      }))
+      annotations = null
+      spinnerUpdate('3', 'Loading page...', 300, 'pageLoading')
+
+      // obtain the iframe detailed information
+      let tv1 = null
+      let tv2 = null
+      const iv = setInterval(function () {
+        spinnerUpdate('2', 'Rendering...', 301, 'pageRendering')
+        if (iframe.contentWindow && iframe.contentWindow.postMessage) {
+          iframe.contentWindow.postMessage({ iAm: custom.scriptName, type: 'writehtml', html, themeKey: genius.option.themeKey }, '*')
+        } else {
+          // console.debug('iframe.contentWindow is ', iframe.contentWindow)
+        }
+      }, 1500)
+      const clear = function () {
+        if ('onLyricsReady' in custom) {
+          custom.onLyricsReady(song, container)
+        }
+        clearInterval(iv)
+        clearTimeout(tv1)
+        clearTimeout(tv2)
+        setTimeout(function () {
+          iframe.style.opacity = 1.0
+          spinnerHolder.remove()
+          spinnerUpdate(null, null, 900, 'complete')
+        }, 30)
+      }
+      addOneMessageListener('htmlwritten', function () {
+        clearInterval(iv)
+        spinnerUpdate('1', 'Calculating...', 302, 'htmlwritten')
       })
-    })
+      addOneMessageListener('pageready', clear)
+
+      // After 15 seconds, try to reload the iframe
+      tv1 = setTimeout(function () {
+        console.debug('tv1')
+        iframe.src = 'data:text/html,%3Ch1%3ELoading...%21%3C%2Fh1%3E'
+        window.setTimeout(function () {
+          iframe.src = custom.emptyURL + '#html:post'
+        }, 1000)
+      }, 15000)
+      // After 30 seconds, try again fresh (only once)
+      tv2 = setTimeout(function () {
+        console.debug('tv2')
+        clear()
+        if (!loadingFailed) {
+          console.debug('try again fresh')
+          loadingFailed = true
+          custom.hideLyrics()
+          window.setTimeout(function () {
+            custom.addLyrics(true)
+          }, 1000)
+        }
+      }, 30000)
+    }
+    showLyricsRunner()
+
   }
 
   function isScrollLyricsEnabled () {
-    if (!autoScrollEnabled) {
-      return false
-    }
-    if (!('scrollLyrics' in theme)) {
-      return false
-    }
-    return true
+    return autoScrollEnabled && ('scrollLyrics' in theme)
   }
 
   function scrollLyrics (positionFraction) {
@@ -2150,9 +2214,9 @@ Genius:  ${originalUrl}
     loadCache()
 
     // Blur background
-    document.querySelectorAll('body > *').forEach(function (e) {
+    for (const e of document.querySelectorAll('body > *')) {
       e.style.filter = 'blur(4px)'
-    })
+    }
     const lyricscontainer = document.getElementById('lyricscontainer')
     if (lyricscontainer) {
       lyricscontainer.style.filter = 'blur(1px)'
@@ -2267,7 +2331,9 @@ Genius:  ${originalUrl}
 
     // Custom buttons
     if ('config' in custom) {
-      custom.config.forEach(f => f(win.appendChild(document.createElement('div'))))
+      for(const f of custom.config){
+        f(win.appendChild(document.createElement('div')))
+      }
     }
 
     // Buttons
@@ -2276,11 +2342,11 @@ Genius:  ${originalUrl}
     const closeButton = div.appendChild(document.createElement('button'))
     closeButton.textContent = 'Close'
     closeButton.addEventListener('click', function onCloseButtonClick () {
-      win.parentNode.removeChild(win)
+      win.remove()
       // Un-blur background
-      document.querySelectorAll('body > *, #lyricscontainer').forEach(function (e) {
+      for (const e of document.querySelectorAll('body > *, #lyricscontainer')) {
         e.style.filter = ''
-      })
+      }
     })
 
     const bytes = metricPrefix(JSON.stringify(selectionCache).length + JSON.stringify(requestCache).length, 2, 1024) + 'Bytes'
@@ -2469,86 +2535,108 @@ Genius:  ${originalUrl}
     }
   }
 
-  (function () {
-    Promise.all([
+  async function mainRunner(){
+    // get values from GM
+    let values = await Promise.all([
       custom.GM.getValue('debug', genius.debug),
       custom.GM.getValue('theme', genius.option.themeKey),
       custom.GM.getValue('annotationsenabled', annotationsEnabled),
       custom.GM.getValue('autoscrollenabled', autoScrollEnabled)
-    ]).then(function (values) {
-      genius.debug = !!values[0]
-      if (Object.prototype.hasOwnProperty.call(themes, values[1])) {
-        genius.option.themeKey = values[1]
-      } else {
-        console.error('Invalid value for theme key: custom.GM.getValue("theme") = ' + values[1])
-        genius.option.themeKey = Reflect.ownKeys(themes)[0]
-      }
-      theme = themes[genius.option.themeKey]
-      annotationsEnabled = !!values[2]
-      autoScrollEnabled = !!values[3]
+    ])
 
-      if (document.location.href.startsWith(custom.emptyURL + '#html:post')) {
-        let received = false
-        window.addEventListener('message', function (e) {
-          if (received || typeof e.data !== 'object' || !('iAm' in e.data) || e.data.iAm !== custom.scriptName || e.data.type !== 'writehtml') {
-            return
-          }
-          if ('themeKey' in e.data && Object.prototype.hasOwnProperty.call(themes, e.data.themeKey)) {
-            genius.option.themeKey = e.data.themeKey
-            theme = themes[genius.option.themeKey]
-            console.debug(`Theme activated in iframe: ${theme.name}`)
-          }
-          received = true
-          document.documentElement.innerHTML = e.data.html
-          e.source.postMessage({ iAm: custom.scriptName, type: 'htmlwritten' }, '*')
-          setTimeout(function () {
-            const onload = theme.scripts()
-            if ('iframeLoadedCallback1' in custom) {
-              // before all onload functions and allow modification of theme and onload from external
-              custom.iframeLoadedCallback1({ document, theme, onload })
-            }
-            onload.forEach(function (func) {
-              try {
-                func()
-              } catch (e) {
-                console.error(`Error in iframe onload ${func.name ? func.name : func}: ${e}`)
-              }
-            })
-            // Scroll lyrics event
-            if ('scrollLyrics' in theme) {
-              window.addEventListener('message', function (e) {
-                if (typeof e.data !== 'object' || !('iAm' in e.data) || e.data.iAm !== custom.scriptName || e.data.type !== 'scrollLyrics' || !('scrollLyrics' in theme)) {
-                  return
-                }
-                theme.scrollLyrics(e.data.position)
-              })
-            }
-            if ('toggleLyricsKey' in custom) {
-              addKeyboardShortcutInFrame(custom.toggleLyricsKey)
-            }
-            e.source.postMessage({ iAm: custom.scriptName, type: 'pageready' }, '*')
-            if ('iframeLoadedCallback2' in custom) {
-              // after all onload functions
-              custom.iframeLoadedCallback2({ document, theme, onload })
-            }
-          }, 500)
-        })
-      } else {
-        listenToMessages()
-        loadCache()
-        addCss()
-        if ('main' in custom) {
-          custom.setupMain ? custom.setupMain(genius) : (genius.iv.main = setInterval(custom.main, 2000))
-        }
-        if ('onResize' in custom) {
-          window.addEventListener('resize', custom.onResize)
-        }
-        if ('toggleLyricsKey' in custom) {
-          addKeyboardShortcut(custom.toggleLyricsKey)
+    // set up variables
+    genius.debug = !!values[0]
+    if (Object.prototype.hasOwnProperty.call(themes, values[1])) {
+      genius.option.themeKey = values[1]
+    } else {
+      console.error('Invalid value for theme key: custom.GM.getValue("theme") = ' + values[1])
+      genius.option.themeKey = Reflect.ownKeys(themes)[0]
+    }
+    theme = themes[genius.option.themeKey]
+    annotationsEnabled = !!values[2]
+    autoScrollEnabled = !!values[3]
+
+    const isMessaging = document.location.href.startsWith(custom.emptyURL + '#html:post')
+
+    // top
+    if (!isMessaging) {
+      listenToMessages()
+      loadCache()
+      addCss()
+      if ('main' in custom) {
+        custom.setupMain ? custom.setupMain(genius) : (genius.iv.main = setInterval(custom.main, 2000))
+      }
+      if ('onResize' in custom) {
+        window.addEventListener('resize', custom.onResize)
+      }
+      if ('toggleLyricsKey' in custom) {
+        addKeyboardShortcut(custom.toggleLyricsKey)
+      }
+      return
+    }
+
+    // iframe
+    let e = await new Promise(resolve => {
+      // only receive 'writehtml' message once
+      let msgFn = function (e) {
+        if ((((e||0).data||0).iAm) === custom.scriptName && e.data.type === 'writehtml') {
+          window.removeEventListener('message', msgFn, false)
+          msgFn = null
+          const { data, source } = e
+          resolve({ data, source })
         }
       }
+      window.addEventListener('message', msgFn, false)
     })
-  })()
+    
+    if ('themeKey' in e.data && Object.prototype.hasOwnProperty.call(themes, e.data.themeKey)) {
+      genius.option.themeKey = e.data.themeKey
+      theme = themes[genius.option.themeKey]
+      console.debug(`Theme activated in iframe: ${theme.name}`)
+    } 
+ 
+    document.documentElement.innerHTML = e.data.html
+    const communicationWindow = e.source
+    communicationWindow.postMessage({ iAm: custom.scriptName, type: 'htmlwritten' }, '*')
+
+    // clean up
+    e = null
+
+    // delay 500ms
+    await new Promise(resolve => setTimeout(resolve, 500))
+
+    const onload = theme.scripts()
+    if ('iframeLoadedCallback1' in custom) {
+      // before all onload functions and allow modification of theme and onload from external
+      custom.iframeLoadedCallback1({ document, theme, onload })
+    }
+    for(const func of onload){
+      try {
+        func()
+      } catch (e) {
+        console.error(`Error in iframe onload ${func.name || func}: ${e}`)
+      }
+    }
+    // Scroll lyrics event
+    if ('scrollLyrics' in theme) {
+      window.addEventListener('message', function (e) {
+        if (typeof e.data !== 'object' || !('iAm' in e.data) || e.data.iAm !== custom.scriptName || e.data.type !== 'scrollLyrics' || !('scrollLyrics' in theme)) {
+          return
+        }
+        theme.scrollLyrics(e.data.position)
+      })
+    }
+    if ('toggleLyricsKey' in custom) {
+      addKeyboardShortcutInFrame(custom.toggleLyricsKey)
+    }
+    communicationWindow.postMessage({ iAm: custom.scriptName, type: 'pageready' }, '*')
+    if ('iframeLoadedCallback2' in custom) {
+      // after all onload functions
+      custom.iframeLoadedCallback2({ document, theme, onload })
+    }
+  }
+
+  mainRunner();
 
   return genius
 }
