@@ -37,7 +37,7 @@
       * connect genius.com
 */
 
-/* global Reflect */
+/* global Reflect, top */
 
 if (typeof module !== 'undefined') {
   module.exports = geniusLyrics
@@ -105,9 +105,10 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   let annotationsEnabled = true
   let autoScrollEnabled = false
   const onMessage = []
-  
+
   let cleanWindow = null
-  let nativeFNs = null
+  // let nativeFNs = null
+  const nativeFNs = null
 
   function makeOriginalFNsAsNative (win) {
     /*
@@ -115,6 +116,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     nativeFNs = { setTimeout, setInterval, clearTimeout, clearInterval }
     */
   }
+  makeOriginalFNsAsNative()
   function makeNativeFNsFromIframe () {
     /*
     let iframe = document.createElement('iframe')
@@ -127,6 +129,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     nativeFNs = { setTimeout, setInterval, clearTimeout, clearInterval }
     */
   }
+  makeNativeFNsFromIframe()
   function setupNativeFNs (iframeWin) {
     /*
     if (nativeFNs === null) {
@@ -140,6 +143,8 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     }
     */
   }
+  setupNativeFNs()
+
   /*
   const setTimeout = function () {
     setupNativeFNs(null)
@@ -157,6 +162,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     setupNativeFNs(null)
     return nativeFNs.clearInterval.call(window, ...arguments)
   }*/
+
   function freshWindowFromIframe () {
     const iframe = document.body.appendChild(document.createElement('iframe'))
     iframe.style.display = 'none'
@@ -666,11 +672,6 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   }
 
   const themeCommon = {
-    annotationsAddHandler () {
-      for (const a of document.querySelectorAll('*[data-annotationid]')) {
-        a.addEventListener('click', showAnnotation1234)
-      }
-    },
     annotationsRemoveAll() {
       for (const a of document.querySelectorAll('.song_body-lyrics .referent,.song_body-lyrics a[class*="referent"]')) {
         let tmpElement
@@ -793,7 +794,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
             html += '\n<div class="u-relative nganimate-fade_slide_from_left" style="margin-left:1px;padding-top:' + paddingTop + 'px; padding-left:2px; border-left:3px #99a7ee solid"><div class="annotation_label">$author</div><div class="rich_text_formatting">$body</div></div>'
             html = html.replace(/\$body/g, decodeHTML(annotation.body.html)).replace(/\$author/g, decodeHTML(annotation.created_by.name))
             div0.innerHTML = html
-            targetBlankLinks145() // Change link target to _blank
+            themeCommon.targetBlankLinks145A() // Change link target to _blank
             setTimeout(checkAnnotationHeight458, 200) // Change link target to _blank
           }
         }
@@ -824,10 +825,9 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
           onload.push(themeCommon.annotationsRemoveAll2)
         } else {
           // Add click handler to annotations
-          // for(const a of document.querySelectorAll('*[data-annotationid]')){
-          //   a.addEventListener('click', showAnnotation1234)
-          // }
-          themeCommon.annotationsAddHandler()
+          for (const a of document.querySelectorAll('*[data-annotationid]')) {
+            a.addEventListener('click', showAnnotation1234)
+          }
         }
 
         // Open real page if not in frame
@@ -880,14 +880,14 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       scripts: function themeGeniusReactScripts () {
         const onload = []
 
-        function pushIfAny(arr, element){
-          if(element) {
+        function pushIfAny (arr, element) {
+          if (element) {
             arr.push(element)
           }
         }
 
         function hideStuff () {
-          let removals = [];
+          let removals = []
           // Hide "Manage Lyrics" and "Click here to go to the old song page"
           pushIfAny(removals, document.querySelector('div[class^="LyricsControls_"]'))
           // Hide "This is a work in progress"
@@ -1200,7 +1200,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
               for (const e of elements) {
                 e.style.maxWidth = maxWidth
               }
-              targetBlankLinks145() // Change link target to _blank
+              themeCommon.targetBlankLinks145B() // Change link target to _blank
             }, 100)
           }
         }
@@ -1309,21 +1309,6 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         onload.push(themeCommon.hideSecondaryFooter895)
         onload.push(themeCommon.hideStuff235)
 
-        function showAnnotation1234A (t) {
-          const es = document.querySelectorAll('.song_body-lyrics .referent--yellow.referent--highlighted')
-          for (const e of es) {
-            e.classList.remove('referent--yellow', 'referent--highlighted')
-          }
-          t.classList.add('referent--yellow', 'referent--highlighted')
-          if (!('annotations1234' in window)) {
-            if (document.getElementById('annotationsdata1234')) {
-              window.annotations1234 = JSON.parse(document.getElementById('annotationsdata1234').innerHTML)
-            } else {
-              window.annotations1234 = {}
-              console.warn('No annotation data found #annotationsdata1234')
-            }
-          }
-        }
         // Show annotations function
         function showAnnotation1234 (ev) {
           ev.preventDefault()
@@ -1345,7 +1330,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
             let html = '<div class="annotationlabel">$author</div><div class="annotation_rich_text_formatting">$body</div>'
             html = html.replace(/\$body/g, decodeHTML(annotation.body.html)).replace(/\$author/g, decodeHTML(annotation.created_by.name))
             div0.innerHTML = html
-            targetBlankLinks145() // Change link target to _blank
+            themeCommon.targetBlankLinks145A() // Change link target to _blank
             setTimeout(function () { // hide on click
               document.body.addEventListener('click', hideAnnotationOnClick1234)
             }, 100)
@@ -1385,6 +1370,8 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
           h1.innerHTML = '<a target="_blank" href="' + url + '">' + h1.innerHTML + '</a>'
           // Featuring and album name
           const h2 = document.querySelector('.header_with_cover_art-primary_info-primary_artist').parentNode
+          let s1 = ''
+          let s2 = ''
           for (const el of document.querySelectorAll('.metadata_unit-label')) {
             if (el.innerText.toLowerCase().indexOf('feat') !== -1) {
               s1 += ' ' + el.parentNode.innerText.trim()
@@ -1395,9 +1382,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
           h1.innerHTML += s1
           h2.innerHTML += s2
           // Remove other meta like Producer
-          while (document.querySelector('h3')) {
-            document.querySelector('h3').remove()
-          }
+          removeElements(document.querySelectorAll('h3'))
         }
         onload.push(clickableTitle037)
 
@@ -1405,14 +1390,13 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         onload.push(() => setTimeout(themeCommon.targetBlankLinks145A, 500))
 
         if (!annotationsEnabled) {
-          // Remove all annotations 
+          // Remove all annotations
           onload.push(themeCommon.annotationsRemoveAll)
         } else {
           // Add click handler to annotations
-          // for(const a of document.querySelectorAll('*[data-annotationid]')){
-          //   a.addEventListener('click', showAnnotation1234)
-          // }
-          themeCommon.annotationsAddHandler()
+          for (const a of document.querySelectorAll('*[data-annotationid]')) {
+            a.addEventListener('click', showAnnotation1234)
+          }
         }
 
         // Open real page if not in frame
@@ -1597,7 +1581,6 @@ Genius:  ${originalUrl}
         onload.push(themeCommon.hideSecondaryFooter895)
         onload.push(themeCommon.hideStuff235)
 
-        
         // Show annotations function
         function showAnnotation1234 (ev) {
           ev.preventDefault()
@@ -1619,7 +1602,7 @@ Genius:  ${originalUrl}
             let html = '<div class="annotationlabel">$author</div><div class="annotation_rich_text_formatting">$body</div>'
             html = html.replace(/\$body/g, decodeHTML(annotation.body.html)).replace(/\$author/g, decodeHTML(annotation.created_by.name))
             div0.innerHTML = html
-            targetBlankLinks145() // Change link target to _blank
+            themeCommon.targetBlankLinks145A() // Change link target to _blank
             setTimeout(function () { document.body.addEventListener('click', hideAnnotationOnClick1234) }, 100) // hide on click
           }
         }
@@ -1668,23 +1651,20 @@ Genius:  ${originalUrl}
           h1.innerHTML += s1
           h2.innerHTML += s2
           // Remove other meta like Producer
-          while (document.querySelector('h3')) {
-            document.querySelector('h3').remove()
-          }
+          removeElements(document.querySelectorAll('h3'))
         }
         onload.push(clickableTitle037)
 
-        onload.push(() => setTimeout(targetBlankLinks145, 1000))
+        onload.push(() => setTimeout(themeCommon.targetBlankLinks145A, 1000))
 
         if (!annotationsEnabled) {
           // Remove all annotations
           onload.push(themeCommon.annotationsRemoveAll)
         } else {
           // Add click handler to annotations
-          // for(const a of document.querySelectorAll('*[data-annotationid]')){
-          //   a.addEventListener('click', showAnnotation1234)
-          // }
-          themeCommon.annotationsAddHandler()
+          for (const a of document.querySelectorAll('*[data-annotationid]')) {
+            a.addEventListener('click', showAnnotation1234)
+          }
         }
 
         // Open real page if not in frame
@@ -1962,7 +1942,7 @@ Genius:  ${originalUrl}
   }
 
   function setupLyricsDisplayDOM (song, searchresultsLengths) {
-
+    // getCleanLyricsContainer
     const container = custom.getCleanLyricsContainer()
     container.className = '' // custom.getCleanLyricsContainer might forget to clear the className if the element is reused
     container.classList.add('genius-lyrics-result-shown')
@@ -2100,7 +2080,7 @@ Genius:  ${originalUrl}
       spinner.classList.add('loadingspinner')
     }
 
-    function spinnerUpdate(text, title, status, textStatus){
+    function spinnerUpdate (text, title, status, textStatus) {
       if (typeof text === 'string') spinner.textContent = text
       if (typeof title === 'string') spinnerHolder.title = title
       if ('notifyGeniusLoading' in custom && arguments.length > 2) {
@@ -2180,7 +2160,6 @@ Genius:  ${originalUrl}
       }, 30000)
     }
     showLyricsRunner()
-
   }
 
   function isScrollLyricsEnabled () {
@@ -2331,7 +2310,7 @@ Genius:  ${originalUrl}
 
     // Custom buttons
     if ('config' in custom) {
-      for(const f of custom.config){
+      for (const f of custom.config) {
         f(win.appendChild(document.createElement('div')))
       }
     }
@@ -2535,7 +2514,7 @@ Genius:  ${originalUrl}
     }
   }
 
-  async function mainRunner(){
+  async function mainRunner () {
     // get values from GM
     let values = await Promise.all([
       custom.GM.getValue('debug', genius.debug),
@@ -2579,7 +2558,7 @@ Genius:  ${originalUrl}
     let e = await new Promise(resolve => {
       // only receive 'writehtml' message once
       let msgFn = function (e) {
-        if ((((e||0).data||0).iAm) === custom.scriptName && e.data.type === 'writehtml') {
+        if ((((e || 0).data || 0).iAm) === custom.scriptName && e.data.type === 'writehtml') {
           window.removeEventListener('message', msgFn, false)
           msgFn = null
           const { data, source } = e
@@ -2588,13 +2567,13 @@ Genius:  ${originalUrl}
       }
       window.addEventListener('message', msgFn, false)
     })
-    
+
     if ('themeKey' in e.data && Object.prototype.hasOwnProperty.call(themes, e.data.themeKey)) {
       genius.option.themeKey = e.data.themeKey
       theme = themes[genius.option.themeKey]
       console.debug(`Theme activated in iframe: ${theme.name}`)
-    } 
- 
+    }
+
     document.documentElement.innerHTML = e.data.html
     const communicationWindow = e.source
     communicationWindow.postMessage({ iAm: custom.scriptName, type: 'htmlwritten' }, '*')
@@ -2610,7 +2589,7 @@ Genius:  ${originalUrl}
       // before all onload functions and allow modification of theme and onload from external
       custom.iframeLoadedCallback1({ document, theme, onload })
     }
-    for(const func of onload){
+    for (const func of onload) {
       try {
         func()
       } catch (e) {
@@ -2636,7 +2615,7 @@ Genius:  ${originalUrl}
     }
   }
 
-  mainRunner();
+  mainRunner()
 
   return genius
 }
