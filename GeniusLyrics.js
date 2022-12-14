@@ -37,7 +37,7 @@
       * connect genius.com
 */
 
-/* global Reflect, top */
+/* global Reflect */
 
 if (typeof module !== 'undefined') {
   module.exports = geniusLyrics
@@ -113,7 +113,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     nativeFNs = { setTimeout, setInterval, clearTimeout, clearInterval }
   }
   function makeNativeFNsFromIframe () {
-    const iframe = document.createElement('iframe')
+    let iframe = document.createElement('iframe')
     iframe.style.position = 'fixed'
     iframe.style.display = 'none'
     document.body.appendChild(iframe)
@@ -122,7 +122,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     iframe = null
     nativeFNs = { setTimeout, setInterval, clearTimeout, clearInterval }
   }
-  function setupNativeFNs(iframeWin) {
+  function setupNativeFNs (iframeWin) {
     if (nativeFNs === null) {
       if (window.setTimeout.name === 'setTimeout') {
         makeOriginalFNsAsNative(window)
@@ -170,7 +170,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
 
   function removeTagsKeepText (node) {
     let tmpNode = null
-    while (tmpNode = node.firstChild) {
+    while ((tmpNode = node.firstChild) !== null) {
       if ('tagName' in tmpNode && tmpNode.tagName !== 'BR') {
         removeTagsKeepText(tmpNode)
       } else {
