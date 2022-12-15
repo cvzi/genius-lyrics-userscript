@@ -69,17 +69,10 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     }
   })
 
-  if ('hideLyrics' in custom) {
-    if (!('__lyricsDisplayState_setEventHandler__' in custom.hideLyrics)) {
-      custom.hideLyrics.__lyricsDisplayState_setEventHandler__ = true
-      custom.hideLyrics = ((_hideLyrics) => {
-        return function hideLyrics () {
-          const ret = _hideLyrics.apply(this, arguments)
-          window.postMessage({ iAm: custom.scriptName, type: 'lyricsDisplayState', visibility: 'hidden' }, '*')
-          return ret
-        }
-      })(custom.hideLyrics)
-    }
+  const hideLyricsWithMessage = () => {
+    const ret = custom.hideLyrics(...arguments)
+    window.postMessage({ iAm: custom.scriptName, type: 'lyricsDisplayState', visibility: 'hidden' }, '*')
+    return ret
   }
 
   const genius = {
@@ -1804,7 +1797,7 @@ Genius:  ${originalUrl}
         geniusSearch(songTitle + ' ' + songArtists, function geniusSearchCb (r) {
           const hits = r.response.sections[0].hits
           if (hits.length === 0) {
-            custom.hideLyrics()
+            hideLyricsWithMessage()
             if (!beLessSpecific && (firstArtist !== songArtists || simpleTitle !== songTitle)) {
               // Try again with only the first artist or the simple title
               custom.addLyrics(!!force, true)
@@ -1900,7 +1893,7 @@ Genius:  ${originalUrl}
         clearInterval(genius.iv.main)
         genius.iv.main = 0
       }
-      custom.hideLyrics()
+      hideLyricsWithMessage()
     })
     elementsToBeAppended.push(hideButton, separator.cloneNode(true))
 
@@ -2081,7 +2074,7 @@ Genius:  ${originalUrl}
       tv1 = setTimeout(function () {
         console.debug('tv1')
         iframe.src = 'data:text/html,%3Ch1%3ELoading...%21%3C%2Fh1%3E'
-        window.setTimeout(function () {
+        setTimeout(function () {
           iframe.src = custom.emptyURL + '#html:post'
         }, 1000)
       }, 15000)
@@ -2094,8 +2087,8 @@ Genius:  ${originalUrl}
         if (!loadingFailed) {
           console.debug('try again fresh')
           loadingFailed = true
-          custom.hideLyrics()
-          window.setTimeout(function () {
+          hideLyricsWithMessage()
+          setTimeout(function () {
             custom.addLyrics(true)
           }, 1000)
         }
@@ -2376,14 +2369,16 @@ Genius:  ${originalUrl}
       if ('main' in custom) {
         custom.setupMain ? custom.setupMain(genius) : (genius.iv.main = setInterval(custom.main, 2000))
       }
-      if ('addLyrics' in custom) {
-        custom.addLyrics(true)
-      }
+      // if ('addLyrics' in custom) {
+      //   custom.addLyrics(true)
+      // }
+      custom.addLyrics(true)
     } else {
       genius.option.autoShow = false // Temporarily disable showing lyrics automatically on song change
-      if ('hideLyrics' in custom) {
-        custom.hideLyrics()
-      }
+      // if ('hideLyrics' in custom) {
+      //   custom.hideLyrics()
+      // }
+      hideLyricsWithMessage()
     }
   }
 
