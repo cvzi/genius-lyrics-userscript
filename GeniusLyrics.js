@@ -2334,16 +2334,18 @@ Genius:  ${originalUrl}
       if (data.iAm !== custom.scriptName) {
         return
       }
-      let arr = onMessage[e.data.type]
-      let tmp = [...arr]
-      arr.length = 0
-      arr = null
-      for (const cb of tmp) {
-        if (typeof cb === 'function') {
-          cb(e)
+      let arr = onMessage[data.type]
+      if (arr && arr.length > 0) {
+        let tmp = [...arr]
+        arr.length = 0
+        arr = null
+        for (const cb of tmp) {
+          if (typeof cb === 'function') {
+            cb(e)
+          }
         }
+        tmp = null
       }
-      tmp = null
     })
   }
 
