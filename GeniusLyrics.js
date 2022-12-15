@@ -69,7 +69,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     }
   })
 
-  const hideLyricsWithMessage = () => {
+  function hideLyricsWithMessage () {
     const ret = custom.hideLyrics(...arguments)
     window.postMessage({ iAm: custom.scriptName, type: 'lyricsDisplayState', visibility: 'hidden' }, '*')
     return ret
