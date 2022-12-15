@@ -1983,13 +1983,13 @@ Genius:  ${originalUrl}
     if (typeof songInfo === 'object') {
       // do nothing; assume the object can be passed through postMessage
     } else {
-      console.warn(`The parameter 'songInfo' in showLyrics() is incorrect.`)
+      console.warn('The parameter \'songInfo\' in showLyrics() is incorrect.')
       return
     }
     if (typeof searchresultsLengths === 'number') {
       // do nothing
     } else {
-      console.warn(`The parameter 'searchresultsLengths' in showLyrics() is incorrect.`)
+      console.warn('The parameter \'searchresultsLengths\' in showLyrics() is incorrect.')
       return
     }
 
@@ -2527,10 +2527,10 @@ Genius:  ${originalUrl}
         }
       }
       window.addEventListener('message', msgFn, false)
-      try{
+      try {
         // faster than setInterval
         top.postMessage({ iAm: custom.scriptName, type: 'genius-iframe-waiting' }, '*')
-      }catch(e){
+      } catch (e) {
         // in case top is not accessible from iframe
       }
     })
