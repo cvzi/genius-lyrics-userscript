@@ -37,7 +37,7 @@
       * connect genius.com
 */
 
-/* global Reflect, top */
+/* global Reflect */
 
 if (typeof module !== 'undefined') {
   module.exports = geniusLyrics
@@ -68,9 +68,10 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       throw new Error(`geniusLyrics() requires parameter ${valName}`)
     }
   })
+
   if ('hideLyrics' in custom) {
-    if (!('__lyricsDisplayState_setEventHanlder__' in custom.hideLyrics)) {
-      custom.hideLyrics.__lyricsDisplayState_setEventHanlder__ = true
+    if (!('__lyricsDisplayState_setEventHandler__' in custom.hideLyrics)) {
+      custom.hideLyrics.__lyricsDisplayState_setEventHandler__ = true
       custom.hideLyrics = ((_hideLyrics) => {
         return function hideLyrics () {
           const ret = _hideLyrics.apply(this, arguments)
@@ -118,136 +119,25 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   let autoScrollEnabled = false
   const onMessage = []
 
-  let cleanWindow = null
-  // let nativeFNs = null
-  const nativeFNs = null
+  function isFakeWindow () {
+    // window is not window in Spotify Web App
+    return (window instanceof window.constructor) === false
+  }
+  function getTrueWindow () {
+    // this can bypass Spotify's window Proxy Object and obtain the original window object
+    return new Function('return window')()
+  }
 
-  function makeOriginalFNsAsNative (win) {
-    /*
-    const { setTimeout, setInterval, clearTimeout, clearInterval } = win
-    nativeFNs = { setTimeout, setInterval, clearTimeout, clearInterval }
-    */
-  }
-  makeOriginalFNsAsNative()
-  function makeNativeFNsFromIframe () {
-    /*
-    let iframe = document.createElement('iframe')
-    iframe.style.position = 'fixed'
-    iframe.style.display = 'none'
-    document.body.appendChild(iframe)
-    const { setTimeout, setInterval, clearTimeout, clearInterval } = iframe.contentWindow
-    iframe.remove()
-    iframe = null
-    nativeFNs = { setTimeout, setInterval, clearTimeout, clearInterval }
-    */
-  }
-  makeNativeFNsFromIframe()
-  function setupNativeFNs (iframeWin) {
-    /*
-    if (nativeFNs === null) {
-      if (window.setTimeout.name === 'setTimeout') {
-        makeOriginalFNsAsNative(window)
-      } else if (iframeWin !== null) {
-        makeOriginalFNsAsNative(iframeWin)
-      } else {
-        makeNativeFNsFromIframe()
-      }
-    }
-    */
-  }
-  setupNativeFNs()
+  let trueWindow = isFakeWindow() ? getTrueWindow() : window
 
-  /*
-    const setTimeout = function () {
-      setupNativeFNs(null)
-      return nativeFNs.setTimeout.call(window, ...arguments)
-    }
-    const setInterval = function () {
-      setupNativeFNs(null)
-      return nativeFNs.setInterval.call(window, ...arguments)
-    }
-    const clearTimeout = function () {
-      setupNativeFNs(null)
-      return nativeFNs.clearTimeout.call(window, ...arguments)
-    }
-    const clearInterval = function () {
-      setupNativeFNs(null)
-      return nativeFNs.clearInterval.call(window, ...arguments)
-    }
-  */
+  const setTimeout = trueWindow.setTimeout.bind(trueWindow)
+  const setInterval = trueWindow.setInterval.bind(trueWindow)
+  const clearTimeout = trueWindow.clearTimeout.bind(trueWindow)
+  const clearInterval = trueWindow.clearInterval.bind(trueWindow)
 
-  // the following coding is to use native setTimeout & setInterval over spotify sites
-  // https://github.com/cvzi/genius-lyrics-userscript/issues/16
-  function freshWindowFromIframe () {
-    const iframe = document.body.appendChild(document.createElement('iframe'))
-    iframe.setAttribute('__genius_native_window__', '')
-    iframe.style.display = 'none'
-    return iframe.contentWindow
-  }
-  const setTimeout = function (a, b) {
-    if (window.setTimeout.name === 'setTimeout') {
-      return window.setTimeout(a, b)
-    }
-    if (top.setTimeout.name === 'setTimeout') {
-      return top.setTimeout(a, b)
-    }
-    if (!cleanWindow && document.body) {
-      cleanWindow = freshWindowFromIframe()
-    }
-    if (cleanWindow) {
-      return cleanWindow.setTimeout(a, b)
-    } else {
-      return window.setTimeout(a, b)
-    }
-  }
-  const setInterval = function (a, b) {
-    if (window.setInterval.name === 'setInterval') {
-      return window.setInterval(a, b)
-    }
-    if (top.setInterval.name !== 'setInterval') {
-      return top.setInterval(a, b)
-    }
-    if (!cleanWindow && document.body) {
-      cleanWindow = freshWindowFromIframe()
-    }
-    if (cleanWindow) {
-      return cleanWindow.setInterval(a, b)
-    } else {
-      return window.setInterval(a, b)
-    }
-  }
-  const clearTimeout = function (a, b) {
-    if (window.clearTimeout.name === 'clearTimeout') {
-      return window.clearTimeout(a, b)
-    }
-    if (top.clearTimeout.name === 'clearTimeout') {
-      return top.clearTimeout(a, b)
-    }
-    if (!cleanWindow && document.body) {
-      cleanWindow = freshWindowFromIframe()
-    }
-    if (cleanWindow) {
-      return cleanWindow.clearTimeout(a, b)
-    } else {
-      return window.clearTimeout(a, b)
-    }
-  }
-  const clearInterval = function (a, b) {
-    if (window.clearInterval.name === 'clearInterval') {
-      return window.clearInterval(a, b)
-    }
-    if (top.clearInterval.name === 'clearInterval') {
-      return top.clearInterval(a, b)
-    }
-    if (!cleanWindow && document.body) {
-      cleanWindow = freshWindowFromIframe()
-    }
-    if (cleanWindow) {
-      return cleanWindow.clearInterval(a, b)
-    } else {
-      return window.clearInterval(a, b)
-    }
-  }
+  trueWindow = null
+  
+
 
   function getHostname (url) {
     // absolute path
@@ -467,26 +357,27 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         'X-Requested-With': 'XMLHttpRequest'
       },
       error: function geniusSearchOnError (response) {
-        window.alert(custom.scriptName + '\n\nError geniusSearch(' + JSON.stringify(query) + ', ' + ('name' in cb ? cb.name : 'cb') + '):\n' + response)
+        window.alert(custom.scriptName + '\n\nError in geniusSearch(' + JSON.stringify(query) + ', ' + ('name' in cb ? cb.name : 'cb') + '):\n' + response)
         invalidateRequestCache(requestObj)
         if (typeof cbError === 'function') cbError()
         requestObj = null
       },
       load: function geniusSearchOnLoad (response) {
         let jsonData = null
+        let errorMsg = ''
         try {
           jsonData = JSON.parse(response.responseText)
         } catch (e) {
-          window.alert(custom.scriptName + '\n\n' + e + ' in geniusSearch(' + JSON.stringify(query) + ', ' + ('name' in cb ? cb.name : 'cb') + '):\n\n' + response.responseText)
-          jsonData = null
+          errorMsg = e
         }
         if (jsonData !== null) {
           cb(jsonData)
-        } else {
+        }else{
+          window.alert(custom.scriptName + '\n\n' + (errorMsg || 'Error') + ' in geniusSearch(' + JSON.stringify(query) + ', ' + ('name' in cb ? cb.name : 'cb') + '):\n\n' + response.responseText)
           invalidateRequestCache(requestObj)
           if (typeof cbError === 'function') cbError()
+          requestObj = null
         }
-        requestObj = null
       }
     }
     request(requestObj)
@@ -1948,7 +1839,7 @@ Genius:  ${originalUrl}
           } else {
             custom.listSongs(hits)
           }
-        }, function geniusSearchErrorCb (r) {
+        }, function geniusSearchErrorCb (){
           // do nothing
         })
       }
@@ -2083,28 +1974,17 @@ Genius:  ${originalUrl}
   function showLyrics (song, searchresultsLengths) {
     // setup DOMs
     const { container, bar, iframe } = 'custom' in setupLyricsDisplayDOM
-      ? custom.setupLyricsDisplayDOM()
-      : setupLyricsDisplayDOM()
+      ? custom.setupLyricsDisplayDOM(song, searchresultsLengths)
+      : setupLyricsDisplayDOM(song, searchresultsLengths)
+
     if (!iframe || iframe.nodeType !== 1 || iframe.closest('html, body') === null) {
-      console.log('iframe#lyricsiframe is not inserted into the page.')
+      console.warn('iframe#lyricsiframe is not inserted into the page.')
       return
     }
 
-    if (nativeFNs === null) {
-      const win = iframe.contentWindow
-      if (win !== null) {
-        setupNativeFNs(win)
-      }
-    }
     iframe.src = custom.emptyURL + '#html:post'
+
     custom.setFrameDimensions(container, iframe, bar)
-    song = `${song}` // ensure typeof song === 'string'
-    const ty = typeof searchresultsLengths
-    if (typeof ty === 'number') {
-      // do nothing
-    } else {
-      searchresultsLengths = '' // ensure searchresultsLengths is primitive
-    }
 
     const spinnerHolder = document.body.appendChild(document.createElement('div'))
     spinnerHolder.classList.add('loadingspinnerholder')
@@ -2130,7 +2010,6 @@ Genius:  ${originalUrl}
       }
     }
     spinnerUpdate('5', null, 0, 'start')
-    window.postMessage({ iAm: custom.scriptName, type: 'lyricsDisplayState', visibility: 'loading', song, searchresultsLengths }, '*')
 
     async function showLyricsRunner () {
       let html = await new Promise(resolve => loadGeniusSong(song, function loadGeniusSongCb (html) {
@@ -2151,16 +2030,17 @@ Genius:  ${originalUrl}
       let tv1 = 0
       let tv2 = 0
       let iv = 0
-
-      // a. clear() when LyricsReady (success)
-      // b. clear() when failed (after 30s)
       const clear = function () {
+        // a. clear() when LyricsReady (success)
+        // b. clear() when failed (after 30s)
         if ('onLyricsReady' in custom) {
           // only on success ???
           custom.onLyricsReady(song, container)
         }
-        clearInterval(iv)
-        iv = 0
+        if (iv > 0) {
+          clearInterval(iv)
+          iv = 0
+        }
         clearTimeout(tv1)
         clearTimeout(tv2)
         iframe.style.opacity = 1.0
@@ -2168,9 +2048,19 @@ Genius:  ${originalUrl}
       }
 
       // event listeners
-      addOneMessageListener('htmlwritten', function () {
+      addOneMessageListener('genius-iframe-waiting', function(){
+        if (iv === 0) {
+          return
+        }
+        ivf(); // this is much faster than 1500ms
         clearInterval(iv)
         iv = 0
+      })
+      addOneMessageListener('htmlwritten', function () {
+        if (iv > 0) {
+          clearInterval(iv)
+          iv = 0
+        }
         spinnerUpdate('1', 'Calculating...', 302, 'htmlwritten')
       })
       addOneMessageListener('pageready', function () {
@@ -2203,27 +2093,23 @@ Genius:  ${originalUrl}
         }
       }, 30000)
 
-      // write html to the iframe window
-      function ivf1 () {
+      const ivf = () => {
         if (iv === 0) {
           return
         }
         spinnerUpdate('2', 'Rendering...', 301, 'pageRendering')
         if (iframe.contentWindow && iframe.contentWindow.postMessage) {
-          clearInterval(iv)
-          iv = 0
           iframe.contentWindow.postMessage({ iAm: custom.scriptName, type: 'writehtml', html, themeKey: genius.option.themeKey }, '*')
         } else if (iframe.closest('html, body') === null) {
           clearInterval(iv)
           iv = 0
           console.warn('iframe#lyricsiframe was removed from the page. No contentWindow could be found.')
-          // removed
         } else {
           // console.debug('iframe.contentWindow is ', iframe.contentWindow)
         }
       }
-      iv = setInterval(ivf1, 1500)
-      ivf1()
+      iv = setInterval(ivf, 1500)
+
     }
     showLyricsRunner()
   }
@@ -2252,7 +2138,7 @@ Genius:  ${originalUrl}
       } else {
         custom.listSongs(hits, container, query)
       }
-    }, function geniusSearchErrorCb (r) {
+    }, function geniusSearchErrorCb (){
       // do nothing
     })
   }
@@ -2634,6 +2520,7 @@ Genius:  ${originalUrl}
         }
       }
       window.addEventListener('message', msgFn, false)
+      top.postMessage({ iAm: custom.scriptName, type: 'genius-iframe-waiting' }, '*')
     })
 
     if ('themeKey' in e.data && Object.prototype.hasOwnProperty.call(themes, e.data.themeKey)) {
