@@ -2330,7 +2330,7 @@ Genius:  ${originalUrl}
 
   function listenToMessages () {
     window.addEventListener('message', function (e) {
-      let data = ((e || 0).data || 0)
+      const data = ((e || 0).data || 0)
       if (data.iAm !== custom.scriptName) {
         return
       }
