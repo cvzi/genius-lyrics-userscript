@@ -37,7 +37,7 @@
       * connect genius.com
 */
 
-/* global Reflect */
+/* global Reflect, top */
 
 if (typeof module !== 'undefined') {
   module.exports = geniusLyrics
@@ -125,19 +125,15 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   }
   function getTrueWindow () {
     // this can bypass Spotify's window Proxy Object and obtain the original window object
-    return new Function('return window')()
+    return new Function('return window')() // eslint-disable-line no-new-func
   }
 
   let trueWindow = isFakeWindow() ? getTrueWindow() : window
-
   const setTimeout = trueWindow.setTimeout.bind(trueWindow)
   const setInterval = trueWindow.setInterval.bind(trueWindow)
   const clearTimeout = trueWindow.clearTimeout.bind(trueWindow)
   const clearInterval = trueWindow.clearInterval.bind(trueWindow)
-
   trueWindow = null
-  
-
 
   function getHostname (url) {
     // absolute path
@@ -372,7 +368,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         }
         if (jsonData !== null) {
           cb(jsonData)
-        }else{
+        } else {
           window.alert(custom.scriptName + '\n\n' + (errorMsg || 'Error') + ' in geniusSearch(' + JSON.stringify(query) + ', ' + ('name' in cb ? cb.name : 'cb') + '):\n\n' + response.responseText)
           invalidateRequestCache(requestObj)
           if (typeof cbError === 'function') cbError()
@@ -1839,7 +1835,7 @@ Genius:  ${originalUrl}
           } else {
             custom.listSongs(hits)
           }
-        }, function geniusSearchErrorCb (){
+        }, function geniusSearchErrorCb () {
           // do nothing
         })
       }
@@ -1971,11 +1967,11 @@ Genius:  ${originalUrl}
     }
   }
 
-  function showLyrics (song, searchresultsLengths) {
+  function showLyrics (songInfo, searchresultsLengths) {
     // setup DOMs
     const { container, bar, iframe } = 'custom' in setupLyricsDisplayDOM
-      ? custom.setupLyricsDisplayDOM(song, searchresultsLengths)
-      : setupLyricsDisplayDOM(song, searchresultsLengths)
+      ? custom.setupLyricsDisplayDOM(songInfo, searchresultsLengths)
+      : setupLyricsDisplayDOM(songInfo, searchresultsLengths)
 
     if (!iframe || iframe.nodeType !== 1 || iframe.closest('html, body') === null) {
       console.warn('iframe#lyricsiframe is not inserted into the page.')
@@ -1983,8 +1979,19 @@ Genius:  ${originalUrl}
     }
 
     iframe.src = custom.emptyURL + '#html:post'
-
     custom.setFrameDimensions(container, iframe, bar)
+    if (typeof songInfo === 'object') {
+      // do nothing; assume the object can be passed through postMessage
+    } else {
+      console.warn(`The parameter 'songInfo' in showLyrics() is incorrect.`)
+      return
+    }
+    if (typeof searchresultsLengths === 'number') {
+      // do nothing
+    } else {
+      console.warn(`The parameter 'searchresultsLengths' in showLyrics() is incorrect.`)
+      return
+    }
 
     const spinnerHolder = document.body.appendChild(document.createElement('div'))
     spinnerHolder.classList.add('loadingspinnerholder')
@@ -2010,17 +2017,18 @@ Genius:  ${originalUrl}
       }
     }
     spinnerUpdate('5', null, 0, 'start')
+    window.postMessage({ iAm: custom.scriptName, type: 'lyricsDisplayState', visibility: 'loading', song: songInfo, searchresultsLengths }, '*')
 
     async function showLyricsRunner () {
-      let html = await new Promise(resolve => loadGeniusSong(song, function loadGeniusSongCb (html) {
+      let html = await new Promise(resolve => loadGeniusSong(songInfo, function loadGeniusSongCb (html) {
         resolve(html)
       }))
       spinnerUpdate('4', 'Downloading annotations...', 100, 'donwloading')
-      let annotations = await new Promise(resolve => loadGeniusAnnotations(song, html, annotationsEnabled, function loadGeniusAnnotationsCb (annotations) {
+      let annotations = await new Promise(resolve => loadGeniusAnnotations(songInfo, html, annotationsEnabled, function loadGeniusAnnotationsCb (annotations) {
         resolve(annotations)
       }))
       spinnerUpdate('3', 'Composing page...', 200, 'pageComposing')
-      html = await new Promise(resolve => combineGeniusResources(song, html, annotations, function combineGeniusResourcesCb (html) {
+      html = await new Promise(resolve => combineGeniusResources(songInfo, html, annotations, function combineGeniusResourcesCb (html) {
         resolve(html)
       }))
       annotations = null
@@ -2035,7 +2043,7 @@ Genius:  ${originalUrl}
         // b. clear() when failed (after 30s)
         if ('onLyricsReady' in custom) {
           // only on success ???
-          custom.onLyricsReady(song, container)
+          custom.onLyricsReady(songInfo, container)
         }
         if (iv > 0) {
           clearInterval(iv)
@@ -2048,11 +2056,11 @@ Genius:  ${originalUrl}
       }
 
       // event listeners
-      addOneMessageListener('genius-iframe-waiting', function(){
+      addOneMessageListener('genius-iframe-waiting', function () {
         if (iv === 0) {
           return
         }
-        ivf(); // this is much faster than 1500ms
+        ivf() // this is much faster than 1500ms
         clearInterval(iv)
         iv = 0
       })
@@ -2109,7 +2117,6 @@ Genius:  ${originalUrl}
         }
       }
       iv = setInterval(ivf, 1500)
-
     }
     showLyricsRunner()
   }
@@ -2138,7 +2145,7 @@ Genius:  ${originalUrl}
       } else {
         custom.listSongs(hits, container, query)
       }
-    }, function geniusSearchErrorCb (){
+    }, function geniusSearchErrorCb () {
       // do nothing
     })
   }
@@ -2520,7 +2527,12 @@ Genius:  ${originalUrl}
         }
       }
       window.addEventListener('message', msgFn, false)
-      top.postMessage({ iAm: custom.scriptName, type: 'genius-iframe-waiting' }, '*')
+      try{
+        // faster than setInterval
+        top.postMessage({ iAm: custom.scriptName, type: 'genius-iframe-waiting' }, '*')
+      }catch(e){
+        // in case top is not accessible from iframe
+      }
     })
 
     if ('themeKey' in e.data && Object.prototype.hasOwnProperty.call(themes, e.data.themeKey)) {
