@@ -58,8 +58,8 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     'emptyURL',
     'listSongs',
     'showSearchField',
-    'addLyrics',
-    'hideLyrics',
+    'addLyrics', // addLyrics would not immediately add lyrics panel
+    'hideLyrics', // hideLyrics immediately hide lyrics panel
     'getCleanLyricsContainer',
     'setFrameDimensions'
   ], function (valName) {
@@ -68,6 +68,18 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       throw new Error(`geniusLyrics() requires parameter ${valName}`)
     }
   })
+  if ('hideLyrics' in custom) {
+    if (!('__lyricsDisplayState_setEventHanlder__' in custom.hideLyrics)) {
+      custom.hideLyrics.__lyricsDisplayState_setEventHanlder__ = true
+      custom.hideLyrics = ((_hideLyrics) => {
+        return function hideLyrics() {
+          let ret = _hideLyrics.apply(this, arguments)
+          window.postMessage({ iAm: custom.scriptName, type: 'lyricsDisplayState', visibility: 'hidden' }, '*')
+          return ret
+        }
+      })(custom.hideLyrics)
+    }
+  }
 
   const genius = {
     option: {
@@ -164,16 +176,19 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     }
   */
 
+  // the following coding is to use native setTimeout & setInterval over spotify sites
+  // https://github.com/cvzi/genius-lyrics-userscript/issues/16
   function freshWindowFromIframe () {
     const iframe = document.body.appendChild(document.createElement('iframe'))
+    iframe.setAttribute('__genius_native_window__', '')
     iframe.style.display = 'none'
     return iframe.contentWindow
   }
   const setTimeout = function (a, b) {
-    if (window.setTimeout.toString().indexOf('[native code]') !== -1) {
+    if (window.setTimeout.name === 'setTimeout') {
       return window.setTimeout(a, b)
     }
-    if (top.setTimeout.toString().indexOf('[native code]') !== -1) {
+    if (top.setTimeout.name === 'setTimeout') {
       return top.setTimeout(a, b)
     }
     if (!cleanWindow && document.body) {
@@ -186,10 +201,10 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     }
   }
   const setInterval = function (a, b) {
-    if (window.setInterval.toString().indexOf('[native code]') !== -1) {
+    if (window.setInterval.name === 'setInterval') {
       return window.setInterval(a, b)
     }
-    if (top.setInterval.toString().indexOf('[native code]') !== -1) {
+    if (top.setInterval.name !== 'setInterval') {
       return top.setInterval(a, b)
     }
     if (!cleanWindow && document.body) {
@@ -202,10 +217,10 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     }
   }
   const clearTimeout = function (a, b) {
-    if (window.clearTimeout.toString().indexOf('[native code]') !== -1) {
+    if (window.clearTimeout.name === 'clearTimeout') {
       return window.clearTimeout(a, b)
     }
-    if (top.clearTimeout.toString().indexOf('[native code]') !== -1) {
+    if (top.clearTimeout.name === 'clearTimeout') {
       return top.clearTimeout(a, b)
     }
     if (!cleanWindow && document.body) {
@@ -218,10 +233,10 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     }
   }
   const clearInterval = function (a, b) {
-    if (window.clearInterval.toString().indexOf('[native code]') !== -1) {
+    if (window.clearInterval.name === 'clearInterval') {
       return window.clearInterval(a, b)
     }
-    if (top.clearInterval.toString().indexOf('[native code]') !== -1) {
+    if (top.clearInterval.name === 'clearInterval') {
       return top.clearInterval(a, b)
     }
     if (!cleanWindow && document.body) {
@@ -445,8 +460,8 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     }
   }
 
-  function geniusSearch (query, cb) {
-    const requestObj = {
+  function geniusSearch (query, cb, cbError) {
+    let requestObj = {
       url: 'https://genius.com/api/search/song?page=1&q=' + encodeURIComponent(query),
       headers: {
         'X-Requested-With': 'XMLHttpRequest'
@@ -454,18 +469,24 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       error: function geniusSearchOnError (response) {
         window.alert(custom.scriptName + '\n\nError geniusSearch(' + JSON.stringify(query) + ', ' + ('name' in cb ? cb.name : 'cb') + '):\n' + response)
         invalidateRequestCache(requestObj)
+        if(typeof cbError === 'function') cbError()
+        requestObj = null
       },
       load: function geniusSearchOnLoad (response) {
         let jsonData = null
         try {
           jsonData = JSON.parse(response.responseText)
         } catch (e) {
-          window.alert(custom.scriptName + '\n\n' + e + ' in geniusSearch(' + JSON.stringify(query) + ', ' + ('name' in cb ? cb.name : 'cb') + '):\n\n' + response.responseText)
-          invalidateRequestCache(requestObj)
+          jsonData = null
         }
         if (jsonData !== null) {
           cb(jsonData)
+        } else {
+          window.alert(custom.scriptName + '\n\n' + e + ' in geniusSearch(' + JSON.stringify(query) + ', ' + ('name' in cb ? cb.name : 'cb') + '):\n\n' + response.responseText)
+          invalidateRequestCache(requestObj)
+          if(typeof cbError === 'function') cbError()
         }
+        requestObj = null
       }
     }
     request(requestObj)
@@ -1927,6 +1948,8 @@ Genius:  ${originalUrl}
           } else {
             custom.listSongs(hits)
           }
+        }, function geniusSearchErrorCb (r) {
+          // do nothing
         })
       }
     }
@@ -2023,11 +2046,12 @@ Genius:  ${originalUrl}
       const backbutton = document.createElement('span')
       backbutton.classList.add('genius-lyrics-back-button')
       backbutton.style.cursor = 'pointer'
-      if (searchresultsLengths === true) {
-        backbutton.textContent = 'Back to search results'
-      } else {
-        backbutton.textContent = `Back to search (${searchresultsLengths - 1} other result${searchresultsLengths === 2 ? '' : 's'})`
-      }
+      // searchresultsLengths === true is always false for searchresultsLengths > 1
+      // if (searchresultsLengths === true) {
+      //  backbutton.textContent = 'Back to search results'
+      // } else {
+      backbutton.textContent = `Back to search (${searchresultsLengths - 1} other result${searchresultsLengths === 2 ? '' : 's'})`
+      // }
       backbutton.addEventListener('click', function backbuttonClick (ev) {
         custom.showSearchField(genius.current.artists + ' ' + genius.current.title)
       })
@@ -2061,6 +2085,10 @@ Genius:  ${originalUrl}
     const { container, bar, iframe } = 'custom' in setupLyricsDisplayDOM
       ? custom.setupLyricsDisplayDOM()
       : setupLyricsDisplayDOM()
+    if (!iframe || iframe.nodeType !== 1 || iframe.closest('html, body') === null) {
+      console.log('iframe#lyricsiframe is not inserted into the page.')
+      return
+    }
 
     if (nativeFNs === null) {
       const win = iframe.contentWindow
@@ -2069,8 +2097,14 @@ Genius:  ${originalUrl}
       }
     }
     iframe.src = custom.emptyURL + '#html:post'
-
     custom.setFrameDimensions(container, iframe, bar)
+    song = `${song}` // ensure typeof song === 'string'
+    const ty = typeof searchresultsLengths
+    if (typeof ty === 'number') {
+      // do nothing
+    } else {
+      searchresultsLengths = '' // ensure searchresultsLengths is primitive
+    }
 
     const spinnerHolder = document.body.appendChild(document.createElement('div'))
     spinnerHolder.classList.add('loadingspinnerholder')
@@ -2096,6 +2130,7 @@ Genius:  ${originalUrl}
       }
     }
     spinnerUpdate('5', null, 0, 'start')
+    window.postMessage({ iAm: custom.scriptName, type: 'lyricsDisplayState', visibility: 'loading', song, searchresultsLengths }, '*')
 
     async function showLyricsRunner () {
       let html = await new Promise(resolve => loadGeniusSong(song, function loadGeniusSongCb (html) {
@@ -2113,34 +2148,36 @@ Genius:  ${originalUrl}
       spinnerUpdate('3', 'Loading page...', 300, 'pageLoading')
 
       // obtain the iframe detailed information
-      let tv1 = null
-      let tv2 = null
-      const iv = setInterval(function () {
-        spinnerUpdate('2', 'Rendering...', 301, 'pageRendering')
-        if (iframe.contentWindow && iframe.contentWindow.postMessage) {
-          iframe.contentWindow.postMessage({ iAm: custom.scriptName, type: 'writehtml', html, themeKey: genius.option.themeKey }, '*')
-        } else {
-          // console.debug('iframe.contentWindow is ', iframe.contentWindow)
-        }
-      }, 1500)
+      let tv1 = 0
+      let tv2 = 0
+      let iv = 0
+
+      // a. clear() when LyricsReady (success)
+      // b. clear() when failed (after 30s)
       const clear = function () {
         if ('onLyricsReady' in custom) {
+          // only on success ???
           custom.onLyricsReady(song, container)
         }
         clearInterval(iv)
+        iv = 0
         clearTimeout(tv1)
         clearTimeout(tv2)
-        setTimeout(function () {
-          iframe.style.opacity = 1.0
-          spinnerHolder.remove()
-          spinnerUpdate(null, null, 900, 'complete')
-        }, 30)
+        iframe.style.opacity = 1.0
+        spinnerHolder.remove()
       }
+
+      // event listeners
       addOneMessageListener('htmlwritten', function () {
         clearInterval(iv)
+        iv = 0
         spinnerUpdate('1', 'Calculating...', 302, 'htmlwritten')
       })
-      addOneMessageListener('pageready', clear)
+      addOneMessageListener('pageready', function (){
+        clear() // loaded
+        spinnerUpdate(null, null, 901, 'complete')
+        window.postMessage({ iAm: custom.scriptName, type: 'lyricsDisplayState', visibility: 'loaded', lyricsSuccess: true }, '*')
+      })
 
       // After 15 seconds, try to reload the iframe
       tv1 = setTimeout(function () {
@@ -2153,7 +2190,9 @@ Genius:  ${originalUrl}
       // After 30 seconds, try again fresh (only once)
       tv2 = setTimeout(function () {
         console.debug('tv2')
-        clear()
+        clear() // unable to load
+        spinnerUpdate(null, null, 902, 'failed')
+        window.postMessage({ iAm: custom.scriptName, type: 'lyricsDisplayState', visibility: 'loaded', lyricsSuccess: false }, '*')
         if (!loadingFailed) {
           console.debug('try again fresh')
           loadingFailed = true
@@ -2163,6 +2202,28 @@ Genius:  ${originalUrl}
           }, 1000)
         }
       }, 30000)
+
+      // write html to the iframe window
+      function ivf1 () {
+        if (iv === 0) {
+          return
+        }
+        spinnerUpdate('2', 'Rendering...', 301, 'pageRendering')
+        if (iframe.contentWindow && iframe.contentWindow.postMessage) {
+          clearInterval(iv)
+          iv = 0
+          iframe.contentWindow.postMessage({ iAm: custom.scriptName, type: 'writehtml', html, themeKey: genius.option.themeKey }, '*')
+        } else if (iframe.closest('html, body') === null) {
+          clearInterval(iv)
+          iv = 0
+          console.warn('iframe#lyricsiframe was removed from the page. No contentWindow could be found.')
+          // removed
+        } else {
+          // console.debug('iframe.contentWindow is ', iframe.contentWindow)
+        }
+      }
+      iv = setInterval(ivf1, 1500)
+      ivf1();
     }
     showLyricsRunner()
   }
@@ -2191,6 +2252,8 @@ Genius:  ${originalUrl}
       } else {
         custom.listSongs(hits, container, query)
       }
+    }, function geniusSearchErrorCb (r) {
+      // do nothing
     })
   }
 
