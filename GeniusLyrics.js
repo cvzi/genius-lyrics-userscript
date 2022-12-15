@@ -110,7 +110,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   let theme
   let annotationsEnabled = true
   let autoScrollEnabled = false
-  const onMessage = []
+  const onMessage = {}
 
   function isFakeWindow () {
     // window is not window in Spotify Web App
@@ -2321,21 +2321,29 @@ Genius:  ${originalUrl}
   }
 
   function addOneMessageListener (type, cb) {
-    onMessage.push([type, cb])
+    let arr = onMessage[type]
+    if (!arr) {
+      arr = onMessage[type] = []
+    }
+    arr.push(cb)
   }
 
   function listenToMessages () {
     window.addEventListener('message', function (e) {
-      if (!onMessage || typeof e.data !== 'object' || !('iAm' in e.data) || e.data.iAm !== custom.scriptName) {
+      let data = ((e || 0).data || 0)
+      if (data.iAm !== custom.scriptName) {
         return
       }
-      for (let i = 0; i < onMessage.length; i++) {
-        if (onMessage[i][0] === e.data.type) {
-          onMessage[i][1](e)
-          onMessage.splice(i, 1)
-          i--
+      let arr = onMessage[e.data.type]
+      let tmp = [...arr]
+      arr.length = 0
+      arr = null
+      for (const cb of tmp) {
+        if (typeof cb === 'function') {
+          cb(e)
         }
       }
+      tmp = null
     })
   }
 
