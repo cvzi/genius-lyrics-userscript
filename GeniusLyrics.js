@@ -72,8 +72,8 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     if (!('__lyricsDisplayState_setEventHanlder__' in custom.hideLyrics)) {
       custom.hideLyrics.__lyricsDisplayState_setEventHanlder__ = true
       custom.hideLyrics = ((_hideLyrics) => {
-        return function hideLyrics() {
-          let ret = _hideLyrics.apply(this, arguments)
+        return function hideLyrics () {
+          const ret = _hideLyrics.apply(this, arguments)
           window.postMessage({ iAm: custom.scriptName, type: 'lyricsDisplayState', visibility: 'hidden' }, '*')
           return ret
         }
@@ -469,7 +469,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       error: function geniusSearchOnError (response) {
         window.alert(custom.scriptName + '\n\nError geniusSearch(' + JSON.stringify(query) + ', ' + ('name' in cb ? cb.name : 'cb') + '):\n' + response)
         invalidateRequestCache(requestObj)
-        if(typeof cbError === 'function') cbError()
+        if (typeof cbError === 'function') cbError()
         requestObj = null
       },
       load: function geniusSearchOnLoad (response) {
@@ -477,14 +477,14 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         try {
           jsonData = JSON.parse(response.responseText)
         } catch (e) {
+          window.alert(custom.scriptName + '\n\n' + e + ' in geniusSearch(' + JSON.stringify(query) + ', ' + ('name' in cb ? cb.name : 'cb') + '):\n\n' + response.responseText)
           jsonData = null
         }
         if (jsonData !== null) {
           cb(jsonData)
         } else {
-          window.alert(custom.scriptName + '\n\n' + e + ' in geniusSearch(' + JSON.stringify(query) + ', ' + ('name' in cb ? cb.name : 'cb') + '):\n\n' + response.responseText)
           invalidateRequestCache(requestObj)
-          if(typeof cbError === 'function') cbError()
+          if (typeof cbError === 'function') cbError()
         }
         requestObj = null
       }
@@ -2173,7 +2173,7 @@ Genius:  ${originalUrl}
         iv = 0
         spinnerUpdate('1', 'Calculating...', 302, 'htmlwritten')
       })
-      addOneMessageListener('pageready', function (){
+      addOneMessageListener('pageready', function () {
         clear() // loaded
         spinnerUpdate(null, null, 901, 'complete')
         window.postMessage({ iAm: custom.scriptName, type: 'lyricsDisplayState', visibility: 'loaded', lyricsSuccess: true }, '*')
@@ -2223,7 +2223,7 @@ Genius:  ${originalUrl}
         }
       }
       iv = setInterval(ivf1, 1500)
-      ivf1();
+      ivf1()
     }
     showLyricsRunner()
   }
