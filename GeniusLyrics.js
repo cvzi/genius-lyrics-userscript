@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.4.1
+// @version      5.4.2
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2020, cuzi (https://github.com/cvzi)
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -365,6 +365,20 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
           errorMsg = e
         }
         if (jsonData !== null) {
+          const section = (((jsonData || 0).response || 0).sections[0] || 0)
+          const hits = section.hits || 0
+          if (typeof hits !== 'object') {
+            window.alert(custom.scriptName + '\n\n' + 'Incorrect Response Format' + ' in geniusSearch(' + JSON.stringify(query) + ', ' + ('name' in cb ? cb.name : 'cb') + '):\n\n' + response.responseText)
+            invalidateRequestCache(requestObj)
+            if (typeof cbError === 'function') cbError()
+            requestObj = null
+            return
+          }
+
+          // There are few instrumental music existing in Genius
+          // No lyrics will be provided for instrumental music in Genius
+          section.hits = section.hits.filter(hit => hit.result.instrumental !== true)
+
           cb(jsonData)
         } else {
           window.alert(custom.scriptName + '\n\n' + (errorMsg || 'Error') + ' in geniusSearch(' + JSON.stringify(query) + ', ' + ('name' in cb ? cb.name : 'cb') + '):\n\n' + response.responseText)
@@ -1819,9 +1833,9 @@ Genius:  ${originalUrl}
           } else if (songArtistsArr.length === 1) {
             // Check if one result is an exact match
             const exactMatches = []
-            for (let i = 0; i < hits.length; i++) {
-              if (hits[i].result.title.toLowerCase() === songTitle.toLowerCase() && hits[i].result.primary_artist.name.toLowerCase() === songArtistsArr[0].toLowerCase()) {
-                exactMatches.push(hits[i])
+            for (const hit of hits) {
+              if (hit.result.title.toLowerCase() === songTitle.toLowerCase() && hit.result.primary_artist.name.toLowerCase() === songArtistsArr[0].toLowerCase()) {
+                exactMatches.push(hit)
               }
             }
             if (exactMatches.length === 1) {
