@@ -1816,7 +1816,7 @@ Genius:  ${originalUrl}
 
       const firstArtist = songArtistsArr[0]
 
-      const simpleTitle = songTitle = songTitle.replace(/\s*-\s*.+?$/, '') // Remove anything following the last dash
+      const simpleTitle = songTitle.replace(/\s*-\s*.+?$/, '') // Remove anything following the last dash
       if (beLessSpecific) {
         songArtists = firstArtist
         songTitle = simpleTitle
