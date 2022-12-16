@@ -365,7 +365,8 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
           errorMsg = e
         }
         if (jsonData !== null) {
-          const hits = (((jsonData || 0).response || 0).sections[0] || 0).hits || 0
+          const section = (((jsonData || 0).response || 0).sections[0] || 0)
+          const hits = section.hits || 0
           if (typeof hits !== 'object') {
             window.alert(custom.scriptName + '\n\n' + 'Incorrect Response Format' + ' in geniusSearch(' + JSON.stringify(query) + ', ' + ('name' in cb ? cb.name : 'cb') + '):\n\n' + response.responseText)
             invalidateRequestCache(requestObj)
@@ -378,13 +379,13 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
           let removed = false
           for (const hit of hits) {
             const title = hits[i].result.title
-            if (/\bInstrumental\b/i.test(title) && !/\b(non|not)\b/i.test(title)) {
+            if ((/\bInstrumental\b/i).test(title) && !(/\b(non|not)\b/i).test(title)) {
               hits[i] = null
               removed = true
             }
           }
           if (removed === true) {
-            r.response.sections[0].hits = r.response.sections[0].hits.filter(hit => hit !== null)
+            section.hits = section.hits.filter(hit => hit !== null)
           }
 
           cb(jsonData)
