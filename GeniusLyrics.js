@@ -377,7 +377,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
           // There are few instrumental music existing in Genius
           let removed = false
           for (const hit of hits) {
-            let title = hits[i].result.title
+            const title = hits[i].result.title
             if (/\bInstrumental\b/i.test(title) && !/\b(non|not)\b/i.test(title)) {
               hits[i] = null
               removed = true
