@@ -1792,7 +1792,7 @@ Genius:  ${originalUrl}
     return theme.combine(song, html, annotations, cb)
   }
 
-  function reloadCurrentLyrics() {
+  function reloadCurrentLyrics () {
     // this is for special use - if the iframe is moved to another container, the content will be re-rendered.
     // As the lyrics is lost, it requires reloading
     const songTitle = genius.current.title
