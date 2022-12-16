@@ -88,6 +88,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       metricPrefix,
       cleanUpSongTitle,
       showLyrics,
+      reloadCurrentLyrics,
       loadLyrics,
       rememberLyricsSelection,
       isGreasemonkey,
@@ -1789,6 +1790,21 @@ Genius:  ${originalUrl}
       }
     }
     return theme.combine(song, html, annotations, cb)
+  }
+
+  function reloadCurrentLyrics() {
+    // this is for special use - if the iframe is moved to another container, the content will be re-rendered.
+    // As the lyrics is lost, it requires reloading
+    const songTitle = genius.current.title
+    const songArtists = genius.current.artists
+    if (songTitle && songArtists) {
+      const hitFromCache = getLyricsSelection(songTitle, songArtists)
+      if (hitFromCache) {
+        showLyrics(hitFromCache, 1)
+        return true
+      }
+    }
+    return false
   }
 
   function loadLyrics (force, beLessSpecific, songTitle, songArtistsArr, musicIsPlaying) {
