@@ -376,7 +376,8 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
           }
 
           // There are few instrumental music existing in Genius
-          section.hits = section.hits.filter(hit => hits[i].result.instrumental !== true)
+          // No lyrics will be provided for instrumental music in Genius
+          section.hits = section.hits.filter(hit => hit.result.instrumental !== true)
 
           cb(jsonData)
         } else {
