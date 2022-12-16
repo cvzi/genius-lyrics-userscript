@@ -90,6 +90,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       showLyrics,
       loadLyrics,
       rememberLyricsSelection,
+      isGreasemonkey,
       forgetLyricsSelection,
       getLyricsSelection,
       geniusSearch,
