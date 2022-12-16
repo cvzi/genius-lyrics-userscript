@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.4.2
+// @version      5.4.3
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2020, cuzi (https://github.com/cvzi)
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -88,6 +88,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       metricPrefix,
       cleanUpSongTitle,
       showLyrics,
+      showLyricsAndRemember,
       reloadCurrentLyrics,
       loadLyrics,
       rememberLyricsSelection,
@@ -1844,8 +1845,10 @@ Genius:  ${originalUrl}
                 custom.onNoResults(songTitle, songArtistsArr)
               }
             }
+            // invalidate previous cache if any 
+            forgetLyricsSelection(songTitle, songArtists)
           } else if (hits.length === 1) {
-            showLyrics(hits[0], 1)
+            showLyricsAndRemember(songTitle, songArtists, hits[0], 1)
           } else if (songArtistsArr.length === 1) {
             // Check if one result is an exact match
             const exactMatches = []
@@ -1855,7 +1858,7 @@ Genius:  ${originalUrl}
               }
             }
             if (exactMatches.length === 1) {
-              showLyrics(exactMatches[0], hits.length)
+              showLyricsAndRemember(songTitle, songArtists, exactMatches[0], hits.length)
             } else {
               // Multiple matches and not one exact match, let user decide
               custom.listSongs(hits)
@@ -2147,6 +2150,16 @@ Genius:  ${originalUrl}
       iv = setInterval(ivf, 1500)
     }
     showLyricsRunner()
+  }
+
+  function showLyricsAndRemember (title, artists, hit, searchresultsLengths) {
+    showLyrics(hit, searchresultsLengths)
+    // store the selection
+    Promise.resolve(0).then(() => {
+      return JSON.stringify(hit)
+    }).then(() => {
+      rememberLyricsSelection(title, artists, JSON.stringify(hit))
+    })
   }
 
   function isScrollLyricsEnabled () {
