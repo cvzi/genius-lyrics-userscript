@@ -1845,7 +1845,7 @@ Genius:  ${originalUrl}
                 custom.onNoResults(songTitle, songArtistsArr)
               }
             }
-            // invalidate previous cache if any 
+            // invalidate previous cache if any
             forgetLyricsSelection(mTitle, mArtists)
           } else if (hits.length === 1) {
             showLyricsAndRemember(mTitle, mArtists, hits[0], 1)
