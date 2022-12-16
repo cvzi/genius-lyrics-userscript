@@ -1811,8 +1811,8 @@ Genius:  ${originalUrl}
   function loadLyrics (force, beLessSpecific, songTitle, songArtistsArr, musicIsPlaying) {
     let songArtists = songArtistsArr.join(' ')
     if (force || beLessSpecific || (!document.hidden && musicIsPlaying && (genius.current.title !== songTitle || genius.current.artists !== songArtists))) {
-      genius.current.title = songTitle
-      genius.current.artists = songArtists
+      const mTitle = genius.current.title = songTitle
+      const mArtists = genius.current.artists = songArtists
 
       const firstArtist = songArtistsArr[0]
 
@@ -1826,7 +1826,7 @@ Genius:  ${originalUrl}
         custom.onNewSongPlaying(songTitle, songArtistsArr)
       }
 
-      const hitFromCache = getLyricsSelection(songTitle, songArtists)
+      const hitFromCache = getLyricsSelection(mTitle, mArtists)
       if (!force && hitFromCache) {
         showLyrics(hitFromCache, 1)
       } else {
@@ -1846,9 +1846,9 @@ Genius:  ${originalUrl}
               }
             }
             // invalidate previous cache if any 
-            forgetLyricsSelection(songTitle, songArtists)
+            forgetLyricsSelection(mTitle, mArtists)
           } else if (hits.length === 1) {
-            showLyricsAndRemember(songTitle, songArtists, hits[0], 1)
+            showLyricsAndRemember(mTitle, mArtists, hits[0], 1)
           } else if (songArtistsArr.length === 1) {
             // Check if one result is an exact match
             const exactMatches = []
@@ -1858,7 +1858,7 @@ Genius:  ${originalUrl}
               }
             }
             if (exactMatches.length === 1) {
-              showLyricsAndRemember(songTitle, songArtists, exactMatches[0], hits.length)
+              showLyricsAndRemember(mTitle, mArtists, exactMatches[0], hits.length)
             } else {
               // Multiple matches and not one exact match, let user decide
               custom.listSongs(hits)
