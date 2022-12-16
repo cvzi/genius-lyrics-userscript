@@ -6,6 +6,10 @@ It's primarily designed for Firefox with [Tampermonkey](https://addons.mozilla.o
 
 This **DOES NOT** work with Greasemonkey because of [this bug greasemonkey/issues/2574](https://github.com/greasemonkey/greasemonkey/issues/2574) in Greasemonkey.
 
+### Navigation Links:
+[Github - Genius Lyrics Userscript (Library)](https://github.com/cvzi/genius-lyrics-userscript/)
+[Greasyfork - Genius Lyrics Userscript (Library)](https://greasyfork.org/en/scripts/406698-geniuslyrics)
+
 My user scripts that use this library:
 *   https://github.com/cvzi/Spotify-Genius-Lyrics-userscript
 *   https://github.com/cvzi/Youtube-Genius-Lyrics-userscript
