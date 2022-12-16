@@ -81,7 +81,6 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   const genius = {
     option: {
       autoShow: true,
-      resizeOnNextRun: false,
       themeKey: null
     },
     f: {
