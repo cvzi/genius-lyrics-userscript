@@ -394,7 +394,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
 
   function loadGeniusSong (song, cb) {
     request({
-      url: song.result.url, // Force react theme: + '?react=1'
+      url: song.result.url,
       error: function loadGeniusSongOnError (response) {
         window.alert(custom.scriptName + '\n\nError loadGeniusSong(' + JSON.stringify(song) + ', cb):\n' + response)
       },
@@ -676,130 +676,6 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       name: 'Genius (Default)',
       themeKey: 'genius',
       scripts: function themeGeniusScripts () {
-        const onload = []
-
-        onload.push(themeCommon.hideFooter895)
-        onload.push(themeCommon.hideSecondaryFooter895)
-        onload.push(themeCommon.hideStuff235)
-
-        // Maked header wider
-        onload.push(function () {
-          const headerCol = document.querySelector('.header_with_cover_art-inner.column_layout .column_layout-column_span--primary')
-          if (headerCol) {
-            headerCol.style.width = '100%'
-          }
-        })
-
-        // Show annotations function
-        function checkAnnotationHeight458 () {
-          const annot = document.querySelector('.song_body.column_layout .column_layout-column_span.column_layout-column_span--secondary .column_layout-flex_column-fill_column')
-          const arrow = annot.querySelector('.annotation_sidebar_arrow')
-          if (arrow.offsetTop > arrow.nextElementSibling.clientHeight) {
-            arrow.nextElementSibling.style.paddingTop = (10 + parseInt(arrow.nextElementSibling.style.paddingTop) + arrow.offsetTop - arrow.nextElementSibling.clientHeight) + 'px'
-          }
-        }
-        function showAnnotation1234 (ev) {
-          ev.preventDefault()
-          const id = this.dataset.annotationid
-          themeCommon.showAnnotation1234A(this)
-          if (id in window.annotations1234) {
-            const annotation = window.annotations1234[id][0]
-            const main = document.querySelector('.song_body.column_layout .column_layout-column_span.column_layout-column_span--secondary')
-            main.style.paddingRight = 0
-            main.innerHTML = ''
-            const div0 = document.createElement('div')
-            div0.className = 'column_layout-flex_column-fill_column'
-            main.appendChild(div0)
-            const arrowTop = this.offsetTop
-            const paddingTop = window.scrollY - main.offsetTop - main.parentNode.offsetTop
-            let html = '<div class="annotation_sidebar_arrow" style="top: ' + arrowTop + 'px;"><svg src="left_arrow.svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10.87 21.32"><path d="M9.37 21.32L0 10.66 9.37 0l1.5 1.32-8.21 9.34L10.87 20l-1.5 1.32"></path></svg></div>'
-            html += '\n<div class="u-relative nganimate-fade_slide_from_left" style="margin-left:1px;padding-top:' + paddingTop + 'px; padding-left:2px; border-left:3px #99a7ee solid"><div class="annotation_label">$author</div><div class="rich_text_formatting">$body</div></div>'
-            html = html.replace(/\$body/g, decodeHTML(annotation.body.html)).replace(/\$author/g, decodeHTML(annotation.created_by.name))
-            div0.innerHTML = html
-            themeCommon.targetBlankLinks145A() // Change link target to _blank
-            setTimeout(checkAnnotationHeight458, 200) // Change link target to _blank
-          }
-        }
-        onload.push(function () {
-          if (document.getElementById('annotationsdata1234')) {
-            window.annotations1234 = JSON.parse(document.getElementById('annotationsdata1234').innerHTML)
-          }
-        })
-
-        // Make song title clickable
-        function clickableTitle037 () {
-          const url = document.querySelector('meta[property="og:url"]').content
-          const h1 = document.querySelector('.header_with_cover_art-primary_info-title')
-          const div = document.querySelector('.header_with_cover_art-cover_art .cover_art')
-          if (!h1 || !div) {
-            return
-          }
-          h1.innerHTML = '<a target="_blank" href="' + url + '" style="color:#ffff64">' + h1.innerHTML + '</a>'
-          div.innerHTML = '<a target="_blank" href="' + url + '">' + div.innerHTML + '</a>'
-        }
-        onload.push(clickableTitle037)
-
-        onload.push(themeCommon.targetBlankLinks145A)
-        onload.push(() => setTimeout(themeCommon.targetBlankLinks145A, 1000))
-
-        if (!annotationsEnabled) {
-          // Remove all annotations
-          onload.push(themeCommon.annotationsRemoveAll2)
-        } else {
-          // Add click handler to annotations
-          for (const a of document.querySelectorAll('*[data-annotationid]')) {
-            a.addEventListener('click', showAnnotation1234)
-          }
-        }
-
-        // Open real page if not in frame
-        onload.push(function () {
-          if (window.top === window) {
-            document.location.href = document.querySelector('meta[property="og:url"]').content
-          }
-        })
-        return onload
-      },
-      combine: function themeGeniusCombineGeniusResources (song, html, annotations, cb) {
-        let headhtml = ''
-
-        // Make annotations clickable
-        html = html.replace(/annotation-fragment="(\d+)"/g, '$0 data-annotationid="$1"')
-
-        // Change design
-        html = html.split('<div class="leaderboard_ad_container">').join('<div class="leaderboard_ad_container" style="width:0px;height:0px">')
-
-        // Remove cookie consent
-        html = html.replace(/<script defer="true" src="https:\/\/cdn.cookielaw.org.+?"/, '<script ')
-
-        // Add annotation data
-        headhtml += '\n<script id="annotationsdata1234" type="application/json">' + JSON.stringify(annotations).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</script>'
-
-        // Scrollbar colors
-        const bodyWidth = document.getElementById('lyricsiframe').style.width || (document.getElementById('lyricsiframe').getBoundingClientRect().width + 'px')
-        headhtml += `<style>
-        body{
-          max-width: ${bodyWidth};
-          overflow-x: hidden;
-        }
-        html{
-          background-color:#181818;
-          scrollbar-color:hsla(0,0%,100%,.3) transparent;
-          scrollbar-width:auto;
-        }
-        </style>`
-
-        // Add to <head>
-        const parts = html.split('</head>')
-        html = parts[0] + '\n' + headhtml + '\n</head>' + parts.slice(1).join('</head>')
-        return cb(html)
-      },
-      scrollLyrics: scrollLyricsFunction('.lyrics', -200)
-    },
-    geniusReact: {
-      name: 'Genius React',
-      themeKey: 'geniusReact',
-      scripts: function themeGeniusReactScripts () {
         const onload = []
 
         function pushIfAny (arr, element) {
@@ -1180,7 +1056,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         })
         return onload
       },
-      combine: function themeGeniusReactCombineGeniusResources (song, html, annotations, cb) {
+      combine: function themeGeniusCombineGeniusResources (song, html, annotations, cb) {
         let headhtml = ''
 
         // Make annotations clickable
@@ -1776,19 +1652,6 @@ Genius:  ${originalUrl}
   theme = themes[genius.option.themeKey]
 
   function combineGeniusResources (song, html, annotations, cb) {
-    if (html.indexOf('__PRELOADED_STATE__ = JSON.parse') !== -1) {
-      if (!genius.option.themeKey.endsWith('React') && (genius.option.themeKey + 'React') in themes) {
-        genius.option.themeKey += 'React'
-        theme = themes[genius.option.themeKey]
-        console.debug(`Temporarily activated React theme: ${theme.name}`)
-      }
-    } else {
-      if (genius.option.themeKey.endsWith('React') && genius.option.themeKey.substring(0, genius.option.themeKey.length - 5) in themes) {
-        genius.option.themeKey = genius.option.themeKey.substring(0, genius.option.themeKey.length - 5)
-        theme = themes[genius.option.themeKey]
-        console.debug(`Temporarily deactivated React theme: ${theme.name}`)
-      }
-    }
     return theme.combine(song, html, annotations, cb)
   }
 
@@ -2245,13 +2108,7 @@ Genius:  ${originalUrl}
     div = win.appendChild(document.createElement('div'))
     div.textContent = 'Theme: '
     const selectTheme = div.appendChild(document.createElement('select'))
-    if (genius.option.themeKey.endsWith('React')) {
-      genius.option.themeKey = genius.option.themeKey.substring(0, genius.option.themeKey.length - 5)
-    }
     for (const key in themes) {
-      if (key.endsWith('React')) {
-        continue
-      }
       const option = selectTheme.appendChild(document.createElement('option'))
       option.value = key
       if (genius.option.themeKey === key) {
@@ -2541,8 +2398,9 @@ Genius:  ${originalUrl}
     if (Object.prototype.hasOwnProperty.call(themes, values[1])) {
       genius.option.themeKey = values[1]
     } else {
-      console.error('Invalid value for theme key: custom.GM.getValue("theme") = ' + values[1])
       genius.option.themeKey = Reflect.ownKeys(themes)[0]
+      custom.GM.setValue('theme', genius.option.themeKey)
+      console.error(`Invalid value for theme key: custom.GM.getValue("theme") = '${values[1]}', using default theme key: '${genius.option.themeKey}'`)
     }
     theme = themes[genius.option.themeKey]
     annotationsEnabled = !!values[2]
