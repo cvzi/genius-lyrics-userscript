@@ -2157,8 +2157,8 @@ Genius:  ${originalUrl}
     // store the selection
     Promise.resolve(0).then(() => {
       return JSON.stringify(hit)
-    }).then(() => {
-      rememberLyricsSelection(title, artists, JSON.stringify(hit))
+    }).then(jsonHit => {
+      rememberLyricsSelection(title, artists, jsonHit)
     })
   }
 
