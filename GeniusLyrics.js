@@ -117,9 +117,9 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     style: {
       enabled: false
     },
-    styleProps:{
+    styleProps: {
     },
-    minimizeHit:{
+    minimizeHit: {
       noImageURL: false,
       noFeaturedArtists: false,
       simpleReleaseDate: false,
@@ -132,13 +132,13 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     debug: false
   }
 
-  function cleanRequestCache(){
+  function cleanRequestCache () {
     return {
       __VERSION__: __REQUEST_CACHE_VERSION__
     }
   }
 
-  function cleanSelectionCache(){
+  function cleanSelectionCache () {
     return {
       __VERSION__: __SELECTION_CACHE_VERSION__
     }
@@ -281,10 +281,10 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     const bugKeys = []
 
     function pushBugKey (selectionCacheKey) {
-      let s = selectionCacheKey.split(/\t/)
+      const s = selectionCacheKey.split(/\t/)
       if (s.length !== 2) return
-      let songTitle = s[0]
-      let artists = s[1]
+      const songTitle = s[0]
+      const artists = s[1]
       // setting simpleTitle as cache key was a bug
       const simpleTitle = songTitle.replace(/\s*-\s*.+?$/, '') // Remove anything following the last dash
       if (simpleTitle !== songTitle) {
@@ -292,11 +292,11 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       }
     }
 
-    console.warn("Genius Lyrics - old section cache is found: ", selectionCache)
+    console.warn('Genius Lyrics - old section cache is found: ', selectionCache)
     for (const originalKey in selectionCache) {
-      if (originalKey === '__VERSION__') continue;
+      if (originalKey === '__VERSION__') continue
       let k = 0
-      const selectionCacheKey = selectionCacheKey
+      const selectionCacheKey = originalKey
         .replace(/[\r\n\t\s]+/g, ' ')
         .replace(/--/g, () => {
           k++
@@ -310,7 +310,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     for (const bugKey of bugKeys) {
       delete ret[bugKey]
     }
-    console.warn("Genius Lyrics - old section cache is converted to: ", ret)
+    console.warn('Genius Lyrics - old section cache is converted to: ', ret)
     return ret
   }
 
@@ -342,7 +342,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     }
     if (selectionCache.__VERSION__ !== __SELECTION_CACHE_VERSION__) {
       if (selectionCache.__VERSION__ === 0) {
-        selectionCache = convertSelectionCacheV0toV1(selectionCache);
+        selectionCache = convertSelectionCacheV0toV1(selectionCache)
         selectionCache.__VERSION__ = __SELECTION_CACHE_VERSION__
       } else {
         selectionCache = cleanSelectionCache()
@@ -370,7 +370,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       const now = (new Date()).getTime()
       const exp = 2 * 60 * 60 * 1000
       for (const prop in requestCache) {
-        if (prop === '__VERSION__') continue;
+        if (prop === '__VERSION__') continue
         // Delete cached values, that are older than 2 hours
         const time = requestCache[prop].split('\n')[0]
         if ((now - (new Date(time)).getTime()) > exp) {
@@ -523,14 +523,14 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     // No lyrics will be provided for instrumental music in Genius
     hits = hits.filter(hit => {
       if (hit.result.instrumental === true) return false
-      if (hit.result.lyrics_state !== "complete") return false
+      if (hit.result.lyrics_state !== 'complete') return false
       return true
     })
 
     for (const hit of hits) {
       const result = hit.result
       if (!result) return
-      let primary_artist = result.primary_artist || 0
+      const primaryArtist = result.primary_artist || 0
       const minimizeHit = genius.minimizeHit
       delete hit.highlights // always []
       delete result.annotation_count // always 0
@@ -549,26 +549,25 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       if (minimizeHit.noFeaturedArtists) {
         // it can be a band of 35 peoples which is wasting storage
         delete result.featured_artists
-
       }
-      if (primary_artist) {
+      if (primaryArtist) {
         if (minimizeHit.noImageURL) {
-          delete primary_artist.header_image_url
-          delete primary_artist.image_url
+          delete primaryArtist.header_image_url
+          delete primaryArtist.image_url
         }
         if (minimizeHit.noRelatedLinks) {
-          delete primary_artist.api_path
-          delete primary_artist.url
-          delete primary_artist.is_meme_verified
-          delete primary_artist.is_verified
-          delete primary_artist.index_character
-          delete primary_artist.slug
+          delete primaryArtist.api_path
+          delete primaryArtist.url
+          delete primaryArtist.is_meme_verified
+          delete primaryArtist.is_verified
+          delete primaryArtist.index_character
+          delete primaryArtist.slug
         }
       }
 
       // reduce release date storage
       if (minimizeHit.simpleReleaseDate && 'release_date_components' in result) {
-        let c = ReleaseDateComponent(result.release_date_components)
+        const c = ReleaseDateComponent(result.release_date_components)
         if (c !== null) {
           result.release_date = c
         }
@@ -579,20 +578,20 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         delete result.release_date_with_abbreviated_month_for_display
       }
 
-      if (minimizeHit.shortenArtistName && primary_artist && typeof primary_artist.name == 'string' && typeof result.artist_names == 'string') {
+      if (minimizeHit.shortenArtistName && primaryArtist && typeof primaryArtist.name === 'string' && typeof result.artist_names === 'string') {
         // if it is a brand the title could be very long as it compose it with the full member names
-        if (primary_artist.name.length < result.artist_names.length) {
-          result.artist_names = primary_artist.name
+        if (primaryArtist.name.length < result.artist_names.length) {
+          result.artist_names = primaryArtist.name
         }
       }
 
       if (minimizeHit.fixArtistName) {
-        if (result.language == 'romanization' && result.title === result.title_with_featured && result.artist_names === primary_artist.name) {
-          //"なとり (Natori) - Overdose (Romanized)"
-          let split = result.title.split(' - ')
+        if (result.language === 'romanization' && result.title === result.title_with_featured && result.artist_names === primaryArtist.name) {
+          // Example: "なとり (Natori) - Overdose (Romanized)"
+          const split = result.title.split(' - ')
           if (split.length === 2) {
             result.artist_names = split[0]
-            primary_artist.name = split[0]
+            primaryArtist.name = split[0]
             result.title = split[1]
             result.title_with_featured = split[1]
           }
@@ -604,7 +603,6 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       }
 
       if (hits.length > 1) {
-
         if (hit.type === 'song') {
           hit._order = 2600
         } else {
@@ -616,14 +614,12 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         if (hit.result.updated_by_human_at) {
           hit._order += 400
         }
-
         if (hit.result.language === 'en') {
           // possible translation for non-english songs
           // if all results are en, no different for hit._order reduction
           hit._order -= 1000
         }
       }
-
     }
 
     if (hits.length > 1) {
@@ -632,11 +628,8 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         return (b._order - a._order) || (b.result.id - a.result.id) || 0
       })
     }
-
     // console.log(hits)
-
     return hits
-
   }
 
   function geniusSearch (query, cb, cbError) {
@@ -703,10 +696,11 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   }
 
   async function delayScrolling (scrollLyricsGeneric) {
-    let p1, p2 = document.scrollingElement.scrollTop
+    let p1
+    let p2 = document.scrollingElement.scrollTop
     do {
       p1 = p2
-      await new Promise(r => requestAnimationFrame(r))
+      await new Promise(r => window.requestAnimationFrame(r)) // eslint-disable-line promise/param-names
       p2 = document.scrollingElement.scrollTop
     } while (`${p1}` !== `${p2}`)
     // the scrollTop is stable now
@@ -776,7 +770,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
             })
             window.scrollLyricsBusy = false
           })
-          resumeButtonFromHere.addEventListener('click', function resumeAutoScrollFromHere() {
+          resumeButtonFromHere.addEventListener('click', function resumeAutoScrollFromHere () {
             resumeButton.classList.remove('btn-show')
             resumeButtonFromHere.classList.remove('btn-show')
             window.scrollLyricsBusy = false
@@ -818,7 +812,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
             }
             window.scrollLyricsBusy = false
           }, 40)
-        } 
+        }
         return
       }
 
@@ -878,8 +872,8 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         }
         indicator.style.top = `${offset.top + window.staticOffsetTop + div.scrollHeight * position}px`
         indicator.innerHTML = `${parseInt(position * 100)}%  -> ${parseInt(newScrollTop)}px`
-      } 
-      window.scrollLyricsBusy = false 
+      }
+      window.scrollLyricsBusy = false
     }
   }
 
@@ -1027,9 +1021,9 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
 
   function appendHeadText (html, headhtml) {
     // Add to <head>
-    const idx_head = html.indexOf('</head>')
-    if (idx_head > 5) {
-      html = html.substring(0, idx_head) + headhtml + html.substring(idx_head)
+    const idxHead = html.indexOf('</head>')
+    if (idxHead > 5) {
+      html = html.substring(0, idxHead) + headhtml + html.substring(idxHead)
     } else {
       html = `<head>${headhtml}</head>${html}`
     }
@@ -1477,7 +1471,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
 
         return cb(html)
       },
-      //scrollLyrics: scrollLyricsFunction('div[class^="Lyrics__Container"]', -200)
+      // scrollLyrics: scrollLyricsFunction('div[class^="Lyrics__Container"]', -200)
       scrollLyrics: scrollLyricsFunction('div[class*="SongPage__LyricsWrapper"]', -120)
     },
 
@@ -1708,7 +1702,7 @@ Genius:  ${originalUrl}
         const title = '<div class="header_with_cover_art-primary_info">' + html.split('class="header_with_cover_art-primary_info">')[1].split('</div>').slice(0, 3).join('</div>') + '</div></div>'
 
         // Remove body content, hide horizontal scroll bar, add lyrics
-        let parts = html.split('<body', 2)
+        const parts = html.split('<body', 2)
         html = parts[0] + '<body' + parts[1].split('>')[0] + '>\n\n' +
       title + '\n\n' + lyrics +
       '\n\n<div class="annotationbox" id="annotationbox"></div><div style="height:5em"></div></body></html>'
@@ -1981,7 +1975,7 @@ Genius:  ${originalUrl}
         const title = '<div class="header_with_cover_art-primary_info">' + html.split('class="header_with_cover_art-primary_info">')[1].split('</div>').slice(0, 3).join('</div>') + '</div></div>'
 
         // Remove body content, hide horizontal scroll bar, add lyrics
-        let parts = html.split('<body', 2)
+        const parts = html.split('<body', 2)
         html = parts[0] + '<body style="overflow-x:hidden;width:100%;" ' + parts[1].split('>')[0] + '>\n\n' +
       title + '\n\n' + lyrics +
       '\n\n<div class="annotationbox" id="annotationbox"></div><div style="height:5em"></div></body></html>'
@@ -2059,7 +2053,7 @@ Genius:  ${originalUrl}
     // Multiple matches and no one exact match
     // or multiple artists multiple results
     if ('autoSelectLyrics' in custom) {
-      let ret = custom.autoSelectLyrics(hits, mTitle, mArtists)
+      const ret = custom.autoSelectLyrics(hits, mTitle, mArtists)
       if (ret && ret.hit) {
         showLyricsAndRemember(mTitle, mArtists, ret.hit, hits.length)
         return
@@ -2474,7 +2468,7 @@ Genius:  ${originalUrl}
 
   let isShowLyricsInterrupted = false
   function interuptMessageHandler (ev) {
-    let data = ev.data || 0
+    const data = ev.data || 0
     if (data.iAm === custom.scriptName && data.type === 'lyricsDisplayState' && typeof data.visibility === 'string') {
       isShowLyricsInterrupted = data.visibility !== 'loading'
     }
@@ -2552,13 +2546,13 @@ Genius:  ${originalUrl}
       if (cacheReqResult !== null) {
         // not obtained from cache
         spinnerUpdate('4', 'Downloading annotations...', 100, 'donwloading')
-        let annotations = await new Promise(resolve => loadGeniusAnnotations(songInfo, html, annotationsEnabled, function loadGeniusAnnotationsCb(annotations) {
+        let annotations = await new Promise(resolve => loadGeniusAnnotations(songInfo, html, annotationsEnabled, function loadGeniusAnnotationsCb (annotations) {
           resolve(annotations)
         }))
         if (isShowLyricsInterrupted === true) return interuptedByExternal()
         spinnerUpdate('3', 'Composing page...', 200, 'pageComposing')
-        html = await new Promise(resolve => combineGeniusResources(songInfo, html, annotations, function combineGeniusResourcesCb(html) {
-          // in fact `combineGeniusResources` is synchronous 
+        html = await new Promise(resolve => combineGeniusResources(songInfo, html, annotations, function combineGeniusResourcesCb (html) {
+          // in fact `combineGeniusResources` is synchronous
           resolve(html)
         }))
         if (isShowLyricsInterrupted === true) return interuptedByExternal()
@@ -2623,7 +2617,7 @@ Genius:  ${originalUrl}
         setTimeout(function () {
           iframe.src = custom.emptyURL + '#html:post'
         }, 400)
-      }  
+      }
       // After 15 seconds, try to reload the iframe
       tv1 = setTimeout(reloadFrame, 15000)
 
@@ -3155,7 +3149,7 @@ Genius:  ${originalUrl}
       addKeyboardShortcutInFrame(custom.toggleLyricsKey)
     }
     // this page is generated by code; pageready does not mean the page is fully rendered
-    communicationWindow.postMessage({ iAm: custom.scriptName, type: 'pageready'/*, html: document.documentElement.innerHTML*/ }, '*')
+    communicationWindow.postMessage({ iAm: custom.scriptName, type: 'pageready'/* , html: document.documentElement.innerHTML */ }, '*')
     if ('iframeLoadedCallback2' in custom) {
       // after all onload functions
       custom.iframeLoadedCallback2({ document, theme, onload })
