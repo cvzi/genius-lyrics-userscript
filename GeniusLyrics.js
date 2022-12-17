@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.4.4
+// @version      5.5.0
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2020, cuzi (https://github.com/cvzi)
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -78,10 +78,15 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     return ret
   }
 
+  const __SELECTION_CACHE_VERSION__ = 1
+  const __REQUEST_CACHE_VERSION__ = 1
+  const REQUEST_CACHE_RESPONSE_TEXT_ONLY = true
+
   const genius = {
     option: {
       autoShow: true,
-      themeKey: null
+      themeKey: null,
+      cacheHTMLRequest: true
     },
     f: {
       metricPrefix,
@@ -90,9 +95,11 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       showLyricsAndRemember,
       reloadCurrentLyrics,
       loadLyrics,
+      hideLyricsWithMessage,
       rememberLyricsSelection,
       isGreasemonkey,
       forgetLyricsSelection,
+      forgetCurrentLyricsSelection,
       getLyricsSelection,
       geniusSearch,
       searchByQuery,
@@ -107,12 +114,39 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     iv: {
       main: null
     },
+    style: {
+      enabled: false
+    },
+    styleProps: {
+    },
+    minimizeHit: {
+      noImageURL: false,
+      noFeaturedArtists: false,
+      simpleReleaseDate: false,
+      noRawReleaseDate: false,
+      shortenArtistName: false,
+      fixArtistName: false,
+      removeStats: false, // note: true for YoutubeGeniusLyrics only
+      noRelatedLinks: false
+    },
     debug: false
   }
 
+  function cleanRequestCache () {
+    return {
+      __VERSION__: __REQUEST_CACHE_VERSION__
+    }
+  }
+
+  function cleanSelectionCache () {
+    return {
+      __VERSION__: __SELECTION_CACHE_VERSION__
+    }
+  }
+
   let loadingFailed = false
-  let requestCache = {}
-  let selectionCache = {}
+  let requestCache = cleanRequestCache()
+  let selectionCache = cleanSelectionCache()
   let theme
   let annotationsEnabled = true
   let autoScrollEnabled = false
@@ -174,7 +208,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   }
 
   function decodeHTML (s) {
-    return ('' + s).replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+    return `${s}`.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
   }
 
   function metricPrefix (n, decimals, k) {
@@ -199,15 +233,14 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     return songTitle
   }
 
-  function sumOffsets (obj, sums) {
-    sums = (typeof sums !== 'undefined') ? sums : { left: 0, top: 0 }
-    if (!obj) {
-      return sums
-    } else {
+  function sumOffsets (obj) {
+    const sums = { left: 0, top: 0 }
+    while (obj) {
       sums.left += obj.offsetLeft
       sums.top += obj.offsetTop
-      return sumOffsets(obj.offsetParent, sums)
+      obj = obj.offsetParent
     }
+    return sums
   }
 
   function parsePreloadedStateData (obj, parent) {
@@ -229,7 +262,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
             for (const attr in child.attributes) {
               let value = child.attributes[attr]
               if ((attr === 'href' || attr === 'src') && (!value.startsWith('http') && !value.startsWith('#'))) {
-                value = 'https://genius.com' + value
+                value = `https://genius.com${value}`
               }
               node.setAttribute(attr, value)
             }
@@ -241,15 +274,91 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     return parent
   }
 
+  function convertSelectionCacheV0toV1 (selectionCache) {
+    // the old cache key use '--' which is possible to mixed up with the brand name
+    // the new cache key use '\t' as separator
+    const ret = {}
+    const bugKeys = []
+
+    function pushBugKey (selectionCacheKey) {
+      const s = selectionCacheKey.split(/\t/)
+      if (s.length !== 2) return
+      const songTitle = s[0]
+      const artists = s[1]
+      // setting simpleTitle as cache key was a bug
+      const simpleTitle = songTitle.replace(/\s*-\s*.+?$/, '') // Remove anything following the last dash
+      if (simpleTitle !== songTitle) {
+        bugKeys.push(`${simpleTitle}\t${artists}`)
+      }
+    }
+
+    console.warn('Genius Lyrics - old section cache is found: ', selectionCache)
+    for (const originalKey in selectionCache) {
+      if (originalKey === '__VERSION__') continue
+      let k = 0
+      const selectionCacheKey = originalKey
+        .replace(/[\r\n\t\s]+/g, ' ')
+        .replace(/--/g, () => {
+          k++
+          return '\t'
+        })
+      if (k === 1) {
+        pushBugKey(selectionCacheKey)
+        ret[selectionCacheKey] = selectionCache[originalKey]
+      }
+    }
+    for (const bugKey of bugKeys) {
+      delete ret[bugKey]
+    }
+    console.warn('Genius Lyrics - old section cache is converted to: ', ret)
+    return ret
+  }
+
+  function loadRequestCache (storedValue) {
+    // global requestCache
+    if (storedValue === '{}') {
+      requestCache = cleanRequestCache()
+    } else {
+      requestCache = JSON.parse(storedValue)
+      if (!requestCache.__VERSION__) {
+        requestCache.__VERSION__ = 0
+      }
+    }
+    if (requestCache.__VERSION__ !== __REQUEST_CACHE_VERSION__) {
+      requestCache = cleanRequestCache()
+      custom.GM.setValue('requestcache', JSON.stringify(requestCache))
+    }
+  }
+
+  function loadSelectionCache (storedValue) {
+    // global selectionCache
+    if (storedValue === '{}') {
+      selectionCache = cleanSelectionCache()
+    } else {
+      selectionCache = JSON.parse(storedValue)
+      if (!selectionCache.__VERSION__) {
+        selectionCache.__VERSION__ = 0
+      }
+    }
+    if (selectionCache.__VERSION__ !== __SELECTION_CACHE_VERSION__) {
+      if (selectionCache.__VERSION__ === 0) {
+        selectionCache = convertSelectionCacheV0toV1(selectionCache)
+        selectionCache.__VERSION__ = __SELECTION_CACHE_VERSION__
+      } else {
+        selectionCache = cleanSelectionCache()
+      }
+      custom.GM.setValue('selectioncache', JSON.stringify(selectionCache))
+    }
+  }
+
   function loadCache () {
     Promise.all([
       custom.GM.getValue('selectioncache', '{}'),
       custom.GM.getValue('requestcache', '{}'),
       custom.GM.getValue('optionautoshow', true)
     ]).then(function (values) {
-      selectionCache = JSON.parse(values[0])
-
-      requestCache = JSON.parse(values[1])
+      loadSelectionCache(values[0])
+      loadRequestCache(values[1])
 
       genius.option.autoShow = values[2] === true || values[2] === 'true'
       /*
@@ -261,7 +370,8 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       const now = (new Date()).getTime()
       const exp = 2 * 60 * 60 * 1000
       for (const prop in requestCache) {
-      // Delete cached values, that are older than 2 hours
+        if (prop === '__VERSION__') continue
+        // Delete cached values, that are older than 2 hours
         const time = requestCache[prop].split('\n')[0]
         if ((now - (new Date(time)).getTime()) > exp) {
           delete requestCache[prop]
@@ -271,16 +381,35 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   }
 
   function invalidateRequestCache (obj) {
-    const cachekey = JSON.stringify(obj)
-    if (cachekey in requestCache) {
-      delete requestCache[cachekey]
+    const resultCachekey = JSON.stringify(obj)
+    if (resultCachekey in requestCache) {
+      delete requestCache[resultCachekey]
     }
   }
 
+  function getRequestCacheKeyReplacer (key, value) {
+    if (key === 'headers') {
+      return undefined
+    } else if (key === 'url') {
+      if (typeof value !== 'string') return undefined
+      let idx
+      idx = value.lastIndexOf('/')
+      value = `~${idx}${value.substring(idx)}`
+      idx = value.indexOf('?')
+      if (idx > 0) {
+        value = value.substring(0, idx + 1) + decodeURIComponent(value.substring(idx + 1)).replace(/\s+/g, '-')
+      }
+    }
+    return value
+  }
+  function getRequestCacheKey (obj) {
+    return JSON.stringify(obj, getRequestCacheKeyReplacer)
+  }
+
   function request (obj) {
-    const cachekey = JSON.stringify(obj)
+    const cachekey = getRequestCacheKey(obj)
     if (cachekey in requestCache) {
-      return obj.load(JSON.parse(requestCache[cachekey].split('\n')[1]))
+      return obj.load(JSON.parse(requestCache[cachekey].split('\n')[1]), null)
     }
 
     let headers = {
@@ -301,63 +430,223 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       onerror: obj.error ? obj.error : function xmlHttpRequestGenericOnError (response) { console.error('xmlHttpRequestGenericOnError: ' + response) },
       onload: function xmlHttpRequestOnLoad (response) {
         const time = (new Date()).toJSON()
-        // Chrome fix: Otherwise JSON.stringify(requestCache) omits responseText
-        const newobj = {}
-        for (const key in response) {
-          newobj[key] = response[key]
+        let cacheObject = null
+        if (typeof obj.preProcess === 'function') {
+          const proceed = obj.preProcess.call(this, response)
+          if (typeof proceed === 'object') {
+            cacheObject = proceed
+          }
         }
-        newobj.responseText = response.responseText
-        requestCache[cachekey] = time + '\n' + JSON.stringify(newobj)
-
-        custom.GM.setValue('requestcache', JSON.stringify(requestCache))
-
-        obj.load(response)
+        if (cacheObject === null) {
+          // only if preProcess is undefined or preProcess() does not return a object
+          if (REQUEST_CACHE_RESPONSE_TEXT_ONLY === true) {
+            // only cache responseText
+            cacheObject = { responseText: response.responseText }
+          } else {
+            // full object
+            const newObject = Object.assign({}, response)
+            newObject.responseText = response.responseText // key 'responseText' is not enumerable
+            cacheObject = newObject
+          }
+        }
+        // only cache when the callback call this function
+        function cacheResult (cacheObject) {
+          if (cacheObject !== null) {
+            requestCache[cachekey] = time + '\n' + JSON.stringify(cacheObject)
+            custom.GM.setValue('requestcache', JSON.stringify(requestCache))
+          }
+        }
+        obj.load(cacheObject, cacheResult)
       }
     })
   }
 
+  function getSelectionCacheKey (title, artists) {
+    title = title.replace(/\s+/g, ' ') // space, \n, \t, ...
+    artists = artists.replace(/\s+/g, ' ')
+    const selectionCacheKey = `${title}\t${artists}`
+    return selectionCacheKey
+  }
+
   function rememberLyricsSelection (title, artists, jsonHit) {
-    const cachekey = title + '--' + artists
+    const selectionCacheKey = getSelectionCacheKey(title, artists)
     if (typeof jsonHit === 'object') {
       jsonHit = JSON.stringify(jsonHit)
     }
     if (typeof jsonHit !== 'string') {
       return
     }
-    selectionCache[cachekey] = jsonHit
+    selectionCache[selectionCacheKey] = jsonHit
     custom.GM.setValue('selectioncache', JSON.stringify(selectionCache))
   }
 
   function forgetLyricsSelection (title, artists) {
-    const cachekey = title + '--' + artists
-    if (cachekey in selectionCache) {
-      delete selectionCache[cachekey]
+    const selectionCacheKey = getSelectionCacheKey(title, artists)
+    if (selectionCacheKey in selectionCache) {
+      delete selectionCache[selectionCacheKey]
       custom.GM.setValue('selectioncache', JSON.stringify(selectionCache))
     }
   }
 
+  function forgetCurrentLyricsSelection () {
+    const title = genius.current.title
+    const artists = genius.current.artists
+    if (typeof title === 'string' && typeof artists === 'string') {
+      forgetLyricsSelection(title, artists)
+      return true
+    }
+    return false
+  }
+
   function getLyricsSelection (title, artists) {
-    const cachekey = title + '--' + artists
-    if (cachekey in selectionCache) {
-      return JSON.parse(selectionCache[cachekey])
+    const selectionCacheKey = getSelectionCacheKey(title, artists)
+    if (selectionCacheKey in selectionCache) {
+      return JSON.parse(selectionCache[selectionCacheKey])
     } else {
       return false
     }
   }
 
+  function ReleaseDateComponent (components) {
+    if (!components) return
+    if (components.year - components.month - components.day > 0) { // avoid NaN
+      return `${components.year}.${components.month < 10 ? '0' : ''}${components.month}.${components.day < 10 ? '0' : ''}${components.day}`
+    }
+    return null
+  }
+
+  function modifyHits (hits) {
+    // the original hits store too much and not in a proper ordering
+    // only song.result.url is neccessary
+
+    // There are few instrumental music existing in Genius
+    // No lyrics will be provided for instrumental music in Genius
+    hits = hits.filter(hit => {
+      if (hit.result.instrumental === true) return false
+      if (hit.result.lyrics_state !== 'complete') return false
+      return true
+    })
+
+    for (const hit of hits) {
+      const result = hit.result
+      if (!result) return
+      const primaryArtist = result.primary_artist || 0
+      const minimizeHit = genius.minimizeHit
+      delete hit.highlights // always []
+      delete result.annotation_count // always 0
+      delete result.pyongs_count // always null
+      if (minimizeHit.noImageURL) {
+        // if the script does not require the images, remove to save storage
+        delete result.header_image_thumbnail_url
+        delete result.header_image_url
+        delete result.song_art_image_thumbnail_url
+        delete result.song_art_image_url
+      }
+      if (minimizeHit.noRelatedLinks) {
+        delete result.relationships_index_url
+      }
+
+      if (minimizeHit.noFeaturedArtists) {
+        // it can be a band of 35 peoples which is wasting storage
+        delete result.featured_artists
+      }
+      if (primaryArtist) {
+        if (minimizeHit.noImageURL) {
+          delete primaryArtist.header_image_url
+          delete primaryArtist.image_url
+        }
+        if (minimizeHit.noRelatedLinks) {
+          delete primaryArtist.api_path
+          delete primaryArtist.url
+          delete primaryArtist.is_meme_verified
+          delete primaryArtist.is_verified
+          delete primaryArtist.index_character
+          delete primaryArtist.slug
+        }
+      }
+
+      // reduce release date storage
+      if (minimizeHit.simpleReleaseDate && 'release_date_components' in result) {
+        const c = ReleaseDateComponent(result.release_date_components)
+        if (c !== null) {
+          result.release_date = c
+        }
+      }
+      if (minimizeHit.noRawReleaseDate) {
+        delete result.release_date_components
+        delete result.release_date_for_display
+        delete result.release_date_with_abbreviated_month_for_display
+      }
+
+      if (minimizeHit.shortenArtistName && primaryArtist && typeof primaryArtist.name === 'string' && typeof result.artist_names === 'string') {
+        // if it is a brand the title could be very long as it compose it with the full member names
+        if (primaryArtist.name.length < result.artist_names.length) {
+          result.artist_names = primaryArtist.name
+        }
+      }
+
+      if (minimizeHit.fixArtistName) {
+        if (result.language === 'romanization' && result.title === result.title_with_featured && result.artist_names === primaryArtist.name) {
+          // Example: "なとり (Natori) - Overdose (Romanized)"
+          const split = result.title.split(' - ')
+          if (split.length === 2) {
+            result.artist_names = split[0]
+            primaryArtist.name = split[0]
+            result.title = split[1]
+            result.title_with_featured = split[1]
+          }
+        }
+      }
+
+      if (minimizeHit.removeStats) {
+        delete result.stats
+      }
+
+      if (hits.length > 1) {
+        if (hit.type === 'song') {
+          hit._order = 2600
+        } else {
+          hit._order = 1300
+        }
+        if (hit.result.language === 'romanization') {
+          hit._order -= 50
+        }
+        if (hit.result.updated_by_human_at) {
+          hit._order += 400
+        }
+        if (hit.result.language === 'en') {
+          // possible translation for non-english songs
+          // if all results are en, no different for hit._order reduction
+          hit._order -= 1000
+        }
+      }
+    }
+
+    if (hits.length > 1) {
+      hits.sort((a, b) => {
+        // if order is the same, compare the entry id (greater is more recent)
+        return (b._order - a._order) || (b.result.id - a.result.id) || 0
+      })
+    }
+    // console.log(hits)
+    return hits
+  }
+
   function geniusSearch (query, cb, cbError) {
+    console.log('Genius Search Query', query)
     let requestObj = {
       url: 'https://genius.com/api/search/song?page=1&q=' + encodeURIComponent(query),
       headers: {
         'X-Requested-With': 'XMLHttpRequest'
       },
+      t: 'search', // differentiate with other types of requesting
       error: function geniusSearchOnError (response) {
         window.alert(custom.scriptName + '\n\nError in geniusSearch(' + JSON.stringify(query) + ', ' + ('name' in cb ? cb.name : 'cb') + '):\n' + response)
         invalidateRequestCache(requestObj)
         if (typeof cbError === 'function') cbError()
         requestObj = null
       },
-      load: function geniusSearchOnLoad (response) {
+      preProcess: function geniusSearchPreProcess (response) {
         let jsonData = null
         let errorMsg = ''
         try {
@@ -375,18 +664,18 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
             requestObj = null
             return
           }
-
-          // There are few instrumental music existing in Genius
-          // No lyrics will be provided for instrumental music in Genius
-          section.hits = section.hits.filter(hit => hit.result.instrumental !== true)
-
-          cb(jsonData)
+          section.hits = modifyHits(hits)
+          return jsonData
         } else {
           window.alert(custom.scriptName + '\n\n' + (errorMsg || 'Error') + ' in geniusSearch(' + JSON.stringify(query) + ', ' + ('name' in cb ? cb.name : 'cb') + '):\n\n' + response.responseText)
           invalidateRequestCache(requestObj)
           if (typeof cbError === 'function') cbError()
           requestObj = null
         }
+      },
+      load: function geniusSearchOnLoad (jsonData, cacheResult) {
+        if (typeof cacheResult === 'function') cacheResult(jsonData)
+        cb(jsonData)
       }
     }
     request(requestObj)
@@ -395,74 +684,65 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   function loadGeniusSong (song, cb) {
     request({
       url: song.result.url,
+      theme: `${genius.option.themeKey}`, // different theme, differnt html cache
       error: function loadGeniusSongOnError (response) {
         window.alert(custom.scriptName + '\n\nError loadGeniusSong(' + JSON.stringify(song) + ', cb):\n' + response)
       },
-      load: function loadGeniusSongOnLoad (response) {
-        cb(response.responseText)
+      load: function loadGeniusSongOnLoad (response, cacheResult) {
+        // cacheResult(response)
+        cb(response, cacheResult)
       }
     })
   }
 
+  async function delayScrolling (scrollLyricsGeneric) {
+    let p1
+    let p2 = document.scrollingElement.scrollTop
+    do {
+      p1 = p2
+      await new Promise(r => window.requestAnimationFrame(r)) // eslint-disable-line promise/param-names
+      p2 = document.scrollingElement.scrollTop
+    } while (`${p1}` !== `${p2}`)
+    // the scrollTop is stable now
+    window.scrollLyricsBusy = false
+    scrollLyricsGeneric(window.latestScrollPos, true)
+  }
+
   function scrollLyricsFunction (lyricsContainerSelector, defaultStaticOffsetTop) {
     // Creates a scroll function for a specific theme
-    return function scrollLyricsGeneric (position) {
-      window.staticOffsetTop = 'staticOffsetTop' in window ? window.staticOffsetTop : defaultStaticOffsetTop
+    return function scrollLyricsGeneric (position, force) {
+      window.latestScrollPos = position
+
+      if (window.scrollLyricsBusy) return
+      window.scrollLyricsBusy = true
+
+      const staticTop = 'staticOffsetTop' in window ? window.staticOffsetTop : defaultStaticOffsetTop
 
       const div = document.querySelector(lyricsContainerSelector)
-      const offset = sumOffsets(div)
-      const newScrollTop = offset.top + window.staticOffsetTop + div.scrollHeight * position
+      const offset = genius.debug ? sumOffsets(div) : null
+      const offsetTop = (div.getBoundingClientRect().top - document.scrollingElement.getBoundingClientRect().top)
+      // const containerHeight = document.documentElement.clientHeight
 
-      if (window.lastScrollTopPosition && window.lastScrollTopPosition > 0 && Math.abs(window.lastScrollTopPosition - document.scrollingElement.scrollTop) > 5) {
+      const lastPos = window.lastScrollTopPosition
+      let newScrollTop = staticTop + div.scrollHeight * position + offsetTop
+      const maxScrollTop = document.scrollingElement.scrollHeight - document.scrollingElement.clientHeight
+      const btns = document.querySelectorAll('#resumeAutoScrollButton, #resumeAutoScrollFromHereButton')
+
+      if (newScrollTop > maxScrollTop) {
+        newScrollTop = maxScrollTop
+      } else if (newScrollTop < 0) {
+        newScrollTop = 0
+      }
+
+      if (lastPos > 0 && Math.abs(lastPos - document.scrollingElement.scrollTop) > 5) {
+        if (!force && document.visibilityState === 'visible') {
+          // the scrolltop is updating by scrollTo({behavior:'smooth'})
+          delayScrolling(scrollLyricsGeneric)
+          return
+        }
+        window.staticOffsetTop = staticTop
         window.newScrollTopPosition = newScrollTop
-        // User scrolled -> stop auto scroll
-        if (!document.getElementById('resumeAutoScrollButton')) {
-          const resumeButton = document.body.appendChild(document.createElement('div'))
-          const resumeButtonFromHere = document.body.appendChild(document.createElement('div'))
-
-          resumeButton.setAttribute('id', 'resumeAutoScrollButton')
-          resumeButton.setAttribute('title', 'Resume auto scrolling')
-          resumeButton.style = 'position:fixed; right:65px; top:30%; cursor: pointer;border: 1px solid #d9d9d9;border-radius:100%;padding: 11px; z-index:101; background:white; '
-          const arrowUpDown = resumeButton.appendChild(document.createElement('div'))
-          arrowUpDown.style = 'width: 0;height: 0;margin-left: 2px;'
-          if (document.scrollingElement.scrollTop - window.newScrollTopPosition < 0) {
-            arrowUpDown.style.borderBottom = ''
-            arrowUpDown.style.borderTop = '18px solid #222'
-            arrowUpDown.style.borderRight = '9px inset transparent'
-            arrowUpDown.style.borderLeft = '9px inset transparent'
-          } else {
-            arrowUpDown.style.borderBottom = '18px solid #222'
-            arrowUpDown.style.borderTop = ''
-            arrowUpDown.style.borderRight = '9px inset transparent'
-            arrowUpDown.style.borderLeft = '9px inset transparent'
-          }
-          resumeButton.addEventListener('click', function resumeAutoScroll () {
-            removeElements([resumeButton, resumeButtonFromHere])
-            window.lastScrollTopPosition = null
-            // Resume auto scrolling
-            document.scrollingElement.scrollTo({
-              top: window.newScrollTopPosition,
-              behavior: 'smooth'
-            })
-          })
-
-          resumeButtonFromHere.setAttribute('id', 'resumeAutoScrollFromHereButton')
-          resumeButtonFromHere.setAttribute('title', 'Resume auto scrolling from here')
-          resumeButtonFromHere.style = 'position:fixed; right:20px; top:30%; cursor: pointer;border: 1px solid #d9d9d9;border-radius:100%;padding: 11px; z-index:101; background:white; '
-          const arrowRight = resumeButtonFromHere.appendChild(document.createElement('div'))
-          arrowRight.style = 'width: 0;height: 0;border-top: 9px inset transparent;border-bottom: 9px inset transparent;border-left: 15px solid #222;margin-left: 2px;'
-          resumeButtonFromHere.addEventListener('click', function resumeAutoScrollFromHere () {
-            removeElements([resumeButton, resumeButtonFromHere])
-            // Resume auto scrolling from current position
-            for (const e of document.querySelectorAll('.scrolllabel')) {
-              e.remove()
-            }
-            window.first = false
-            window.lastScrollTopPosition = null
-            window.staticOffsetTop += document.scrollingElement.scrollTop - window.newScrollTopPosition
-          })
-        } else {
-          const arrowUpDown = document.querySelector('#resumeAutoScrollButton div')
+        function setArrowUpDownStyle (arrowUpDown) {
           if (document.scrollingElement.scrollTop - window.newScrollTopPosition < 0) {
             arrowUpDown.style.borderBottom = ''
             arrowUpDown.style.borderTop = '18px solid #222'
@@ -475,7 +755,70 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
             arrowUpDown.style.borderLeft = '9px inset transparent'
           }
         }
+        // User scrolled -> stop auto scroll
+        if (!document.getElementById('resumeAutoScrollButton')) {
+          const resumeButton = document.createElement('div')
+          const resumeButtonFromHere = document.createElement('div')
+          resumeButton.addEventListener('click', function resumeAutoScroll () {
+            resumeButton.classList.remove('btn-show')
+            resumeButtonFromHere.classList.remove('btn-show')
+            window.lastScrollTopPosition = null
+            // Resume auto scrolling
+            document.scrollingElement.scrollTo({
+              top: window.newScrollTopPosition,
+              behavior: 'smooth'
+            })
+            window.scrollLyricsBusy = false
+          })
+          resumeButtonFromHere.addEventListener('click', function resumeAutoScrollFromHere () {
+            resumeButton.classList.remove('btn-show')
+            resumeButtonFromHere.classList.remove('btn-show')
+            window.scrollLyricsBusy = false
+            // Resume auto scrolling from current position
+            if (genius.debug) {
+              for (const e of document.querySelectorAll('.scrolllabel')) {
+                e.remove()
+              }
+              window.first = false
+            }
+            window.lastScrollTopPosition = null
+            window.staticOffsetTop += document.scrollingElement.scrollTop - window.newScrollTopPosition
+          })
+          resumeButton.id = 'resumeAutoScrollButton'
+          resumeButton.setAttribute('title', 'Resume auto scrolling')
+          const arrowUpDown = resumeButton.appendChild(document.createElement('div'))
+          arrowUpDown.style = 'width: 0;height: 0;margin-left: 2px;'
+          setArrowUpDownStyle(arrowUpDown)
+          resumeButtonFromHere.id = 'resumeAutoScrollFromHereButton'
+          resumeButtonFromHere.setAttribute('title', 'Resume auto scrolling from here')
+          const arrowRight = resumeButtonFromHere.appendChild(document.createElement('div'))
+          arrowRight.style = 'width: 0;height: 0;border-top: 9px inset transparent;border-bottom: 9px inset transparent;border-left: 15px solid #222;margin-left: 2px;'
+          setTimeout(() => {
+            if (newScrollTop > 0 && newScrollTop < maxScrollTop) {
+              resumeButton.classList.add('btn-show')
+              resumeButtonFromHere.classList.add('btn-show')
+            }
+            window.scrollLyricsBusy = false
+          }, 40)
+          appendElements(document.body, [resumeButton, resumeButtonFromHere])
+        } else {
+          const arrowUpDown = document.querySelector('#resumeAutoScrollButton div')
+          setArrowUpDownStyle(arrowUpDown)
+          window.scrollLyricsBusy = false
+          setTimeout(() => {
+            if (newScrollTop > 0 && newScrollTop < maxScrollTop) {
+              btns[0].classList.add('btn-show')
+              btns[1].classList.add('btn-show')
+            }
+            window.scrollLyricsBusy = false
+          }, 40)
+        }
         return
+      }
+
+      if (btns.length === 2) {
+        btns[0].classList.remove('btn-show')
+        btns[1].classList.remove('btn-show')
       }
 
       window.lastScrollTopPosition = newScrollTop
@@ -493,25 +836,25 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
             label.classList.add('scrolllabel')
             label.textContent = (`${i * 10}% + ${window.staticOffsetTop}px`)
             label.style.position = 'absolute'
-            label.style.top = (offset.top + window.staticOffsetTop + div.scrollHeight * 0.1 * i) + 'px'
+            label.style.top = `${offset.top + window.staticOffsetTop + div.scrollHeight * 0.1 * i}px`
             label.style.color = 'rgba(255,0,0,0.5)'
             label.style.zIndex = 1000
           }
 
           let label = document.body.appendChild(document.createElement('div'))
           label.classList.add('scrolllabel')
-          label.textContent = (`Start @ offset.top +  window.staticOffsetTop = ${offset.top}px + ${window.staticOffsetTop}px`)
+          label.textContent = `Start @ offset.top +  window.staticOffsetTop = ${offset.top}px + ${window.staticOffsetTop}px`
           label.style.position = 'absolute'
-          label.style.top = offset.top + window.staticOffsetTop + 'px'
+          label.style.top = `${offset.top + window.staticOffsetTop}px`
           label.style.left = '200px'
           label.style.color = '#008000a6'
           label.style.zIndex = 1000
 
           label = document.body.appendChild(document.createElement('div'))
           label.classList.add('scrolllabel')
-          label.textContent = (`Base @ offset.top = ${offset.top}px`)
+          label.textContent = `Base @ offset.top = ${offset.top}px`
           label.style.position = 'absolute'
-          label.style.top = offset.top + 'px'
+          label.style.top = `${offset.top}px`
           label.style.left = '200px'
           label.style.color = '#008000a6'
           label.style.zIndex = 1000
@@ -521,15 +864,16 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         if (!indicator) {
           indicator = document.body.appendChild(document.createElement('div'))
           indicator.classList.add('scrolllabel')
-          indicator.setAttribute('id', 'scrollindicator')
+          indicator.id = 'scrollindicator'
           indicator.style.position = 'absolute'
           indicator.style.left = '150px'
           indicator.style.color = '#00dbff'
           indicator.style.zIndex = 1000
         }
-        indicator.style.top = (offset.top + window.staticOffsetTop + div.scrollHeight * position) + 'px'
+        indicator.style.top = `${offset.top + window.staticOffsetTop + div.scrollHeight * position}px`
         indicator.innerHTML = `${parseInt(position * 100)}%  -> ${parseInt(newScrollTop)}px`
       }
+      window.scrollLyricsBusy = false
     }
   }
 
@@ -558,11 +902,12 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       headers: {
         'X-Requested-With': 'XMLHttpRequest'
       },
+      t: 'annotations', // differentiate with other types of requesting
       error: function loadGeniusAnnotationsOnError (response) {
         window.alert(custom.scriptName + '\n\nError loadGeniusAnnotations(' + JSON.stringify(song) + ', cb):\n' + response)
         cb(annotations)
       },
-      load: function loadGeniusAnnotationsOnLoad (response) {
+      preProcess: function loadGeniusAnnotationsPreProcess (response) {
         const r = JSON.parse(response.responseText).response
         annotations = {}
         if (typeof r.referents.length === 'number') {
@@ -587,7 +932,10 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
             }
           }
         }
-        // cb(song, html, annotations)
+        return annotations
+      },
+      load: function loadGeniusAnnotationsOnLoad (annotations, cacheResult) {
+        if (typeof cacheResult === 'function') cacheResult(annotations)
         cb(annotations)
       }
     })
@@ -671,9 +1019,20 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     }
   }
 
+  function appendHeadText (html, headhtml) {
+    // Add to <head>
+    const idxHead = html.indexOf('</head>')
+    if (idxHead > 5) {
+      html = html.substring(0, idxHead) + headhtml + html.substring(idxHead)
+    } else {
+      html = `<head>${headhtml}</head>${html}`
+    }
+    return html
+  }
+
   const themes = {
     genius: {
-      name: 'Genius (Default)',
+      name: 'Genius (Default)', // obsoleted
       themeKey: 'genius',
       scripts: function themeGeniusScripts () {
         const onload = []
@@ -1075,29 +1434,49 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         headhtml += '\n<script id="annotationsdata1234" type="application/json">' + JSON.stringify(annotations).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</script>'
 
         // Scrollbar colors
-        headhtml += '\n<style>\nhtml{background-color:#181818;\nscrollbar-color:hsla(0,0%,100%,.3) transparent;\nscrollbar-width:auto;}\n</style>'
-
         // Highlight annotated lines on hover
         headhtml += `
-      <style>
-        .annotated span {
-          background-color:#f0f0f0;
-        }
-        .annotated:hover span, .annotated.highlighted span {
-          background-color:#ddd;
-        }
-      </style>`
+        <style>
+          html{
+            background-color: #181818;
+            scrollbar-color: hsla(0,0%,100%,.3) transparent;
+            scrollbar-width: auto;
+          }
+          .annotated span {
+            background-color: #f0f0f0;
+          }
+          .annotated:hover span, .annotated.highlighted span {
+            background-color: #ddd;
+          }
+
+          #resumeAutoScrollButton{
+            position:fixed; right:65px; top:30%; cursor: pointer;border: 1px solid #d9d9d9;border-radius:100%;padding: 11px; z-index:101; background:white;
+          }
+
+          #resumeAutoScrollFromHereButton{
+            position:fixed; right:20px; top:30%; cursor: pointer;border: 1px solid #d9d9d9;border-radius:100%;padding: 11px; z-index:101; background:white;
+          }
+
+          #resumeAutoScrollButton, #resumeAutoScrollFromHereButton{
+            visibility: hidden;
+            visibility: collapse;
+          }
+          #resumeAutoScrollButton.btn-show, #resumeAutoScrollFromHereButton.btn-show{
+            visibility: visible;
+          }
+        </style>`
 
         // Add to <head>
-        const parts = html.split('</head>')
-        html = parts[0] + '\n' + headhtml + '\n</head>' + parts.slice(1).join('</head>')
+        html = appendHeadText(html, headhtml)
+
         return cb(html)
       },
-      scrollLyrics: scrollLyricsFunction('div[class^="Lyrics__Container"]', -200)
+      // scrollLyrics: scrollLyricsFunction('div[class^="Lyrics__Container"]', -200)
+      scrollLyrics: scrollLyricsFunction('div[class*="SongPage__LyricsWrapper"]', -120)
     },
 
     cleanwhite: {
-      name: 'Clean white',
+      name: 'Clean white', // secondary theme
       themeKey: 'cleanwhite',
       scripts: function themeCleanWhiteScripts () {
         const onload = []
@@ -1323,7 +1702,7 @@ Genius:  ${originalUrl}
         const title = '<div class="header_with_cover_art-primary_info">' + html.split('class="header_with_cover_art-primary_info">')[1].split('</div>').slice(0, 3).join('</div>') + '</div></div>'
 
         // Remove body content, hide horizontal scroll bar, add lyrics
-        let parts = html.split('<body', 2)
+        const parts = html.split('<body', 2)
         html = parts[0] + '<body' + parts[1].split('>')[0] + '>\n\n' +
       title + '\n\n' + lyrics +
       '\n\n<div class="annotationbox" id="annotationbox"></div><div style="height:5em"></div></body></html>'
@@ -1361,15 +1740,15 @@ Genius:  ${originalUrl}
         </style>`
 
         // Add to <head>
-        parts = html.split('</head>')
-        html = parts[0] + '\n' + headhtml + '\n</head>' + parts.slice(1).join('</head>')
+        html = appendHeadText(html, headhtml)
+
         return onCombine(html)
       },
       scrollLyrics: scrollLyricsFunction('.mylyrics', -200)
     },
 
     spotify: {
-      name: 'Spotify',
+      name: 'Spotify', // secondary theme
       themeKey: 'spotify',
       scripts: function themeSpotifyScripts () {
         const onload = []
@@ -1596,7 +1975,7 @@ Genius:  ${originalUrl}
         const title = '<div class="header_with_cover_art-primary_info">' + html.split('class="header_with_cover_art-primary_info">')[1].split('</div>').slice(0, 3).join('</div>') + '</div></div>'
 
         // Remove body content, hide horizontal scroll bar, add lyrics
-        let parts = html.split('<body', 2)
+        const parts = html.split('<body', 2)
         html = parts[0] + '<body style="overflow-x:hidden;width:100%;" ' + parts[1].split('>')[0] + '>\n\n' +
       title + '\n\n' + lyrics +
       '\n\n<div class="annotationbox" id="annotationbox"></div><div style="height:5em"></div></body></html>'
@@ -1640,8 +2019,8 @@ Genius:  ${originalUrl}
         </style>`
 
         // Add to <head>
-        parts = html.split('</head>')
-        html = parts[0] + '\n' + headhtml + '\n</head>' + parts.slice(1).join('</head>')
+        html = appendHeadText(html, headhtml)
+
         return onCombine(html)
       },
       scrollLyrics: scrollLyricsFunction('.mylyrics', -200)
@@ -1668,6 +2047,20 @@ Genius:  ${originalUrl}
       }
     }
     return false
+  }
+
+  function multipleResultsFound (hits, mTitle, mArtists) {
+    // Multiple matches and no one exact match
+    // or multiple artists multiple results
+    if ('autoSelectLyrics' in custom) {
+      const ret = custom.autoSelectLyrics(hits, mTitle, mArtists)
+      if (ret && ret.hit) {
+        showLyricsAndRemember(mTitle, mArtists, ret.hit, hits.length)
+        return
+      }
+    }
+    // let user decide
+    custom.listSongs(hits)
   }
 
   function loadLyrics (force, beLessSpecific, songTitle, songArtistsArr, musicIsPlaying) {
@@ -1715,18 +2108,20 @@ Genius:  ${originalUrl}
             // Check if one result is an exact match
             const exactMatches = []
             for (const hit of hits) {
+              // hit sorted by _order
               if (hit.result.title.toLowerCase() === songTitle.toLowerCase() && hit.result.primary_artist.name.toLowerCase() === songArtistsArr[0].toLowerCase()) {
                 exactMatches.push(hit)
               }
             }
             if (exactMatches.length === 1) {
+              console.log(`Genius Lyrics - exact match is found in ${hits.length} results.`)
               showLyricsAndRemember(mTitle, mArtists, exactMatches[0], hits.length)
             } else {
-              // Multiple matches and not one exact match, let user decide
-              custom.listSongs(hits)
+              multipleResultsFound(hits, mTitle, mArtists)
             }
           } else {
-            custom.listSongs(hits)
+            console.log('Genius Lyrics - lyrics results with multiple artists are found.')
+            multipleResultsFound(hits, mTitle, mArtists)
           }
         }, function geniusSearchErrorCb () {
           // do nothing
@@ -1812,11 +2207,9 @@ Genius:  ${originalUrl}
       const wrongLyricsButton = document.createElement('span')
       wrongLyricsButton.classList.add('genius-lyrics-wronglyrics-button')
       wrongLyricsButton.style.cursor = 'pointer'
-      wrongLyricsButton.href = '#'
       wrongLyricsButton.textContent = 'Wrong lyrics'
       wrongLyricsButton.addEventListener('click', function wrongLyricsButtonClick (ev) {
         removeElements(document.querySelectorAll('.loadingspinnerholder'))
-        // forgetLyricsSelection(genius.current.title, genius.current.artists, this.dataset.hit)
         forgetLyricsSelection(genius.current.title, genius.current.artists)
         custom.showSearchField(`${genius.current.artists} ${genius.current.title}`)
       })
@@ -1860,9 +2253,230 @@ Genius:  ${originalUrl}
     }
   }
 
+  function contentStyling (html) {
+    // only if genius.style.enable is set to true by external script
+    if (genius.style.enabled !== true) return html
+    if (typeof genius.style.setup === 'function') {
+      if (genius.style.setup() === false) return html
+    }
+
+    const customProperties = Object.entries(genius.styleProps).map(([prop, value]) => {
+      return `${prop}: ${value};`
+    }).join('\n')
+
+    const css = `
+    html {
+      margin: 0;
+      padding: 0;
+      ${customProperties}
+    }
+
+    body {
+      background-color: var(--ygl-background);
+      color: var(--ygl-color);
+      font-size: var(--ygl-font-size);
+      margin: 0;
+      padding: 0;
+      padding-top: 50vh;
+      padding-bottom: 50vh;
+    }
+
+    main, #application {
+      --ygl-container-display: none;
+    }
+
+    #application {
+      padding: 28px;
+    }
+
+    div[data-lyrics-container]{
+      font-size: var(--ygl-font-size);
+    }
+
+    div[class*="SongPageGrid"], div[class*="SongHeader"] {
+      background-color: none;
+      padding: 0;
+      color: var(--ygl-color);
+    }
+
+    div[class*="SongPageGrid"], div[class*="SongHeaderWithPrimis__Container"]{
+      background-image: none;
+    }
+
+    div[data-exclude-from-selection] {
+      display: none;
+    }
+
+    main[class*="Container"] a[href] {
+      color: var(--ygl-color) !important;
+    }
+
+    main[class*="Container"] h1[font-size][class] {
+      color: var(--ygl-color);
+    }
+
+    div[class*="SongHeaderWithPrimis__Left"] {
+      display: none;
+    }
+
+    div[class*="SongPageGriddesktop"] {
+      display: block;
+    }
+    
+    span[class*="LabelWithIcon"] > svg,
+    button[class*="LabelWithIcon"] > svg,
+    div[class*="Tooltip__Container"] svg{
+      fill: currentColor;
+    }
+
+    p[class*="__Label"],
+    span[class*="__Label"],
+    div[class*="__Section"],
+    button[class*="__Container"] {
+      color: inherit;
+      text-decoration: none;
+      cursor: inherit;
+    }
+
+    div[class*="MetadataStats"] {
+      cursor: default;
+    }
+
+    div[class*="SongHeaderWithPrimis__Information"] div[class*="HeaderCreditsPrimis__Container"] {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-items: center;
+    }
+
+    div[class*="SongHeaderWithPrimis__Information"] {
+      margin: 0;
+      padding: 0;
+      max-width: 100%;
+      white-space: normal;
+    }
+
+    div[class*="SongHeaderWithPrimis__Bottom"] a[href] {
+      padding: 0;
+      margin: 0;
+    }
+    
+    div[class*="SongHeaderWithPrimis__Right"]{
+      background-color: var(--ygl-infobox-background);
+      padding: 18px 26px;
+    }
+
+    div[data-lyrics-container][class*="Lyrics__Container"] {
+      padding: 0;
+    }
+
+    body .annotated span,
+    body .annotated span:hover,
+    body a[href],
+    body a[href]:hover,
+    body .annotated a[href],
+    body .annotated a[href]:hover,
+    body a[href]:focus-visible,
+    body .annotated a[href]:focus-visible,
+    body .annotated:hover span,
+    body .annotated.highlighted span {
+      background-color: none;
+      outline: none;
+    }
+
+    a[href][class],
+    span[class*="PortalTooltip"],
+    div[class*="HeaderCreditsPrimis"],
+    div[class*="HeaderArtistAndTracklistPrimis"] {
+      font-size: inherit;
+    }
+    
+    div[class*="SongHeaderWithPrimis__Information"] h1 + div[class*="HeaderArtistAndTracklistPrimis"] {
+      font-size: 80%;
+      margin-top: 10px;
+      margin-bottom: 6px;
+    }
+
+    div[class*="MetadataStats__Stats"] {  
+      display: flex;
+      flex-wrap: wrap;
+      white-space: nowrap;    
+      row-gap: 4px;
+      column-gap: 16px;
+      white-space: nowrap;
+      margin-top: 6px;
+    }
+
+    h1,
+    div[class*="SongPage__LyricsWrapper"] {
+      white-space: normal;
+    }
+    
+    div[class*="MetadataStats__Stats"] > [class] {
+      margin-right: 0;
+    }
+
+    div[class*="SongHeaderWithPrimis__Information"] div[class*="HeaderCreditsPrimis__List"] {
+      font-size: 85%;
+    }
+
+    div[class*="SongHeaderWithPrimis__Information"] ~ div[class*="SongHeaderWithPrimis__PrimisContainer"] {
+      display: none;
+    }
+
+    div[class*="SongHeaderWithPrimis__Information"] {
+      --ygl-container-display: '-NULL-';
+    }
+
+    div[class*="Footer"],
+    div[class*="Leaderboard"] {
+      display: none;
+    }
+
+    div[class*="SongPage__Section"] #about,
+    div[class*="SongPage__Section"] #about ~ *,
+    div[class*="SongPage__Section"] #comments,
+    div[class*="SongPage__Section"] #comments ~ * {
+      display: none;
+    }
+    
+    div[class*="SongPage__Section"] #lyrics-root-pin-spacer {
+      padding-top: 12px;
+    }
+
+    div[class*="Header"] {
+      max-width: unset;
+    }
+
+    span[class*="InlineSvg__Wrapper"] > svg {
+      fill: currentColor;
+    }
+
+    div[class*="SongHeader"] h1[font-size="medium"]{
+      font-size: 140%;
+    }
+    `
+
+    const headhtml = `<style>${css}</style>`
+
+    // Add to <head>
+    html = appendHeadText(html, headhtml)
+    return html
+  }
+
+  let isShowLyricsInterrupted = false
+  function interuptMessageHandler (ev) {
+    const data = ev.data || 0
+    if (data.iAm === custom.scriptName && data.type === 'lyricsDisplayState' && typeof data.visibility === 'string') {
+      isShowLyricsInterrupted = data.visibility !== 'loading'
+    }
+  }
+
   function showLyrics (songInfo, searchresultsLengths) {
     // setup DOMs
-    const { container, bar, iframe } = 'custom' in setupLyricsDisplayDOM
+    const { container, bar, iframe } = 'setupLyricsDisplayDOM' in custom
       ? custom.setupLyricsDisplayDOM(songInfo, searchresultsLengths)
       : setupLyricsDisplayDOM(songInfo, searchresultsLengths)
 
@@ -1886,9 +2500,8 @@ Genius:  ${originalUrl}
       return
     }
 
-    const spinnerHolder = document.body.appendChild(document.createElement('div'))
+    const spinnerHolder = document.createElement('div')
     spinnerHolder.classList.add('loadingspinnerholder')
-    spinnerHolder.title = 'Downloading lyrics...'
     let spinner
     if ('createSpinner' in custom) {
       spinner = custom.createSpinner(spinnerHolder)
@@ -1898,6 +2511,7 @@ Genius:  ${originalUrl}
       spinner = spinnerHolder.appendChild(document.createElement('div'))
       spinner.classList.add('loadingspinner')
     }
+    document.body.appendChild(spinnerHolder)
 
     function spinnerUpdate (text, title, status, textStatus) {
       if (typeof text === 'string') spinner.textContent = text
@@ -1909,22 +2523,44 @@ Genius:  ${originalUrl}
         })
       }
     }
-    spinnerUpdate('5', null, 0, 'start')
+
+    window.removeEventListener('message', interuptMessageHandler, false)
+    window.addEventListener('message', interuptMessageHandler, false)
+    isShowLyricsInterrupted = false
+
+    spinnerUpdate('5', 'Downloading lyrics...', 0, 'start')
     window.postMessage({ iAm: custom.scriptName, type: 'lyricsDisplayState', visibility: 'loading', song: songInfo, searchresultsLengths }, '*')
 
+    function interuptedByExternal () {
+      window.removeEventListener('message', interuptMessageHandler, false)
+    }
     async function showLyricsRunner () {
-      let html = await new Promise(resolve => loadGeniusSong(songInfo, function loadGeniusSongCb (html) {
-        resolve(html)
+      if (isShowLyricsInterrupted === true) return interuptedByExternal()
+      let cacheReqResult = null
+      let html = await new Promise(resolve => loadGeniusSong(songInfo, function loadGeniusSongCb (response, cacheResult) {
+        cacheReqResult = cacheResult // cache the proceeded html only
+        resolve(response.responseText)
       }))
-      spinnerUpdate('4', 'Downloading annotations...', 100, 'donwloading')
-      let annotations = await new Promise(resolve => loadGeniusAnnotations(songInfo, html, annotationsEnabled, function loadGeniusAnnotationsCb (annotations) {
-        resolve(annotations)
-      }))
-      spinnerUpdate('3', 'Composing page...', 200, 'pageComposing')
-      html = await new Promise(resolve => combineGeniusResources(songInfo, html, annotations, function combineGeniusResourcesCb (html) {
-        resolve(html)
-      }))
-      annotations = null
+      if (isShowLyricsInterrupted === true) return interuptedByExternal()
+
+      if (cacheReqResult !== null) {
+        // not obtained from cache
+        spinnerUpdate('4', 'Downloading annotations...', 100, 'donwloading')
+        let annotations = await new Promise(resolve => loadGeniusAnnotations(songInfo, html, annotationsEnabled, function loadGeniusAnnotationsCb (annotations) {
+          resolve(annotations)
+        }))
+        if (isShowLyricsInterrupted === true) return interuptedByExternal()
+        spinnerUpdate('3', 'Composing page...', 200, 'pageComposing')
+        html = await new Promise(resolve => combineGeniusResources(songInfo, html, annotations, function combineGeniusResourcesCb (html) {
+          // in fact `combineGeniusResources` is synchronous
+          resolve(html)
+        }))
+        if (isShowLyricsInterrupted === true) return interuptedByExternal()
+        annotations = null
+        html = contentStyling(html)
+        if (genius.option.cacheHTMLRequest === true) cacheReqResult({ responseText: html }) // note: 1 page consume 2XX KBytes
+      }
+
       spinnerUpdate('3', 'Loading page...', 300, 'pageLoading')
 
       // obtain the iframe detailed information
@@ -1934,6 +2570,7 @@ Genius:  ${originalUrl}
       const clear = function () {
         // a. clear() when LyricsReady (success)
         // b. clear() when failed (after 30s)
+        window.removeEventListener('message', interuptMessageHandler, false)
         if ('onLyricsReady' in custom) {
           // only on success ???
           custom.onLyricsReady(songInfo, container)
@@ -1964,22 +2601,28 @@ Genius:  ${originalUrl}
         }
         spinnerUpdate('1', 'Calculating...', 302, 'htmlwritten')
       })
-      addOneMessageListener('pageready', function () {
+      addOneMessageListener('pageready', function (ev) {
+        // note: this is not called after the whole page is rendered
+        // console.log(ev.data)
         clear() // loaded
         spinnerUpdate(null, null, 901, 'complete')
         window.postMessage({ iAm: custom.scriptName, type: 'lyricsDisplayState', visibility: 'loaded', lyricsSuccess: true }, '*')
       })
 
-      // After 15 seconds, try to reload the iframe
-      tv1 = setTimeout(function () {
+      function reloadFrame () {
+        // no use if the iframe is detached
+        tv1 = 0
         console.debug('tv1')
         iframe.src = 'data:text/html,%3Ch1%3ELoading...%21%3C%2Fh1%3E'
         setTimeout(function () {
           iframe.src = custom.emptyURL + '#html:post'
-        }, 1000)
-      }, 15000)
-      // After 30 seconds, try again fresh (only once)
-      tv2 = setTimeout(function () {
+        }, 400)
+      }
+      // After 15 seconds, try to reload the iframe
+      tv1 = setTimeout(reloadFrame, 15000)
+
+      function fresh () {
+        tv2 = 0
         console.debug('tv2')
         clear() // unable to load
         spinnerUpdate(null, null, 902, 'failed')
@@ -1990,21 +2633,38 @@ Genius:  ${originalUrl}
           hideLyricsWithMessage()
           setTimeout(function () {
             custom.addLyrics(true)
-          }, 1000)
+          }, 100)
         }
-      }, 30000)
+      }
+      // After 30 seconds, try again fresh (only once)
+      tv2 = setTimeout(fresh, 30000)
+
+      function unableToProcess (msg) {
+        clearInterval(iv)
+        iv = 0
+        console.warn(msg)
+        clearTimeout(tv1)
+        clearTimeout(tv2)
+        // iframe is probrably detached from the page
+        if (tv2 > 0) {
+          fresh()
+        }
+      }
 
       const ivf = () => {
         if (iv === 0) {
           return
         }
+        if (isShowLyricsInterrupted === true) {
+          // this is possible if the lyrics was hidden by other function calling
+          unableToProcess('Genius Lyrics - showLyrics() was interrupted')
+        }
         spinnerUpdate('2', 'Rendering...', 301, 'pageRendering')
         if (iframe.contentWindow && iframe.contentWindow.postMessage) {
           iframe.contentWindow.postMessage({ iAm: custom.scriptName, type: 'writehtml', html, themeKey: genius.option.themeKey }, '*')
         } else if (iframe.closest('html, body') === null) {
-          clearInterval(iv)
-          iv = 0
-          console.warn('iframe#lyricsiframe was removed from the page. No contentWindow could be found.')
+          // unlikely as interupter_lyricsDisplayState is checked
+          unableToProcess('iframe#lyricsiframe was removed from the page. No contentWindow could be found.')
         } else {
           // console.debug('iframe.contentWindow is ', iframe.contentWindow)
         }
@@ -2186,13 +2846,16 @@ Genius:  ${originalUrl}
       }
     })
 
+    // console.dir(selectionCache)
+    // console.dir(requestCache)
+
     const bytes = metricPrefix(JSON.stringify(selectionCache).length + JSON.stringify(requestCache).length, 2, 1024) + 'Bytes'
     const clearCacheButton = div.appendChild(document.createElement('button'))
-    clearCacheButton.textContent = 'Clear cache (' + bytes + ')'
+    clearCacheButton.textContent = `Clear cache (${bytes})`
     clearCacheButton.addEventListener('click', function onClearCacheButtonClick () {
       Promise.all([custom.GM.setValue('selectioncache', '{}'), custom.GM.setValue('requestcache', '{}')]).then(function () {
         clearCacheButton.innerHTML = 'Cleared'
-        selectionCache = {}
+        selectionCache = cleanSelectionCache()
         requestCache = {}
       })
     })
@@ -2406,7 +3069,7 @@ Genius:  ${originalUrl}
     annotationsEnabled = !!values[2]
     autoScrollEnabled = !!values[3]
 
-    const isMessaging = document.location.href.startsWith(custom.emptyURL + '#html:post')
+    const isMessaging = document.location.href.startsWith(`${custom.emptyURL}#html:post`)
 
     // top
     if (!isMessaging) {
@@ -2485,7 +3148,8 @@ Genius:  ${originalUrl}
     if ('toggleLyricsKey' in custom) {
       addKeyboardShortcutInFrame(custom.toggleLyricsKey)
     }
-    communicationWindow.postMessage({ iAm: custom.scriptName, type: 'pageready' }, '*')
+    // this page is generated by code; pageready does not mean the page is fully rendered
+    communicationWindow.postMessage({ iAm: custom.scriptName, type: 'pageready'/* , html: document.documentElement.innerHTML */ }, '*')
     if ('iframeLoadedCallback2' in custom) {
       // after all onload functions
       custom.iframeLoadedCallback2({ document, theme, onload })
