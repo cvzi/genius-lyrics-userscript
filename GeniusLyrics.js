@@ -2257,7 +2257,7 @@ Genius:  ${originalUrl}
     // only if genius.style.enable is set to true by external script
     if (genius.style.enabled !== true) return html
     if (typeof genius.style.setup === 'function') {
-      genius.style.setup()
+      if (genius.style.setup() === false) return html
     }
 
     const customProperties = Object.entries(genius.styleProps).map(([prop, value]) => {
