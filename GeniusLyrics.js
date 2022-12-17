@@ -127,7 +127,8 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       shortenArtistName: false,
       fixArtistName: false,
       removeStats: false, // note: true for YoutubeGeniusLyrics only
-      noRelatedLinks: false
+      noRelatedLinks: false,
+      onlyCompleteLyrics: false
     },
     debug: false
   }
@@ -523,7 +524,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     // No lyrics will be provided for instrumental music in Genius
     hits = hits.filter(hit => {
       if (hit.result.instrumental === true) return false
-      if (hit.result.lyrics_state !== 'complete') return false
+      if (minimizeHit.onlyCompleteLyrics && hit.result.lyrics_state !== 'complete') return false
       return true
     })
 
