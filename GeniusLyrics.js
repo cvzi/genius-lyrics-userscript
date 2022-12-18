@@ -727,7 +727,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       const lastPos = window.lastScrollTopPosition
       let newScrollTop = staticTop + div.scrollHeight * position + offsetTop
       const maxScrollTop = document.scrollingElement.scrollHeight - document.scrollingElement.clientHeight
-      const btns = document.querySelectorAll('#resumeAutoScrollButton, #resumeAutoScrollFromHereButton')
+      const btnContainer = document.querySelector('#resumeAutoScrollButtonContainer')
 
       if (newScrollTop > maxScrollTop) {
         newScrollTop = maxScrollTop
@@ -735,7 +735,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         newScrollTop = 0
       }
 
-      if (lastPos > 0 && Math.abs(lastPos - document.scrollingElement.scrollTop) > 5) {
+      if (lastPos > 0 && Math.abs(lastPos - document.scrollingElement.scrollTop) > 5) { // lastPos !== null
         if (!force && document.visibilityState === 'visible') {
           // the scrolltop is updating by scrollTo({behavior:'smooth'})
           delayScrolling(scrollLyricsGeneric)
@@ -743,38 +743,36 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         }
         window.staticOffsetTop = staticTop
         window.newScrollTopPosition = newScrollTop
-        function setArrowUpDownStyle (arrowUpDown) {
+        function setArrowUpDownStyle (resumeButton) {
+
           if (document.scrollingElement.scrollTop - window.newScrollTopPosition < 0) {
-            arrowUpDown.style.borderBottom = ''
-            arrowUpDown.style.borderTop = '18px solid #222'
-            arrowUpDown.style.borderRight = '9px inset transparent'
-            arrowUpDown.style.borderLeft = '9px inset transparent'
+            resumeButton.setAttribute('arrow-icon', 'up')
           } else {
-            arrowUpDown.style.borderBottom = '18px solid #222'
-            arrowUpDown.style.borderTop = ''
-            arrowUpDown.style.borderRight = '9px inset transparent'
-            arrowUpDown.style.borderLeft = '9px inset transparent'
+            resumeButton.setAttribute('arrow-icon', 'down')
           }
         }
         // User scrolled -> stop auto scroll
-        if (!document.getElementById('resumeAutoScrollButton')) {
+        if (!btnContainer) {
           const resumeButton = document.createElement('div')
           const resumeButtonFromHere = document.createElement('div')
+          const resumeAutoScrollButtonContainer = document.createElement('div')
+          resumeAutoScrollButtonContainer.id = 'resumeAutoScrollButtonContainer'
           resumeButton.addEventListener('click', function resumeAutoScroll () {
-            resumeButton.classList.remove('btn-show')
-            resumeButtonFromHere.classList.remove('btn-show')
+            window.scrollLyricsBusy = true
+            resumeAutoScrollButtonContainer.classList.remove('btn-show')
             window.lastScrollTopPosition = null
             // Resume auto scrolling
             document.scrollingElement.scrollTo({
               top: window.newScrollTopPosition,
               behavior: 'smooth'
             })
-            window.scrollLyricsBusy = false
+            setTimeout(() => {
+              window.scrollLyricsBusy = false
+            }, 100)
           })
           resumeButtonFromHere.addEventListener('click', function resumeAutoScrollFromHere () {
-            resumeButton.classList.remove('btn-show')
-            resumeButtonFromHere.classList.remove('btn-show')
-            window.scrollLyricsBusy = false
+            window.scrollLyricsBusy = true
+            resumeAutoScrollButtonContainer.classList.remove('btn-show')
             // Resume auto scrolling from current position
             if (genius.debug) {
               for (const e of document.querySelectorAll('.scrolllabel')) {
@@ -784,32 +782,33 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
             }
             window.lastScrollTopPosition = null
             window.staticOffsetTop += document.scrollingElement.scrollTop - window.newScrollTopPosition
+            setTimeout(() => {
+              window.scrollLyricsBusy = false
+            }, 30)
           })
           resumeButton.id = 'resumeAutoScrollButton'
           resumeButton.setAttribute('title', 'Resume auto scrolling')
-          const arrowUpDown = resumeButton.appendChild(document.createElement('div'))
-          arrowUpDown.style = 'width: 0;height: 0;margin-left: 2px;'
-          setArrowUpDownStyle(arrowUpDown)
+          resumeButton.appendChild(document.createElement('div'))
+          setArrowUpDownStyle(resumeButton)
           resumeButtonFromHere.id = 'resumeAutoScrollFromHereButton'
           resumeButtonFromHere.setAttribute('title', 'Resume auto scrolling from here')
-          const arrowRight = resumeButtonFromHere.appendChild(document.createElement('div'))
-          arrowRight.style = 'width: 0;height: 0;border-top: 9px inset transparent;border-bottom: 9px inset transparent;border-left: 15px solid #222;margin-left: 2px;'
+          resumeButtonFromHere.appendChild(document.createElement('div'))
           setTimeout(() => {
             if (newScrollTop > 0 && newScrollTop < maxScrollTop) {
-              resumeButton.classList.add('btn-show')
-              resumeButtonFromHere.classList.add('btn-show')
+              resumeAutoScrollButtonContainer.classList.add('btn-show')
             }
             window.scrollLyricsBusy = false
           }, 40)
-          appendElements(document.body, [resumeButton, resumeButtonFromHere])
+
+          appendElements(resumeAutoScrollButtonContainer, [resumeButton, resumeButtonFromHere])
+          document.body.appendChild(resumeAutoScrollButtonContainer)
         } else {
-          const arrowUpDown = document.querySelector('#resumeAutoScrollButton div')
-          setArrowUpDownStyle(arrowUpDown)
+          const resumeButton = document.querySelector('#resumeAutoScrollButton')
+          setArrowUpDownStyle(resumeButton)
           window.scrollLyricsBusy = false
           setTimeout(() => {
             if (newScrollTop > 0 && newScrollTop < maxScrollTop) {
-              btns[0].classList.add('btn-show')
-              btns[1].classList.add('btn-show')
+              btnContainer.classList.add('btn-show')
             }
             window.scrollLyricsBusy = false
           }, 40)
@@ -817,9 +816,9 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         return
       }
 
-      if (btns.length === 2) {
-        btns[0].classList.remove('btn-show')
-        btns[1].classList.remove('btn-show')
+      if (btnContainer) {
+        btnContainer.classList.remove('btn-show')
+        btnContainer.classList.remove('btn-show')
       }
 
       window.lastScrollTopPosition = newScrollTop
@@ -943,6 +942,23 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   }
 
   const themeCommon = {
+    lyricsAppInit() {
+      document.addEventListener('animationstart', (ev) => {
+        if (ev.animationName === 'appDomAppended' || ev.animationName === 'appDomAppended2') {
+          Promise.resolve(0).then(() => {
+            window.postMessage({ iAm: custom.scriptName, type: 'iframeLyricsAppRendered' }, '*')
+          })
+        }
+        if (ev.animationName === 'songHeaderDomAppended') {
+          ev.target.dispatchEvent(new CustomEvent('songHeaderDomAppended'))
+        }
+      }, true)
+      let application = null
+      if (application = document.querySelector('#application')) {
+        application.classList.add('app11')
+      }
+      application = null
+    },
     annotationsRemoveAll () {
       for (const a of document.querySelectorAll('.song_body-lyrics .referent,.song_body-lyrics a[class*="referent"]')) {
         let tmpElement
@@ -1031,9 +1047,131 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     return html
   }
 
+  const iframeCSSCommon =
+  `
+  html {
+    --ygl-btn-half-border-size: 7px;
+    --ygl-btn-color: #222;
+  }
+
+  #resumeAutoScrollButtonContainer{
+    position: fixed; 
+    right: 20px; 
+    top: 30%; 
+    z-index: 101; 
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+  }
+
+  #resumeAutoScrollButtonContainer #resumeAutoScrollButton,
+  #resumeAutoScrollButtonContainer #resumeAutoScrollFromHereButton{
+    cursor: pointer;
+    border: 1px solid #d9d9d9;
+    border-radius:100%;
+    background:white;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    justify-items: center;
+    align-items: center;
+    padding: calc(1.732*var(--ygl-btn-half-border-size) + 3px);
+    contain: strict;
+  }
+
+  #resumeAutoScrollButtonContainer {
+    visibility: hidden;
+    pointer-events: none;
+    visibility: collapse; /* if collapse is supported */
+  }
+  #resumeAutoScrollButtonContainer.btn-show {
+    visibility: visible;
+    pointer-events: initial;
+  }
+
+  #resumeAutoScrollButton > div:only-child {
+    position: absolute;
+    contain: strict;
+  }
+  #resumeAutoScrollButton[arrow-icon="up"] > div:only-child {
+    border-top: calc(1.732*var(--ygl-btn-half-border-size)) solid var(--ygl-btn-color);
+    border-right: var(--ygl-btn-half-border-size) inset transparent;
+    border-bottom: 0;
+    border-left: var(--ygl-btn-half-border-size) inset transparent;
+  }
+  #resumeAutoScrollButton[arrow-icon="down"] > div:only-child {
+    border-top: 0;
+    border-right: var(--ygl-btn-half-border-size) inset transparent;
+    border-bottom: calc(1.732*var(--ygl-btn-half-border-size)) solid var(--ygl-btn-color);
+    border-left: var(--ygl-btn-half-border-size) inset transparent;
+  }
+
+  #resumeAutoScrollFromHereButton > div:only-child {
+    position: absolute;
+    contain: strict;
+    border-top: var(--ygl-btn-half-border-size) inset transparent;
+    border-right: 0;
+    border-bottom: var(--ygl-btn-half-border-size) inset transparent;
+    border-left: calc(1.732*var(--ygl-btn-half-border-size)) solid var(--ygl-btn-color);
+  }
+  
+  body div[class*="__Container"] iframe,
+  body div[class*="__Container"] div[class*="_preview"] iframe,
+  body div[class*="__Container"] div[class*="embed"] iframe {
+    /* override .hPdMCA .embedly_preview iframe {display: block;} */
+    display: none;
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  @keyframes appDomAppended {
+    0% {
+      background-position-x: 1px;
+    }
+  
+    100% {
+      background-position-x: 2px;
+    }
+  }
+  
+  @keyframes appDomAppended2 {
+    0% {
+      background-position-x: 3px;
+    }
+  
+    100% {
+      background-position-x: 4px;
+    }
+  }
+
+  @keyframes songHeaderDomAppended {
+    0% {
+      background-position-x: 1px;
+    }
+  
+    100% {
+      background-position-x: 2px;
+    }
+  }
+
+  #application {
+    animation: appDomAppended 1ms linear 0s 1 normal forwards;
+  }
+  #application.app11 {
+    animation: appDomAppended2 1ms linear 0s 1 normal forwards;
+  }
+
+  #application.app11 div[class*="SongHeaderWithPrimis__Container"] > div[class*="SongHeaderWithPrimis__Right"] {
+    animation: songHeaderDomAppended 1ms linear 0s 1 normal forwards;
+  }
+  `
+
   const themes = {
     genius: {
-      name: 'Genius (Default)', // obsoleted
+      name: 'Genius (Default)',
       themeKey: 'genius',
       scripts: function themeGeniusScripts () {
         const onload = []
@@ -1449,22 +1587,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
           .annotated:hover span, .annotated.highlighted span {
             background-color: #ddd;
           }
-
-          #resumeAutoScrollButton{
-            position:fixed; right:65px; top:30%; cursor: pointer;border: 1px solid #d9d9d9;border-radius:100%;padding: 11px; z-index:101; background:white;
-          }
-
-          #resumeAutoScrollFromHereButton{
-            position:fixed; right:20px; top:30%; cursor: pointer;border: 1px solid #d9d9d9;border-radius:100%;padding: 11px; z-index:101; background:white;
-          }
-
-          #resumeAutoScrollButton, #resumeAutoScrollFromHereButton{
-            visibility: hidden;
-            visibility: collapse;
-          }
-          #resumeAutoScrollButton.btn-show, #resumeAutoScrollFromHereButton.btn-show{
-            visibility: visible;
-          }
+          ${iframeCSSCommon}
         </style>`
 
         // Add to <head>
@@ -1590,7 +1713,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
 
         return onload
       },
-      combine: function themeCleanWhiteXombineGeniusResources (song, html, annotations, onCombine) {
+      combine: function themeCleanWhiteCombineGeniusResources (song, html, annotations, onCombine) {
         let headhtml = ''
         const bodyWidth = document.getElementById('lyricsiframe').style.width || (document.getElementById('lyricsiframe').getBoundingClientRect().width + 'px')
 
@@ -1643,6 +1766,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
             .annotationbox .annotationlabel {display:block;color:rgb(10, 10, 10);border-bottom:1px solid rgb(200,200,200);padding: 0;font-weight:600}
             .annotationbox .annotation_rich_text_formatting {color: black}
             .annotationbox .annotation_rich_text_formatting a {color: rgb(6, 95, 212)}
+            ${iframeCSSCommon}
           </style>`
 
             // Add annotation data
@@ -1738,6 +1862,8 @@ Genius:  ${originalUrl}
           h1.header_with_cover_art-primary_info-title a {color: gray; font-size:1.1em}
           h2 a,h2 a.header_with_cover_art-primary_info-primary_artist {color: gray; font-size:1.0em; font-weight:300}
           .header_with_cover_art-primary_info {display:inline-block;color: black;border-radius: 2px;padding:7px 10px 0px 5px;}
+        
+          ${iframeCSSCommon}
         </style>`
 
         // Add to <head>
@@ -1858,7 +1984,7 @@ Genius:  ${originalUrl}
 
         return onload
       },
-      combine: function themeSpotifyXombineGeniusResources (song, html, annotations, onCombine) {
+      combine: function themeSpotifyCombineGeniusResources (song, html, annotations, onCombine) {
         let headhtml = ''
         const bodyWidth = document.getElementById('lyricsiframe').style.width || (document.getElementById('lyricsiframe').getBoundingClientRect().width + 'px')
 
@@ -1917,6 +2043,7 @@ Genius:  ${originalUrl}
             .annotationbox .annotationlabel {display:inline-block;background-color: hsla(0,0%,100%,.6);color: #000;border-radius: 2px;padding: 0 .3em;}
             .annotationbox .annotation_rich_text_formatting {color: rgb(255,255,255,0.6)}
             .annotationbox .annotation_rich_text_formatting a {color: rgb(255,255,255,0.9)}
+            ${iframeCSSCommon}
           </style>`
 
             // Add annotation data
@@ -2017,6 +2144,7 @@ Genius:  ${originalUrl}
           .header_with_cover_art-primary_info {display:inline-block;background-color: hsla(0,0%,0%,.2);color: #000;border-radius: 2px;padding:7px 10px 0px 5px;}
           ::-webkit-scrollbar {width: 16px;}
           ::-webkit-scrollbar-thumb {background-color: hsla(0,0%,100%,.3);}
+          ${iframeCSSCommon}
         </style>`
 
         // Add to <head>
@@ -2455,8 +2583,31 @@ Genius:  ${originalUrl}
       fill: currentColor;
     }
 
-    div[class*="SongHeader"] h1[font-size="medium"]{
+    div[class*="SongHeader"] h1[font-size="medium"] {
       font-size: 140%;
+    }
+
+    /* the following shall apply with padding-top: 50vh */
+    /* the content might be hidden if height > 50vh */
+    /* the max-height allow the header box to be scrolled if height > 50vh */
+    .genius-lyrics-header-container {
+      posiiton: relative; /* set 100% width for inner absolute box */
+    }
+    .genius-lyrics-header-container > * {
+      --genius-lyrics-header-content-display: none;
+      display: var(--genius-lyrics-header-content-display); /* none by default */
+    }
+    .genius-lyrics-header-container > .genius-lyrics-header-content {
+      --genius-lyrics-header-content-display: '--NULL--'; /* override none */
+      position: absolute;
+      width: 100%; /* related to .genius-lyrics-header-container which is padded */
+      transform: translateY(-100%); /* 100% height refer to the element itself dim */
+      max-height: 50vh;
+      overflow: auto;
+    }
+
+    [class*="MetadataStats__Container"] {
+      max-width: 65%;
     }
     `
 
@@ -2896,25 +3047,31 @@ Genius:  ${originalUrl}
     arr.push(cb)
   }
 
-  function listenToMessages () {
-    window.addEventListener('message', function (e) {
-      const data = ((e || 0).data || 0)
-      if (data.iAm !== custom.scriptName) {
-        return
-      }
-      let arr = onMessage[data.type]
-      if (arr && arr.length > 0) {
-        let tmp = [...arr]
-        arr.length = 0
-        arr = null
-        for (const cb of tmp) {
-          if (typeof cb === 'function') {
-            cb(e)
-          }
+  function listenToMessagesHandler (e) {
+    const data = ((e || 0).data || 0)
+    if (data.iAm !== custom.scriptName) {
+      return
+    }
+    let arr = onMessage[data.type]
+    if (arr && arr.length > 0) {
+      let tmp = [...arr]
+      arr.length = 0
+      arr = null
+      for (const cb of tmp) {
+        if (typeof cb === 'function') {
+          cb(e)
         }
-        tmp = null
       }
-    })
+      tmp = null
+    }
+  }
+
+  function listenToMessages () {
+    window.addEventListener('message', listenToMessagesHandler, false)
+  }
+
+  function unlistenToMessages () {
+    window.removeEventListener('message', listenToMessagesHandler, false)
   }
 
   function pageKeyboardEvent (keyParams, fct) {
@@ -3122,8 +3279,35 @@ Genius:  ${originalUrl}
     // clean up
     e = null
 
-    // delay 500ms
-    await new Promise(resolve => setTimeout(resolve, 500))
+    document.addEventListener('songHeaderDomAppended', function (ev) {
+      let elm = (ev.target || 0)
+      let pElm = (elm.parentNode || 0)
+      if (elm && pElm && pElm.matches('div[class*="SongHeaderWithPrimis__Container"]') && elm.matches('div[class*="SongHeaderWithPrimis__Right"]')) {
+        // let elms = [...pElm.childNodes].filter(entry => entry !== elm)
+        // removeElements(elms)
+        pElm.classList.add('genius-lyrics-header-container')
+        elm.classList.add('genius-lyrics-header-content')
+      }
+    }, true)
+
+    // page rendered via CSS rendering
+    const race1 = new Promise(resolve => {
+      listenToMessages()
+      addOneMessageListener('iframeLyricsAppRendered', () => {
+        resolve() // possible called multiple times in CSS rendering; filtered the first one via addOneMessageListener
+      })
+      themeCommon.lyricsAppInit()
+    });
+
+    // delay 500ms as a backup
+    const race2 = new Promise(resolve => setTimeout(resolve, 500))
+
+    await Promise.race([race1, race2]) // page is rendered or 500ms after written html
+
+    unlistenToMessages() // remove message handler
+    removeElements(document.querySelectorAll('iframe')) // remove all embeded iframes inside #lyricsiframe
+
+    // communicationWindow.postMessage({ iAm: custom.scriptName, type: 'lyricsAppInit', html: document.documentElement.innerHTML }, '*')
 
     const onload = theme.scripts()
     if ('iframeLoadedCallback1' in custom) {
