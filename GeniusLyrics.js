@@ -744,11 +744,10 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         window.staticOffsetTop = staticTop
         window.newScrollTopPosition = newScrollTop
         function setArrowUpDownStyle (resumeButton) {
-
-          if (document.scrollingElement.scrollTop - window.newScrollTopPosition < 0) {
-            resumeButton.setAttribute('arrow-icon', 'up')
-          } else {
-            resumeButton.setAttribute('arrow-icon', 'down')
+          const oldAttribute = resumeButton.getAttribute('arrow-icon')
+          const newAttribute = (document.scrollingElement.scrollTop - window.newScrollTopPosition < 0) ? 'up' : 'down'
+          if (oldAttribute !== newAttribute) {
+            resumeButton.setAttribute('arrow-icon', newAttribute)
           }
         }
         // User scrolled -> stop auto scroll
@@ -942,7 +941,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   }
 
   const themeCommon = {
-    lyricsAppInit() {
+    lyricsAppInit () {
       document.addEventListener('animationstart', (ev) => {
         if (ev.animationName === 'appDomAppended' || ev.animationName === 'appDomAppended2') {
           Promise.resolve(0).then(() => {
@@ -950,11 +949,11 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
           })
         }
         if (ev.animationName === 'songHeaderDomAppended') {
-          ev.target.dispatchEvent(new CustomEvent('songHeaderDomAppended'))
+          ev.target.dispatchEvent(new window.CustomEvent('songHeaderDomAppended'))
         }
       }, true)
-      let application = null
-      if (application = document.querySelector('#application')) {
+      let application = document.querySelector('#application')
+      if (application !== null) {
         application.classList.add('app11')
       }
       application = null
@@ -3280,8 +3279,8 @@ Genius:  ${originalUrl}
     e = null
 
     document.addEventListener('songHeaderDomAppended', function (ev) {
-      let elm = (ev.target || 0)
-      let pElm = (elm.parentNode || 0)
+      const elm = (ev.target || 0)
+      const pElm = (elm.parentNode || 0)
       if (elm && pElm && pElm.matches('div[class*="SongHeaderWithPrimis__Container"]') && elm.matches('div[class*="SongHeaderWithPrimis__Right"]')) {
         // let elms = [...pElm.childNodes].filter(entry => entry !== elm)
         // removeElements(elms)
@@ -3297,7 +3296,7 @@ Genius:  ${originalUrl}
         resolve() // possible called multiple times in CSS rendering; filtered the first one via addOneMessageListener
       })
       themeCommon.lyricsAppInit()
-    });
+    })
 
     // delay 500ms as a backup
     const race2 = new Promise(resolve => setTimeout(resolve, 500))
