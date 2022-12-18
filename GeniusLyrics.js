@@ -744,6 +744,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         window.staticOffsetTop = staticTop
         window.newScrollTopPosition = newScrollTop
         function setArrowUpDownStyle (resumeButton) {
+          if (!resumeButton) return
           const oldAttribute = resumeButton.getAttribute('arrow-icon')
           const newAttribute = (document.scrollingElement.scrollTop - window.newScrollTopPosition < 0) ? 'up' : 'down'
           if (oldAttribute !== newAttribute) {
