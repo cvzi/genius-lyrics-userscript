@@ -2406,20 +2406,20 @@ Genius:  ${originalUrl}
       font-size: var(--ygl-font-size);
       margin: 0;
       padding: 0;
-      padding-top: 50vh;
-      padding-bottom: 50vh;
+      padding-top: 50vh; /* this is intended to give some space to see the first line at the vertical center */
+      padding-bottom: 50vh; /* this is intended to give some space to see the last line at the vertical center */
     }
 
     main, #application {
-      --ygl-container-display: none;
+      --ygl-container-display: none; /* default hide; override by info conatiner */
     }
 
     #application {
-      padding: 28px;
+      padding: 28px; /* looks better to give some space away from the iframe */
     }
 
     div[data-lyrics-container]{
-      font-size: var(--ygl-font-size);
+      font-size: var(--ygl-font-size); /* adjust font to smaller size */
     }
 
     div[class*="SongPageGrid"], div[class*="SongHeader"] {
@@ -2429,7 +2429,7 @@ Genius:  ${originalUrl}
     }
 
     div[class*="SongPageGrid"], div[class*="SongHeaderWithPrimis__Container"]{
-      background-image: none;
+      background-image: none; /* no header background image */
     }
 
     div[data-exclude-from-selection] {
@@ -2445,7 +2445,7 @@ Genius:  ${originalUrl}
     }
 
     div[class*="SongHeaderWithPrimis__Left"] {
-      display: none;
+      display: none; /* just empty space */
     }
 
     div[class*="SongPageGriddesktop"] {
@@ -2454,24 +2454,26 @@ Genius:  ${originalUrl}
     
     span[class*="LabelWithIcon"] > svg,
     button[class*="LabelWithIcon"] > svg,
-    div[class*="Tooltip__Container"] svg{
-      fill: currentColor;
+    div[class*="Tooltip__Container"] svg,
+    span[class*="InlineSvg__Wrapper"] > svg {
+      fill: currentColor; /* dynamic color instead of black */
     }
 
     p[class*="__Label"],
     span[class*="__Label"],
     div[class*="__Section"],
     button[class*="__Container"] {
-      color: inherit;
+      color: inherit; /* follow parent styles */
       text-decoration: none;
-      cursor: inherit;
+      cursor: inherit; /* follow parent styles */
     }
 
     div[class*="MetadataStats"] {
-      cursor: default;
+      cursor: default; /* no pointer */
     }
 
     div[class*="SongHeaderWithPrimis__Information"] div[class*="HeaderCreditsPrimis__Container"] {
+      /* using flexbox with wrapping */
       display: flex;
       flex-direction: row;
       flex-wrap: wrap;
@@ -2492,9 +2494,9 @@ Genius:  ${originalUrl}
       margin: 0;
     }
     
-    div[class*="SongHeaderWithPrimis__Right"]{
-      background-color: var(--ygl-infobox-background);
-      padding: 18px 26px;
+    div[class*="SongHeaderWithPrimis__Right"] {
+      background-color: var(--ygl-infobox-background); /* give some color to info container background */
+      padding: 18px 26px; /* looks better */
     }
 
     div[data-lyrics-container][class*="Lyrics__Container"] {
@@ -2529,12 +2531,12 @@ Genius:  ${originalUrl}
     }
 
     div[class*="MetadataStats__Stats"] {  
+      /* using flexbox with wrapping */
       display: flex;
-      flex-wrap: wrap;
-      white-space: nowrap;    
+      flex-wrap: wrap; /* element blocks with wrapping */
+      white-space: nowrap; /* text itself no wrapping */
       row-gap: 4px;
       column-gap: 16px;
-      white-space: nowrap;
       margin-top: 6px;
     }
 
@@ -2556,35 +2558,31 @@ Genius:  ${originalUrl}
     }
 
     div[class*="SongHeaderWithPrimis__Information"] {
-      --ygl-container-display: '-NULL-';
+      --ygl-container-display: '-NULL-'; /* all under info would not hide */
     }
 
     div[class*="Footer"],
     div[class*="Leaderboard"] {
-      display: none;
+      display: none; /* unnessary info */
     }
 
     div[class*="SongPage__Section"] #about,
     div[class*="SongPage__Section"] #about ~ *,
     div[class*="SongPage__Section"] #comments,
     div[class*="SongPage__Section"] #comments ~ * {
-      display: none;
+      display: none; /* unnessary info */
     }
     
     div[class*="SongPage__Section"] #lyrics-root-pin-spacer {
-      padding-top: 12px;
+      padding-top: 12px; /* look better */
     }
 
     div[class*="Header"] {
-      max-width: unset;
-    }
-
-    span[class*="InlineSvg__Wrapper"] > svg {
-      fill: currentColor;
+      max-width: unset; /* default just 50%; want full width */
     }
 
     div[class*="SongHeader"] h1[font-size="medium"] {
-      font-size: 140%;
+      font-size: 140%; /* make song header title smaller */
     }
 
     /* the following shall apply with padding-top: 50vh */
@@ -2593,7 +2591,7 @@ Genius:  ${originalUrl}
     .genius-lyrics-header-container {
       posiiton: relative; /* set 100% width for inner absolute box */
     }
-    .genius-lyrics-header-container > * {
+    .genius-lyrics-header-container > * {  /* main purpose for adding class using CSS event triggering; avoid :has() */
       --genius-lyrics-header-content-display: none;
       display: var(--genius-lyrics-header-content-display); /* none by default */
     }
@@ -2607,7 +2605,11 @@ Genius:  ${originalUrl}
     }
 
     [class*="MetadataStats__Container"] {
-      max-width: 65%;
+      max-width: 65%; /* looks better */
+    }
+
+    div[class*="Lyrics__Container"][data-lyrics-container="true"] {
+      word-break: keep-all; /* not only a single lyrics character get wrapped. the whole lyrics word will be wrapped */
     }
     `
 
