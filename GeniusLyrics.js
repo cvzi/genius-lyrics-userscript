@@ -2772,6 +2772,7 @@ pre{white-space:pre-wrap}
           if (typeof text === 'string') {
             return `<svg${w}>` + text.substring(5)
           }
+          text = null
         }
         return ''
       })
@@ -3173,7 +3174,7 @@ pre{white-space:pre-wrap}
     }
   }
 
-  /* eslint-disable quotes, comma-dangle */
+  /* eslint-disable quotes, comma-dangle, indent */
   // to check validity of the content style being used in defaultCSS
   const defaultStyleCheckerArr = [".dTXQYT", ".ilfajN", ".bIwkeM", ".dIgauN", ".jOhzET", ".kokouQ", ".xQwqG", ".jDxAhO", ".dawSPu", ".cmIqeW", ".hTPksM", ".hVAZmF", ".cLBJdA", ".cpvLYi", ".kMDkxm", ".leLkHK", ".cRrFdP", ".dvOJud", ".fqAixv", ".cVGQZE", ".eRbhLo", ".huhsMa", ".dCKKNS", ".kMItKF", ".gjSNHg", ".itbKya", ".eMjKRh", ".eQViPi", ".ctylSH", ".gAieh", ".csMTdh", ".jecoie", ".jiZgac", ".brVVKA", ".iMmhUH", ".iFxQsP", ".hudniQ", ".dnpvgJ", ".jSgIpQ", ".fmRrc", ".iEXgTT", ".heddkF", ".ENCiS", ".iwZJzz", ".bBMTMQ", ".dyewdM", ".ePvBqA", ".kJxpEi", ".ueUKD", ".fraZOY", ".kMKmmz", ".hQgDBO", ".fUyrrM", ".fVWWod", ".lfAvEQ", ".fdEmdh", ".fHdUT", ".jrjShc", ".YYrds", ".fMoZxb", ".hXQMRu", ".eDBQeK", ".rncXA", ".kkpCaw", ".eqRvkr", ".bcLwQh", ".hFPGxa", ".lbdVJq", ".hGLtDM", ".bXbziL", ".ldjaSd", ".cSKAwQ", ".fPpEQG", ".vrxkS", ".cabqMy", ".fyUjsz", ".esoPOn", ".uEMeZ", ".ceKRFE", ".bZsZHM", ".iRKrFW", ".dWcYSx", ".fognin", ".lopKUj", ".eSiFpi", ".cVjBCj", ".frgRKG", ".bIlJhm", ".lgbAKX", ".kojbqH", ".jZrfsi", ".euQZer", ".gRiFtA", ".fOsBvT", ".gTBWpu", ".fHiIPi", ".iXrcWP", ".cziiuX", ".fRTMWj", ".iuNSEV", ".uGviF", ".kTXFZQ", ".hAxKUd", ".boDKcJ", ".gwrcCS", ".gUdeqB", ".iDkyVM", ".kNXBDG", ".eIiYRJ", ".hNrwqx", ".bMBKQI", ".dcpJwP", ".cXvCRB", ".bcJzkW", ".UKjRP", ".noscroll"]
   // store all the svgs displayed in the lyrics panel; reduce cache size
@@ -3207,7 +3208,7 @@ pre{white-space:pre-wrap}
       "<svg><path d=\"M11 2c4 0 7.26 3.85 8.6 5.72-1.34 1.87-4.6 5.73-8.6 5.73S3.74 9.61 2.4 7.73C3.74 5.86 7 2 11 2m0-2C4.45 0 0 7.73 0 7.73s4.45 7.73 11 7.73 11-7.73 11-7.73S17.55 0 11 0z\"></path><path d=\"M11 5a2.73 2.73 0 1 1-2.73 2.73A2.73 2.73 0 0 1 11 5m0-2a4.73 4.73 0 1 0 4.73 4.73A4.73 4.73 0 0 0 11 3z\"></path></svg>",
       "<svg><path d=\"M24 10h-10v-10h-4v10h-10v4h10v10h4v-10h10z\"></path></svg>",
   ]
-  /* eslint-enable quotes, comma-dangle */
+  /* eslint-enable quotes, comma-dangle, indent */
 
   async function trimHTMLReponseTextFn (htmlText) {
     /*
@@ -3290,6 +3291,7 @@ pre{white-space:pre-wrap}
     })
     const om = new Set()
     htmlText = htmlText.replace(/\s*<svg\b[^<]*(?:(?!<\/svg>)<[^<]*)*<\/svg>\s*/gi, (m) => {
+      m = m.trim()
       const mi = m.indexOf('><') // <svg .... ><....  </svg>
       if (mi < 0) return m
       const n = `<svg><${m.substring(mi + 2).trim()}`
