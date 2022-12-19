@@ -69,7 +69,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     }
   })
 
-  function unScroll() { // unable to do delete window.xxx
+  function unScroll () { // unable to do delete window.xxx
     // only for mainWin
     window.lastScrollTopPosition = null
     window.scrollLyricsBusy = false
@@ -552,7 +552,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       if (!result) return
       const primaryArtist = result.primary_artist || 0
       const minimizeHit = genius.minimizeHit
-      const isGeniusTranslationLike = primaryArtist && (primaryArtist.slug||'').startsWith('Genius-') && hit.result.language !== 'romanization'
+      const isGeniusTranslationLike = primaryArtist && (primaryArtist.slug || '').startsWith('Genius-') && hit.result.language !== 'romanization'
       delete hit.highlights // always []
       delete result.annotation_count // always 0
       delete result.pyongs_count // always null
@@ -1184,8 +1184,8 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     const rect = a.getBoundingClientRect()
     const bodyH = document.scrollingElement.clientHeight
 
-    let upSpace = Math.max(rect.top, 0)
-    let downSpace = bodyH - Math.min(rect.bottom, bodyH)
+    const upSpace = Math.max(rect.top, 0)
+    const downSpace = bodyH - Math.min(rect.bottom, bodyH)
 
     if (isContentChanged) {
       c.style.setProperty('--annotation-container-syrt', `${window.scrollY + rect.top}px`)
@@ -1207,7 +1207,9 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         if (a !== null) {
           setAnnotationsContainerTop(c, a, false)
         }
+        a = null
       }
+      c = null
     })
   }
 
@@ -1415,7 +1417,6 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
           c.style.display = 'block'
           c.style.opacity = 1.0
           setAnnotationsContainerTop(c, a, true)
-
 
           const arrow = c.querySelector('.arrow') || c.appendChild(document.createElement('div'))
           arrow.className = 'arrow'
@@ -2769,13 +2770,12 @@ pre{white-space:pre-wrap}
         if (d >= 0) {
           let text = defaultSVGBoxs[d]
           if (typeof text === 'string') {
-            return `<svg${w}>` + text.substring(5);
+            return `<svg${w}>` + text.substring(5)
           }
         }
         return ''
       })
     return html
-
   }
 
   function contentStyling () {
@@ -2804,7 +2804,7 @@ pre{white-space:pre-wrap}
 
   function contentStylingIframe (html, contentStyle) {
     if (!contentStyle) return html
-    let css = `
+    const css = `
     body {
       background-color: var(--egl-background);
       color: var(--egl-color);
@@ -3173,9 +3173,9 @@ pre{white-space:pre-wrap}
     }
   }
 
-  /* eslint-disable quotes*/
+  /* eslint-disable quotes, comma-dangle */
   // to check validity of the content style being used in defaultCSS
-  const defaultStyleCheckerArr = [ ".dTXQYT", ".ilfajN", ".bIwkeM", ".dIgauN", ".jOhzET", ".kokouQ", ".xQwqG", ".jDxAhO", ".dawSPu", ".cmIqeW", ".hTPksM", ".hVAZmF", ".cLBJdA", ".cpvLYi", ".kMDkxm", ".leLkHK", ".cRrFdP", ".dvOJud", ".fqAixv", ".cVGQZE", ".eRbhLo", ".huhsMa", ".dCKKNS", ".kMItKF", ".gjSNHg", ".itbKya", ".eMjKRh", ".eQViPi", ".ctylSH", ".gAieh", ".csMTdh", ".jecoie", ".jiZgac", ".brVVKA", ".iMmhUH", ".iFxQsP", ".hudniQ", ".dnpvgJ", ".jSgIpQ", ".fmRrc", ".iEXgTT", ".heddkF", ".ENCiS", ".iwZJzz", ".bBMTMQ", ".dyewdM", ".ePvBqA", ".kJxpEi", ".ueUKD", ".fraZOY", ".kMKmmz", ".hQgDBO", ".fUyrrM", ".fVWWod", ".lfAvEQ", ".fdEmdh", ".fHdUT", ".jrjShc", ".YYrds", ".fMoZxb", ".hXQMRu", ".eDBQeK", ".rncXA", ".kkpCaw", ".eqRvkr", ".bcLwQh", ".hFPGxa", ".lbdVJq", ".hGLtDM", ".bXbziL", ".ldjaSd", ".cSKAwQ", ".fPpEQG", ".vrxkS", ".cabqMy", ".fyUjsz", ".esoPOn", ".uEMeZ", ".ceKRFE", ".bZsZHM", ".iRKrFW", ".dWcYSx", ".fognin", ".lopKUj", ".eSiFpi", ".cVjBCj", ".frgRKG", ".bIlJhm", ".lgbAKX", ".kojbqH", ".jZrfsi", ".euQZer", ".gRiFtA", ".fOsBvT", ".gTBWpu", ".fHiIPi", ".iXrcWP", ".cziiuX", ".fRTMWj", ".iuNSEV", ".uGviF", ".kTXFZQ", ".hAxKUd", ".boDKcJ", ".gwrcCS", ".gUdeqB", ".iDkyVM", ".kNXBDG", ".eIiYRJ", ".hNrwqx", ".bMBKQI", ".dcpJwP", ".cXvCRB", ".bcJzkW", ".UKjRP", ".noscroll"]
+  const defaultStyleCheckerArr = [".dTXQYT", ".ilfajN", ".bIwkeM", ".dIgauN", ".jOhzET", ".kokouQ", ".xQwqG", ".jDxAhO", ".dawSPu", ".cmIqeW", ".hTPksM", ".hVAZmF", ".cLBJdA", ".cpvLYi", ".kMDkxm", ".leLkHK", ".cRrFdP", ".dvOJud", ".fqAixv", ".cVGQZE", ".eRbhLo", ".huhsMa", ".dCKKNS", ".kMItKF", ".gjSNHg", ".itbKya", ".eMjKRh", ".eQViPi", ".ctylSH", ".gAieh", ".csMTdh", ".jecoie", ".jiZgac", ".brVVKA", ".iMmhUH", ".iFxQsP", ".hudniQ", ".dnpvgJ", ".jSgIpQ", ".fmRrc", ".iEXgTT", ".heddkF", ".ENCiS", ".iwZJzz", ".bBMTMQ", ".dyewdM", ".ePvBqA", ".kJxpEi", ".ueUKD", ".fraZOY", ".kMKmmz", ".hQgDBO", ".fUyrrM", ".fVWWod", ".lfAvEQ", ".fdEmdh", ".fHdUT", ".jrjShc", ".YYrds", ".fMoZxb", ".hXQMRu", ".eDBQeK", ".rncXA", ".kkpCaw", ".eqRvkr", ".bcLwQh", ".hFPGxa", ".lbdVJq", ".hGLtDM", ".bXbziL", ".ldjaSd", ".cSKAwQ", ".fPpEQG", ".vrxkS", ".cabqMy", ".fyUjsz", ".esoPOn", ".uEMeZ", ".ceKRFE", ".bZsZHM", ".iRKrFW", ".dWcYSx", ".fognin", ".lopKUj", ".eSiFpi", ".cVjBCj", ".frgRKG", ".bIlJhm", ".lgbAKX", ".kojbqH", ".jZrfsi", ".euQZer", ".gRiFtA", ".fOsBvT", ".gTBWpu", ".fHiIPi", ".iXrcWP", ".cziiuX", ".fRTMWj", ".iuNSEV", ".uGviF", ".kTXFZQ", ".hAxKUd", ".boDKcJ", ".gwrcCS", ".gUdeqB", ".iDkyVM", ".kNXBDG", ".eIiYRJ", ".hNrwqx", ".bMBKQI", ".dcpJwP", ".cXvCRB", ".bcJzkW", ".UKjRP", ".noscroll"]
   // store all the svgs displayed in the lyrics panel; reduce cache size
   const defaultSVGBoxs =
     [
@@ -3207,9 +3207,9 @@ pre{white-space:pre-wrap}
       "<svg><path d=\"M11 2c4 0 7.26 3.85 8.6 5.72-1.34 1.87-4.6 5.73-8.6 5.73S3.74 9.61 2.4 7.73C3.74 5.86 7 2 11 2m0-2C4.45 0 0 7.73 0 7.73s4.45 7.73 11 7.73 11-7.73 11-7.73S17.55 0 11 0z\"></path><path d=\"M11 5a2.73 2.73 0 1 1-2.73 2.73A2.73 2.73 0 0 1 11 5m0-2a4.73 4.73 0 1 0 4.73 4.73A4.73 4.73 0 0 0 11 3z\"></path></svg>",
       "<svg><path d=\"M24 10h-10v-10h-4v10h-10v4h10v10h4v-10h10z\"></path></svg>",
   ]
-  /* eslint-enable quotes*/
+  /* eslint-enable quotes, comma-dangle */
 
-  async function trimHTMLReponseTextFn(htmlText) {
+  async function trimHTMLReponseTextFn (htmlText) {
     /*
 
     original:                                         200 ~ 400 KB
@@ -3220,7 +3220,7 @@ pre{white-space:pre-wrap}
 
     const originalHtmlText = htmlText
 
-    //unicode fix
+    // unicode fix
     htmlText = htmlText.replace(/[\t\x20\u0009-\u000D\u0085\u00A0\u1680\u2000-\u200A\u2028-\u2029\u202F\u205F\u3000]+/g, ' ') /* spacing */ // eslint-disable-line no-control-regex
     htmlText = htmlText.replace(/[\u180E\u200B-\u200D\u2060\uFEFF]/g, '')
 
@@ -3233,14 +3233,13 @@ pre{white-space:pre-wrap}
       return ''
     })
 
-    /* eslint-disable no-useless-escape*/
     // minimize style
     htmlText = htmlText.replace(/\s*<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>\s*/gi, (m) => {
-      m = m.replace(/\/\*[^\/\*]*\*\//g, '') // comments
+      m = m.replace(/\/\*[^/*]*\*\//g, '') // comments
 
       if (genius.option.enableStyleSubstitution) {
-        m = m.replace(/\s[\w\-\.\[\]\=\"]+\{content:\"[^\"]*\"\}\s*/g, ' ') // content:'xxx'
-        m = m.replace(/\s+\!important;/g, ';') // !important
+        m = m.replace(/\s[\w\-.[\]="]+\{content:"[^"]*"\}\s*/g, ' ') // content:'xxx'
+        m = m.replace(/\s+!important;/g, ';') // !important
         // this allows further reduction of html text size, but it shall be used with content styling
         // since some genius css is removed in the minimized version (default CSS)
 
@@ -3248,7 +3247,7 @@ pre{white-space:pre-wrap}
           // font-face
           console.log('Genius Lyrics - REPX1')
           return '<style id="REPX1"></style>'
-        } else if (m.indexOf('<style data-styled=\"true\" data-styled-version=\"5.1.0\">') >= 0) {
+        } else if (m.indexOf('<style data-styled="true" data-styled-version="5.1.0">') >= 0) {
           const arr = defaultStyleCheckerArr
           let match = true
           const p = []
@@ -3256,7 +3255,7 @@ pre{white-space:pre-wrap}
             if (m.indexOf(t) < 0) {
               p.push(t)
               match = false
-              //break
+              // break
             }
           }
           if (match) {
@@ -3291,10 +3290,10 @@ pre{white-space:pre-wrap}
     })
     const om = new Set()
     htmlText = htmlText.replace(/\s*<svg\b[^<]*(?:(?!<\/svg>)<[^<]*)*<\/svg>\s*/gi, (m) => {
-      let mi = m.indexOf('><') // <svg .... ><....  </svg>
+      const mi = m.indexOf('><') // <svg .... ><....  </svg>
       if (mi < 0) return m
-      let n = `<svg><${m.substring(mi + 2).trim()}`
-      let match = defaultSVGBoxs.indexOf(n); // array search
+      const n = `<svg><${m.substring(mi + 2).trim()}`
+      const match = defaultSVGBoxs.indexOf(n) // array search
       if (match >= 0) {
         return `${m.substring(0, mi)}><svg-repx${match} v1 /></svg>`
       } else {
@@ -3309,7 +3308,6 @@ pre{white-space:pre-wrap}
       if (m.startsWith('<div style="display: none;">')) return ''
       return m
     })
-    /* eslint-enable no-useless-escape*/
 
     console.log(`Genius Lyrics - HTML text size reduced from ${metricPrefix(originalHtmlText.length, 2, 1024)} to ${metricPrefix(htmlText.length, 2, 1024)}`)
     // console.log([htmlText])
@@ -3359,7 +3357,7 @@ pre{white-space:pre-wrap}
   }
 
   function showLyrics (songInfo, searchresultsLengths) {
-
+    // showLyrics
     const currentFunctionClosureIdentifier = ((window.showLyricsIdentifier || 0) + 1) % 100000000
     window.showLyricsIdentifier = currentFunctionClosureIdentifier // if this function closure is no longer valid, they will be not equal.
     // setup DOMs
@@ -3386,7 +3384,7 @@ pre{white-space:pre-wrap}
       console.warn('The parameter \'searchresultsLengths\' in showLyrics() is incorrect.')
       return
     }
-    
+
     let spinnerDOM = null
     if ('customSpinnerDOM' in custom && typeof custom.customSpinnerDOM === 'function') {
       spinnerDOM = custom.customSpinnerDOM(container, bar, iframe)
@@ -3431,7 +3429,7 @@ pre{white-space:pre-wrap}
       isCancelLoadingEnabled = false
     })
 
-    function isThisShowLyricsInvalidated() {
+    function isThisShowLyricsInvalidated () {
       return isShowLyricsInterrupted === true || window.showLyricsIdentifier !== currentFunctionClosureIdentifier
     }
 
@@ -3644,20 +3642,23 @@ pre{white-space:pre-wrap}
       const hits = r.response.sections[0].hits
       if (hits.length === 0) {
         if (typeof callback === 'function') {
-          callback({ hits, status: 200 })
+          const res = { hits, status: 200 }
+          callback(res)
         } else {
           window.alert(custom.scriptName + '\n\nNo search results')
         }
       } else {
         if (typeof callback === 'function') {
-          callback({ hits, status: 200 })
+          const res = { hits, status: 200 }
+          callback(res)
         } else {
           custom.listSongs(hits, container, query)
         }
       }
     }, function geniusSearchErrorCb () {
       if (typeof callback === 'function') {
-        callback({ status: 500 })
+        const res = { status: 500 }
+        callback(res)
       }
       // do nothing
     })
@@ -4003,7 +4004,6 @@ pre{white-space:pre-wrap}
       custom.addCss()
     }
   }
-  
 
   async function mainRunner () {
     // get values from GM
@@ -4076,9 +4076,10 @@ pre{white-space:pre-wrap}
     let html = e.data.html
     html = defaultCSS(html)
     let contentStyle = e.data.contentStyle
-    if (typeof contentStyle == 'string' && contentStyle.length > 0) {
+    if (typeof contentStyle === 'string' && contentStyle.length > 0) {
       html = contentStylingIframe(html, contentStyle)
     }
+    contentStyle = null
     document.documentElement.innerHTML = html
 
     const communicationWindow = e.source // top
@@ -4118,7 +4119,6 @@ pre{white-space:pre-wrap}
         }
       }, true)
     }
-
 
     // page rendered via CSS rendering
     const race1 = new Promise(resolve => {
