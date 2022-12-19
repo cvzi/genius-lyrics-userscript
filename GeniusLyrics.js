@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.6.1
+// @version      5.6.2
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2020, cuzi (https://github.com/cvzi)
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -1797,11 +1797,21 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
           const doc = new window.DOMParser().parseFromString(html, 'text/html')
           const originalUrl = doc.querySelector('meta[property="og:url"]').content
 
-          if (html.indexOf('__PRELOADED_STATE__ = JSON.parse(\'') !== -1) {
+          if (html.indexOf('class="Lyrics__Container') !== -1) {
+            const parts = html.split('class="Lyrics__Container')[1].split('>')
+            parts.shift()
+            const lyricsContainerHTML = '<div>' + parts.join('>').split('<div class="RightSidebar')[0]
+
+            const root = document.createElement('div')
+            root.innerHTML = lyricsContainerHTML
+
+            /*
+           if (html.indexOf('__PRELOADED_STATE__ = JSON.parse(\'') !== -1) {
             const jsonStr = html.split('__PRELOADED_STATE__ = JSON.parse(\'')[1].split('\');\n')[0].replace(/\\([^\\])/g, '$1').replace(/\\\\/g, '\\')
             const jData = JSON.parse(jsonStr)
-
             const root = parsePreloadedStateData(jData.songPage.lyricsData.body, document.createElement('div'))
+*/
+            parsePreloadedStateData({})
 
             // Annotations
             for (const a of root.querySelectorAll('a[data-id]')) {
@@ -2068,11 +2078,20 @@ Genius:  ${originalUrl}
           const doc = new window.DOMParser().parseFromString(html, 'text/html')
           const originalUrl = doc.querySelector('meta[property="og:url"]').content
 
-          if (html.indexOf('__PRELOADED_STATE__ = JSON.parse(\'') !== -1) {
+          if (html.indexOf('class="Lyrics__Container') !== -1) {
+            const parts = html.split('class="Lyrics__Container')[1].split('>')
+            parts.shift()
+            const lyricsContainerHTML = '<div>' + parts.join('>').split('<div class="RightSidebar')[0]
+
+            const root = document.createElement('div')
+            root.innerHTML = lyricsContainerHTML
+
+            /*
+           if (html.indexOf('__PRELOADED_STATE__ = JSON.parse(\'') !== -1) {
             const jsonStr = html.split('__PRELOADED_STATE__ = JSON.parse(\'')[1].split('\');\n')[0].replace(/\\([^\\])/g, '$1').replace(/\\\\/g, '\\')
             const jData = JSON.parse(jsonStr)
-
             const root = parsePreloadedStateData(jData.songPage.lyricsData.body, document.createElement('div'))
+*/
 
             // Annotations
             for (const a of root.querySelectorAll('a[data-id]')) {
