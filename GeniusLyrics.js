@@ -3173,8 +3173,9 @@ pre{white-space:pre-wrap}
     }
   }
 
+  /* eslint-disable quotes*/
   // to check validity of the content style being used in defaultCSS
-  const defaultStyleCheckerArr = [ ".dTXQYT", ".ilfajN", ".bIwkeM", ".dIgauN", ".jOhzET", ".kokouQ", ".xQwqG", ".jDxAhO", ".dawSPu", ".cmIqeW", ".hTPksM", ".hVAZmF", ".cLBJdA", ".cpvLYi", ".kMDkxm", ".leLkHK", ".cRrFdP", ".dvOJud", ".fqAixv", ".cVGQZE", ".eRbhLo", ".huhsMa", ".dCKKNS", ".kMItKF", ".gjSNHg", ".itbKya", ".eMjKRh", ".eQViPi", ".ctylSH", ".gAieh", ".csMTdh", ".jecoie", ".jiZgac", ".brVVKA", ".iMmhUH", ".iFxQsP", ".hudniQ", ".dnpvgJ", ".jSgIpQ", ".fmRrc", ".iEXgTT", ".heddkF", ".ENCiS", ".iwZJzz", ".bBMTMQ", ".dyewdM", ".ePvBqA", ".kJxpEi", ".ueUKD", ".fraZOY", ".kMKmmz", ".hQgDBO", ".fUyrrM", ".fVWWod", ".lfAvEQ", ".fdEmdh", ".fHdUT", ".jrjShc", ".YYrds", ".fMoZxb", ".hXQMRu", ".eDBQeK", ".rncXA", ".kkpCaw", ".eqRvkr", ".bcLwQh", ".hFPGxa", ".lbdVJq", ".hGLtDM", ".bXbziL", ".ldjaSd", ".cSKAwQ", ".fPpEQG", ".vrxkS", ".cabqMy", ".fyUjsz", ".esoPOn", ".uEMeZ", ".ceKRFE", ".bZsZHM", ".iRKrFW", ".dWcYSx", ".fognin", ".lopKUj", ".eSiFpi", ".cVjBCj", ".frgRKG", ".bIlJhm", ".lgbAKX", ".kojbqH", ".jZrfsi", ".euQZer", ".gRiFtA", ".fOsBvT", ".gTBWpu", ".fHiIPi", ".iXrcWP", ".cziiuX", ".fRTMWj", ".iuNSEV", ".uGviF", ".kTXFZQ", ".hAxKUd", ".boDKcJ", ".gwrcCS", ".gUdeqB", ".iDkyVM", ".kNXBDG", ".eIiYRJ", ".hNrwqx", ".bMBKQI", ".dcpJwP", ".cXvCRB", ".bcJzkW", ".UKjRP", ".noscroll"];
+  const defaultStyleCheckerArr = [ ".dTXQYT", ".ilfajN", ".bIwkeM", ".dIgauN", ".jOhzET", ".kokouQ", ".xQwqG", ".jDxAhO", ".dawSPu", ".cmIqeW", ".hTPksM", ".hVAZmF", ".cLBJdA", ".cpvLYi", ".kMDkxm", ".leLkHK", ".cRrFdP", ".dvOJud", ".fqAixv", ".cVGQZE", ".eRbhLo", ".huhsMa", ".dCKKNS", ".kMItKF", ".gjSNHg", ".itbKya", ".eMjKRh", ".eQViPi", ".ctylSH", ".gAieh", ".csMTdh", ".jecoie", ".jiZgac", ".brVVKA", ".iMmhUH", ".iFxQsP", ".hudniQ", ".dnpvgJ", ".jSgIpQ", ".fmRrc", ".iEXgTT", ".heddkF", ".ENCiS", ".iwZJzz", ".bBMTMQ", ".dyewdM", ".ePvBqA", ".kJxpEi", ".ueUKD", ".fraZOY", ".kMKmmz", ".hQgDBO", ".fUyrrM", ".fVWWod", ".lfAvEQ", ".fdEmdh", ".fHdUT", ".jrjShc", ".YYrds", ".fMoZxb", ".hXQMRu", ".eDBQeK", ".rncXA", ".kkpCaw", ".eqRvkr", ".bcLwQh", ".hFPGxa", ".lbdVJq", ".hGLtDM", ".bXbziL", ".ldjaSd", ".cSKAwQ", ".fPpEQG", ".vrxkS", ".cabqMy", ".fyUjsz", ".esoPOn", ".uEMeZ", ".ceKRFE", ".bZsZHM", ".iRKrFW", ".dWcYSx", ".fognin", ".lopKUj", ".eSiFpi", ".cVjBCj", ".frgRKG", ".bIlJhm", ".lgbAKX", ".kojbqH", ".jZrfsi", ".euQZer", ".gRiFtA", ".fOsBvT", ".gTBWpu", ".fHiIPi", ".iXrcWP", ".cziiuX", ".fRTMWj", ".iuNSEV", ".uGviF", ".kTXFZQ", ".hAxKUd", ".boDKcJ", ".gwrcCS", ".gUdeqB", ".iDkyVM", ".kNXBDG", ".eIiYRJ", ".hNrwqx", ".bMBKQI", ".dcpJwP", ".cXvCRB", ".bcJzkW", ".UKjRP", ".noscroll"]
   // store all the svgs displayed in the lyrics panel; reduce cache size
   const defaultSVGBoxs =
     [
@@ -3206,6 +3207,7 @@ pre{white-space:pre-wrap}
       "<svg><path d=\"M11 2c4 0 7.26 3.85 8.6 5.72-1.34 1.87-4.6 5.73-8.6 5.73S3.74 9.61 2.4 7.73C3.74 5.86 7 2 11 2m0-2C4.45 0 0 7.73 0 7.73s4.45 7.73 11 7.73 11-7.73 11-7.73S17.55 0 11 0z\"></path><path d=\"M11 5a2.73 2.73 0 1 1-2.73 2.73A2.73 2.73 0 0 1 11 5m0-2a4.73 4.73 0 1 0 4.73 4.73A4.73 4.73 0 0 0 11 3z\"></path></svg>",
       "<svg><path d=\"M24 10h-10v-10h-4v10h-10v4h10v10h4v-10h10z\"></path></svg>",
   ]
+  /* eslint-enable quotes*/
 
   async function trimHTMLReponseTextFn(htmlText) {
     /*
@@ -3231,13 +3233,14 @@ pre{white-space:pre-wrap}
       return ''
     })
 
+    /* eslint-disable no-useless-escape*/
     // minimize style
     htmlText = htmlText.replace(/\s*<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>\s*/gi, (m) => {
       m = m.replace(/\/\*[^\/\*]*\*\//g, '') // comments
 
       if (genius.option.enableStyleSubstitution) {
         m = m.replace(/\s[\w\-\.\[\]\=\"]+\{content:\"[^\"]*\"\}\s*/g, ' ') // content:'xxx'
-        m = m.replace(/\s+\!important\;/g, ';') // !important
+        m = m.replace(/\s+\!important;/g, ';') // !important
         // this allows further reduction of html text size, but it shall be used with content styling
         // since some genius css is removed in the minimized version (default CSS)
 
@@ -3283,7 +3286,7 @@ pre{white-space:pre-wrap}
       return ''
     })
     // comments tag
-    htmlText = htmlText.replace(/\s*\<\!\-\-[^\-\>]+\-\-\>\s*/gi, (m) => {
+    htmlText = htmlText.replace(/\s*<!--[^\->]+-->\s*/gi, (m) => {
       return ''
     })
     const om = new Set()
@@ -3306,6 +3309,7 @@ pre{white-space:pre-wrap}
       if (m.startsWith('<div style="display: none;">')) return ''
       return m
     })
+    /* eslint-enable no-useless-escape*/
 
     console.log(`Genius Lyrics - HTML text size reduced from ${metricPrefix(originalHtmlText.length, 2, 1024)} to ${metricPrefix(htmlText.length, 2, 1024)}`)
     // console.log([htmlText])
