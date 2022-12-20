@@ -1176,7 +1176,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     animation: appDomAppended2 1ms linear 0s 1 normal forwards;
   }
 
-  #application.app11 div[class*="SongHeaderWithPrimis__Container"] > div[class*="SongHeaderWithPrimis__Right"] {
+  #application.app11 div[class*="SongHeader"][class*="__Container"] > div[class*="SongHeader"][class*="__Right"] {
     animation: songHeaderDomAppended 1ms linear 0s 1 normal forwards;
   }
   `
@@ -2868,7 +2868,7 @@ pre{white-space:pre-wrap}
     }
     
     div[class*="SongPageGrid"],
-    div[class*="SongHeaderWithPrimis__Container"] {
+    div[class*="SongHeader"][class*="__Container"] {
       background-image: none;
       /* no header background image */
     }
@@ -2885,7 +2885,7 @@ pre{white-space:pre-wrap}
       color: var(--egl-color);
     }
     
-    main[class*="Container"] h1[font-size][class*="SongHeaderWithPrimis__Title"] {
+    main[class*="Container"] h1[font-size][class*="SongHeader"][class*="__Title"] {
       margin-bottom: 8px;
     }
     
@@ -2895,7 +2895,7 @@ pre{white-space:pre-wrap}
       width: 100%;
     }
     
-    div[class*="SongHeaderWithPrimis__Left"] {
+    div[class*="SongHeader"][class*="__Left"] {
       display: none;
       /* just empty space */
     }
@@ -2992,7 +2992,7 @@ pre{white-space:pre-wrap}
       font-size: inherit;
     }
     
-    div[class*="SongHeaderWithPrimis__Information"] h1+div[class*="HeaderArtistAndTracklistPrimis"] {
+    div[class*="SongHeader"][class*="__Information"] h1+div[class*="HeaderArtistAndTracklist"] {
       font-size: 80%;
       margin-top: 10px;
       margin-bottom: 3px;
@@ -3025,7 +3025,7 @@ pre{white-space:pre-wrap}
       column-gap: 2px;
     }
     
-    div[class*="SongHeaderWithPrimis__Information"] div[class*="HeaderCreditsPrimis__List"] {
+    div[class*="SongHeader"][class*="__Information"] div[class*="HeaderCredits"][class*="__List"] {
       font-size: 85%;
     }
     
@@ -3100,12 +3100,12 @@ pre{white-space:pre-wrap}
       max-height: 80vh;
     }
     
-    div[class*="SongHeaderWithPrimis__Container"]>div[class*="SongHeaderWithPrimis__Right"].genius-lyrics-header-content {
+    div[class*="SongHeader"][class*="__Container"]>div[class*="SongHeader"][class*="__Right"].genius-lyrics-header-content {
       display: flex;
       flex-direction: column;
     }
     
-    div[class*="SongHeaderWithPrimis__Container"]>div[class*="SongHeaderWithPrimis__Right"].genius-lyrics-header-content>div {
+    div[class*="SongHeader"][class*="__Container"]>div[class*="SongHeader"][class*="__Right"].genius-lyrics-header-content>div {
       overflow: auto;
     }
     
@@ -3114,7 +3114,7 @@ pre{white-space:pre-wrap}
       /* not only a single lyrics character get wrapped. the whole lyrics word will be wrapped */
     }
     
-    div[class*="HeaderCreditsPrimis__Section"] {
+    div[class*="HeaderCredits"][class*="__Section"] {
       /* flexbox for header info */
       display: flex;
       flex-direction: row;
@@ -3172,7 +3172,7 @@ pre{white-space:pre-wrap}
       overflow: auto;
     }
     
-    [class*="SongHeaderWithPrimis"] a[href][class*="Link__"] {
+    [class*="SongHeader"] a[href][class*="Link__"] {
       --egl-color: var(--egl-link-color);
     }
     
@@ -4127,7 +4127,7 @@ pre{white-space:pre-wrap}
     function addClassNameToInfoHeader (evTarget) {
       const elm = (evTarget || 0)
       const pElm = (elm.parentNode || 0)
-      if (elm && pElm && pElm.matches('div[class*="SongHeaderWithPrimis__Container"]') && elm.matches('div[class*="SongHeaderWithPrimis__Right"]')) {
+      if (elm && pElm && pElm.matches('div[class*="SongHeader"][class*="__Container"]') && elm.matches('div[class*="SongHeader"][class*="__Right"]')) {
         // let elms = [...pElm.childNodes].filter(entry => entry !== elm)
         // removeElements(elms)
         pElm.classList.add('genius-lyrics-header-container')
