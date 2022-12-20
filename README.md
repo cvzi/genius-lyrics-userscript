@@ -6,14 +6,13 @@ It's primarily designed for Firefox with [Tampermonkey](https://addons.mozilla.o
 
 This **DOES NOT** work with Greasemonkey because of [this bug greasemonkey/issues/2574](https://github.com/greasemonkey/greasemonkey/issues/2574) in Greasemonkey.
 
-### Navigation Links:
-*   [Github - Genius Lyrics Userscript (Library)](https://github.com/cvzi/genius-lyrics-userscript/)
-*   [Greasyfork - Genius Lyrics Userscript (Library)](https://greasyfork.org/en/scripts/406698-geniuslyrics)
+Family of GeniusLyrics Userscripts:
+*   Powered by **GeniusLyrics Library** [GitHub](https://github.com/cvzi/genius-lyrics-userscript/) [Greaskfork](https://greasyfork.org/en/scripts/406698-geniuslyrics)
+*   **Spotify Genius Lyrics** [GitHub](https://github.com/cvzi/Spotify-Genius-Lyrics-userscript) [Greaskfork](https://greasyfork.org/en/scripts/377439-spotify-genius-lyrics)
+*   **Youtube Genius Lyrics** [GitHub](https://github.com/cvzi/Youtube-Genius-Lyrics-userscript) [Greaskfork](https://greasyfork.org/en/scripts/386259-youtube-genius-lyrics)
+*   **Youtube Music Genius Lyrics** [GitHub](https://github.com/cvzi/Youtube-Music-Genius-Lyrics-userscript/) [Greaskfork](https://greasyfork.org/en/scripts/406892-youtube-music-genius-lyrics)
 
-My user scripts that use this library:
-*   https://github.com/cvzi/Spotify-Genius-Lyrics-userscript
-*   https://github.com/cvzi/Youtube-Genius-Lyrics-userscript
-*   https://github.com/cvzi/Youtube-Music-Genius-Lyrics-userscript
+My other Userscripts that use this library:
 *   https://github.com/cvzi/Bandcamp-script-deluxe-edition
 
 
