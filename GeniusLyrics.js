@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.6.2
+// @version      5.6.3
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2020, cuzi (https://github.com/cvzi)
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -121,6 +121,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       getLyricsSelection,
       geniusSearch,
       searchByQuery,
+      updateAutoScrollEnabled,
       isScrollLyricsEnabled, // refer to user setting
       isScrollLyricsCallable, // refer to content rendering
       scrollLyrics,
@@ -3638,6 +3639,10 @@ pre{white-space:pre-wrap}
     })
   }
 
+  async function updateAutoScrollEnabled () {
+    const newValue = await custom.GM.getValue('autoscrollenabled')
+    autoScrollEnabled = newValue
+  }
   function isScrollLyricsEnabled () {
     return autoScrollEnabled && ('scrollLyrics' in theme) // note: if iframe is not ready, still no action
   }
@@ -3785,10 +3790,14 @@ pre{white-space:pre-wrap}
     checkAutoScrollEnabled.id = 'checkAutoScrollEnabled748'
     checkAutoScrollEnabled.checked = autoScrollEnabled === true
     const onAutoScrollEnabled = function onAutoScrollEnabledListener () {
-      if (checkAutoScrollEnabled.checked !== autoScrollEnabled) {
-        autoScrollEnabled = checkAutoScrollEnabled.checked === true
-        custom.addLyrics(true)
-        custom.GM.setValue('autoscrollenabled', autoScrollEnabled)
+      const newValue = checkAutoScrollEnabled.checked === true
+      if (newValue !== autoScrollEnabled) {
+        custom.GM.setValue('autoscrollenabled', newValue).then(() => {
+          // note: custom.addLyrics(true) shall not be required in both coding implementation in Spotify / YouTube / YouTube Music
+          updateAutoScrollEnabled()
+          // autoScrollEnabled = checkAutoScrollEnabled.checked === true
+          // custom.addLyrics(true)
+        })
       }
     }
     checkAutoScrollEnabled.addEventListener('click', onAutoScrollEnabled)
