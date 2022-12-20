@@ -2854,6 +2854,12 @@ pre{white-space:pre-wrap}
       /* adjust font to smaller size */
     }
     
+    #application:not(:hover) [data-lyrics-container="true"]::selection {
+      /* no selection when the cursor moved out */
+      color: inherit;
+      background: inherit;
+    }
+    
     div[class*="SongPageGrid"],
     div[class*="SongHeader"] {
       background-color: transparent;
