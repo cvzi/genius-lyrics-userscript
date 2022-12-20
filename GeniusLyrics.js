@@ -3790,9 +3790,9 @@ pre{white-space:pre-wrap}
     checkAutoScrollEnabled.id = 'checkAutoScrollEnabled748'
     checkAutoScrollEnabled.checked = autoScrollEnabled === true
     const onAutoScrollEnabled = function onAutoScrollEnabledListener () {
-      let newValue = checkAutoScrollEnabled.checked === true
+      const newValue = checkAutoScrollEnabled.checked === true
       if (newValue !== autoScrollEnabled) {
-        custom.GM.setValue('autoscrollenabled', newValue).then(()=>{
+        custom.GM.setValue('autoscrollenabled', newValue).then(() => {
           // note: custom.addLyrics(true) shall not be required in both coding implementation in Spotify / YouTube / YouTube Music
           updateAutoScrollEnabled()
           // autoScrollEnabled = checkAutoScrollEnabled.checked === true
