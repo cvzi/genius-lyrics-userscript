@@ -1,0 +1,179 @@
+<html><head>
+<style>
+html {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 100%;
+  background: #333;
+}
+
+#page-wrapper {
+  width: 600px;
+  background: #FFF;
+  padding: 1em;
+  margin: 1em auto;
+  min-height: 300px;
+  border-top: 5px solid #69c773;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.8);
+  display: flex;
+  flex-direction: column;
+  position:relative;
+  overflow: auto;
+  max-height:300px;
+}
+
+h4 {
+  padding:0;
+	margin: 0;
+}
+
+img {
+  max-width: 100%;
+}
+
+pre{
+  font-size:40%;
+  background: black;
+  color:white;
+  flex:1;
+}
+
+.c{
+  display:flex;
+  width:95vw;
+  flex-direction:row;
+}
+
+</style>
+  </head><body>
+<div class=c>
+<div id="page-wrapper">
+
+		<h4>File1</h4>
+		<div>
+			Select a text file: 
+			<input type="file" id="fileInput1">
+		</div>
+		<pre id="fileDisplayArea1"><pre>
+
+	</div>
+  
+  <div id="page-wrapper">
+
+		<h4>File2</h4>
+		<div>
+			Select a text file: 
+			<input type="file" id="fileInput2">
+		</div>
+		<pre id="fileDisplayArea2"><pre>
+
+	</div>
+  </div>
+  
+  </body></html>
+  <script>
+const mContents = ['', ''];
+
+function listTo(fileInput, fileDisplayArea, mi) {
+
+
+  fileInput.addEventListener('change', function(e) {
+    var file = fileInput.files[0];
+    var textType = /text.*/;
+
+    if (file.type.match(textType)) {
+      var reader = new FileReader();
+
+      reader.onload = function(e) {
+        fileDisplayArea.innerText = reader.result;
+        mContents[mi] = reader.result;
+        if (mContents[0] && mContents[1]) main()
+      }
+
+      reader.readAsText(file);
+    } else {
+      fileDisplayArea.innerText = "File not supported!"
+    }
+  });
+}
+
+listTo(document.querySelector('#fileInput1'), document.querySelector('#fileDisplayArea1'), 0)
+listTo(document.querySelector('#fileInput2'), document.querySelector('#fileDisplayArea2'), 1)
+
+function readTextFile(file) {
+
+  return new Promise(resolve => {
+    var rawFile = new XMLHttpRequest();
+    rawFile.open("GET", file, false);
+    rawFile.onreadystatechange = function() {
+      if (rawFile.readyState === 4) {
+        if (rawFile.status === 200 || rawFile.status == 0) {
+          var allText = rawFile.responseText;
+          resolve(allText);
+        }
+      }
+    }
+    rawFile.send(null);
+  })
+}
+
+// let path ='./'
+let path = 'https://github.com/cvzi/genius-lyrics-userscript/raw/master/references'
+path = path.replace(/\/$/, '')
+let file1 = `${path}/ref-1-edge-108.html`
+let file2 = `${path}/ref-1-edge-108n.html`
+
+async function main2(){
+try{
+  mContents[0] = await readTextFile(file1);
+  mContents[1] = await readTextFile(file1);
+}
+        if (mContents[0] && mContents[1]) main()
+}
+    main2()
+async function main() {
+  let mi = 0
+  async function feed(url) {
+
+    let content = mContents[mi++]
+    /*
+            let content = await fetch(url,{
+    method: 'GET',
+    mode:'cors',
+      headers: {
+        'Content-Type': 'text/html'
+      }
+            })
+            */
+    let map = new Map()
+    content.replace(/\sclass=\"([^\"><\r\n]+)\"/g, (a, c) => {
+      for (const t of c.split(/\s+/)) {
+        map.set(t, (map.get(t) || 0) + 1)
+      }
+    })
+    let arr = [...map.entries()].map(x => ({
+      key: x[0],
+      val: x[1]
+    }))
+    arr.sort((a, b) => (b.val - a.val || b.key.length - a.key.length || a.key.toUpperCase().charCodeAt(0) - b.key.toUpperCase().charCodeAt(0)))
+    arr = arr.map(x => x.key)
+    let resMap = new Map()
+    for(const t of arr){
+    
+    resMap.set(t)
+    }
+    return resMap
+
+  }
+  let r1= await feed(file1)
+  let r2=await feed(file2)
+  let p1=[...r1.keys()].filter(x=>!r2.has(x))
+  let p2=[...r2.keys()].filter(x=>!r1.has(x))
+  p1.sort()
+  p2.sort()
+  
+  console.log(p1)
+  console.log(p2)
+
+}
+
+</script>
