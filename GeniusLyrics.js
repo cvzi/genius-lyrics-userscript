@@ -1652,7 +1652,7 @@ Genius:     ${originalUrl}
 
         const lyricshtml = '<div class="SongPage__Section"><div class="Lyrics__Container">' + parts.join('>').split('<div class="RightSidebar')[0] + '</div>'
 
-        const h1 = doc.querySelector('div[class^=SongHeader][class*=Column] h1')
+        const h1 = doc.querySelector('div[class^=SongHeader] h1')
         const titleNode = h1.firstChild
         const titleA = h1.appendChild(document.createElement('a'))
         titleA.href = originalUrl
@@ -1666,7 +1666,7 @@ Genius:     ${originalUrl}
 
         headhtml = `<style>
             body {
-              background:#ffffff linear-gradient(to bottom, #fafafa, #ffffff) fixed;
+              background:#ffffff linear-gradient(to bottom, #fafafa, #ffffff) fixed !important;
               color:black;
               font-family:Roboto, Arial, sans-serif;
               max-width:${bodyWidth - 20}px;
@@ -1680,6 +1680,13 @@ Genius:     ${originalUrl}
             .annotationbox .annotationlabel {display:block;color:rgb(10, 10, 10);border-bottom:1px solid rgb(200,200,200);padding: 0;font-weight:600}
             .annotationbox .annotation_rich_text_formatting {color: black}
             .annotationbox .annotation_rich_text_formatting a {color: rgb(6, 95, 212)}
+
+            div[class*="HeaderArtistAndTracklistPrimis"] {
+              display:none;
+            }
+            div[class*="HeaderCreditsPrimis__Container"] {
+              display:none;
+            }
             ${iframeCSSCommon}
           </style>`
 
@@ -1781,7 +1788,7 @@ Genius:     ${originalUrl}
 
         const lyricshtml = '<div class="SongPage__Section"><div class="Lyrics__Container">' + parts.join('>').split('<div class="RightSidebar')[0] + '</div>'
 
-        const h1 = doc.querySelector('div[class^=SongHeader][class*=Column] h1')
+        const h1 = doc.querySelector('div[class^=SongHeader] h1')
         const titleNode = h1.firstChild
         const titleA = h1.appendChild(document.createElement('a'))
         titleA.href = originalUrl
@@ -1799,7 +1806,7 @@ Genius:     ${originalUrl}
               scrollbar-color:hsla(0,0%,100%,.3) transparent;
               scrollbar-width:auto; }
             body {
-              background-color: rgb(21, 21, 21);
+              background-color: rgb(21, 21, 21) !important;
               color:white;
               max-width: ${bodyWidth - 20}px;
               overflow-x:hidden;
@@ -1814,6 +1821,13 @@ Genius:     ${originalUrl}
             .annotationbox .annotationlabel {display:inline-block;background-color: hsla(0,0%,100%,.6);color: #000;border-radius: 2px;padding: 0 .3em;}
             .annotationbox .annotation_rich_text_formatting {color: black}
             .annotationbox .annotation_rich_text_formatting a {color: black)}
+
+            div[class*="HeaderArtistAndTracklistPrimis"] {
+              display:none;
+            }
+            div[class*="HeaderCreditsPrimis__Container"] {
+              display:none;
+            }
             ${iframeCSSCommon}
           </style>`
 
