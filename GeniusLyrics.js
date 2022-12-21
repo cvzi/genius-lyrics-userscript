@@ -977,95 +977,6 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       if (!c) {
         c = document.body.appendChild(document.createElement('div'))
         c.setAttribute('id', 'annotationcontainer958')
-        const isChrome = navigator.userAgent.indexOf('Chrome') !== -1
-        document.head.appendChild(document.createElement('style')).innerHTML = `
-        #annotationcontainer958 {
-          opacity:0.0;
-          display:none;
-          transition:opacity 500ms;
-          position:absolute;
-          background:linear-gradient(to bottom, #FFF1, 5px, white);
-          color:black;
-          font: 100 1.125rem / 1.5 "Programme", sans-serif;
-          max-width:95%;
-          min-width:60%;
-          margin:10px;
-          z-index:4;
-        }
-        #annotationcontainer958 .arrow {
-          height:30px;
-          background: white;
-        }
-        #annotationcontainer958 .arrow:before {
-          content: "";
-          position: absolute;
-          width: 0px;
-          height: 0px;
-          margin-top: 6px;
-          ${isChrome ? 'margin-left: calc(50% - 15px);' : 'inset: -1rem 0px 0px 50%;'}
-          border-style: solid;
-          border-width: 0px 25px 20px;
-          border-color: transparent transparent rgb(170, 170, 170);
-        }
-        #annotationcontainer958 .annotationcontent {
-          background-color:#E9E9E9;
-          padding:5px;
-          border-bottom-left-radius: 5px;
-          border-bottom-right-radius: 5px;
-          border-top-right-radius: 0px;
-          border-top-left-radius: 0px;
-          box-shadow: #646464 5px 5px 5px;
-        }
-        #annotationcontainer958 .annotationtab {
-          display:none
-        }
-        #annotationcontainer958 .annotationtab.selected {
-          display:block
-        }
-        #annotationcontainer958 .annotationtabbar .tabbutton {
-          background-color:#d0cece;
-          cursor:pointer;
-          user-select:none;
-          padding: 1px 7px;
-          margin: 0px 3px;
-          border-radius: 5px 5px 0px 0px;
-          box-shadow: #0000004f 2px -2px 3px;
-          float:left
-        }
-        #annotationcontainer958 .annotationtabbar .tabbutton.selected {
-          background-color:#E9E9E9;
-        }
-        #annotationcontainer958 .annotationcontent .annotationfooter {
-          user-select: none;
-        }
-        #annotationcontainer958 .annotationcontent .annotationfooter > div {
-          float: right;
-          min-width: 20%;
-          text-align: center;
-        }
-        #annotationcontainer958 .annotationcontent .redhint {
-          color:#ff146470;
-          padding:.1rem 0.7rem;
-        }
-        #annotationcontainer958 .annotationcontent .annotation-img-parent-p {
-          display: flex;
-          justify-content: center;
-          align-content: center;
-          margin: 6px;
-        }
-        #annotationcontainer958 .annotationcontent .annotation-img-parent-p > img[src][width][height]:only-child{
-          object-fit: contain;
-          height: auto;
-        }
-        #annotationcontainer958[location-dir="down"]{
-          transform: '';
-          top: calc(var(--annotation-container-syrt) + var(--annotation-container-rh) + 3px);
-        }
-        #annotationcontainer958[location-dir="up"]{
-          transform: translateY(-100%);
-          top: calc(var(--annotation-container-syrt) - 3px - 18px);  window.scrollY + rect.top - 3 - 18);
-        }
-      `
         themeCommon.setScrollUpdateLocation(c)
       }
       c.innerHTML = ''
@@ -1138,7 +1049,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
           const tabButton = annotationTabBar.appendChild(document.createElement('div'))
           tabButton.dataset.annotid = annotation.id
           tabButton.classList.add('tabbutton')
-          tabButton.addEventListener('click', themeCommon.switchTab)
+          tabButton.addEventListener('click', themeCommon.annotationSwitchTab)
           if (annotation.state === 'verified') {
             tabButton.textContent = ('Verified annotation')
           } else {
@@ -1303,7 +1214,7 @@ Genius:     ${originalUrl}
     }
     return html
   }
-
+  const isChrome = navigator.userAgent.indexOf('Chrome') !== -1
   const iframeCSSCommon =
   `
   html {
@@ -1414,6 +1325,94 @@ Genius:     ${originalUrl}
   }
   #application.app11 div[class*="SongHeaderWithPrimis__Container"] > div[class*="SongHeaderWithPrimis__Right"] {
     animation: songHeaderDomAppended 1ms linear 0s 1 normal forwards;
+  }
+
+  /* CSS for annotation container */
+  #annotationcontainer958 {
+    opacity:0.0;
+    display:none;
+    transition:opacity 500ms;
+    position:absolute;
+    background:linear-gradient(to bottom, #FFF1, 5px, white);
+    color:black;
+    font: 100 1.125rem / 1.5 "Programme", sans-serif;
+    max-width:95%;
+    min-width:60%;
+    margin:10px;
+    z-index:4;
+  }
+  #annotationcontainer958 .arrow {
+    height:30px;
+    background: white;
+  }
+  #annotationcontainer958 .arrow:before {
+    content: "";
+    position: absolute;
+    width: 0px;
+    height: 0px;
+    margin-top: 6px;
+    ${isChrome ? 'margin-left: calc(50% - 15px);' : 'inset: -1rem 0px 0px 50%;'}
+    border-style: solid;
+    border-width: 0px 25px 20px;
+    border-color: transparent transparent rgb(170, 170, 170);
+  }
+  #annotationcontainer958 .annotationcontent {
+    background-color:#E9E9E9;
+    padding:5px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    border-top-right-radius: 0px;
+    border-top-left-radius: 0px;
+    box-shadow: #646464 5px 5px 5px;
+  }
+  #annotationcontainer958 .annotationtab {
+    display:none
+  }
+  #annotationcontainer958 .annotationtab.selected {
+    display:block
+  }
+  #annotationcontainer958 .annotationtabbar .tabbutton {
+    background-color:#d0cece;
+    cursor:pointer;
+    user-select:none;
+    padding: 1px 7px;
+    margin: 0px 3px;
+    border-radius: 5px 5px 0px 0px;
+    box-shadow: #0000004f 2px -2px 3px;
+    float:left
+  }
+  #annotationcontainer958 .annotationtabbar .tabbutton.selected {
+    background-color:#E9E9E9;
+  }
+  #annotationcontainer958 .annotationcontent .annotationfooter {
+    user-select: none;
+  }
+  #annotationcontainer958 .annotationcontent .annotationfooter > div {
+    float: right;
+    min-width: 20%;
+    text-align: center;
+  }
+  #annotationcontainer958 .annotationcontent .redhint {
+    color:#ff146470;
+    padding:.1rem 0.7rem;
+  }
+  #annotationcontainer958 .annotationcontent .annotation-img-parent-p {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    margin: 6px;
+  }
+  #annotationcontainer958 .annotationcontent .annotation-img-parent-p > img[src][width][height]:only-child{
+    object-fit: contain;
+    height: auto;
+  }
+  #annotationcontainer958[location-dir="down"]{
+    transform: '';
+    top: calc(var(--annotation-container-syrt) + var(--annotation-container-rh) + 3px);
+  }
+  #annotationcontainer958[location-dir="up"]{
+    transform: translateY(-100%);
+    top: calc(var(--annotation-container-syrt) - 3px - 18px);  window.scrollY + rect.top - 3 - 18);
   }
   `
 
