@@ -264,37 +264,6 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     return sums
   }
 
-  function parsePreloadedStateData (obj, parent) {
-  // Convert genius' JSON represenation of lyrics to DOM object
-    if ('children' in obj) {
-      for (const child of obj.children) {
-        if (typeof (child) === 'string') {
-          if (child) {
-            parent.appendChild(document.createTextNode(child))
-          }
-        } else {
-          const node = parent.appendChild(document.createElement(child.tag))
-          if ('data' in child) {
-            for (const key in child.data) {
-              node.dataset[key] = child.data[key]
-            }
-          }
-          if ('attributes' in child) {
-            for (const attr in child.attributes) {
-              let value = child.attributes[attr]
-              if ((attr === 'href' || attr === 'src') && (!value.startsWith('http') && !value.startsWith('#'))) {
-                value = `https://genius.com${value}`
-              }
-              node.setAttribute(attr, value)
-            }
-          }
-          parsePreloadedStateData(child, node)
-        }
-      }
-    }
-    return parent
-  }
-
   function convertSelectionCacheV0toV1 (selectionCache) {
     // the old cache key use '--' which is possible to mixed up with the brand name
     // the new cache key use '\t' as separator
@@ -904,15 +873,13 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       // return cb(song, html, {})
       return cb(annotations)
     }
-    let m = html.match(/annotation-fragment="\d+"/g)
-    if (!m) {
-      m = html.match(/href="\/\d+\//g)
-      if (!m) {
-        // No annotations in source -> skip loading annotations from API
-        // return cb(song, html, {})
-        return cb(annotations)
-      }
+    if (html.indexOf('__ClickTarget') === -1) {
+      console.log('No annotations in source -> skip loading annotations from API')
+      // No annotations in source -> skip loading annotations from API
+      // return cb(song, html, {})
+      return cb(annotations)
     }
+    const m = html.match(/href="\/\d+\//g)
 
     const ids = m.map((s) => `ids[]=${s.match(/\d+/)[0]}`)
 
@@ -970,37 +937,15 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       }
       application = null
     },
-    annotationsRemoveAll () {
-      for (const a of document.querySelectorAll('.song_body-lyrics .referent,.song_body-lyrics a[class*="referent"]')) {
-        let tmpElement
-        while ((tmpElement = a.firstChild) !== null) {
-          a.parentNode.insertBefore(tmpElement, a)
-        }
-        a.remove()
-      }
-    },
-    annotationsRemoveAll2 () {
-      const referents = document.querySelectorAll('.song_body-lyrics .referent')
-      for (const a of referents) {
-        let tmpElement
-        while ((tmpElement = a.firstChild) !== null) {
-          a.parentNode.insertBefore(tmpElement, a)
-        }
-        a.remove()
-      }
-      // Remove right column
-      document.querySelector('.song_body.column_layout .column_layout-column_span--secondary').remove()
-      document.querySelector('.song_body.column_layout .column_layout-column_span--primary').style.width = '100%'
-    },
     // Hide footer
-    hideFooter895 () {
+    hideFooter () {
       const f = document.querySelectorAll('.footer div')
       if (f.length) {
         removeIfExists(f[0])
         removeIfExists(f[1])
       }
     },
-    hideSecondaryFooter895 () {
+    hideSecondaryFooter () {
       removeIfExists(document.querySelector('.footer.footer--secondary'))
     },
     // Hide other stuff
@@ -1009,29 +954,8 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       removeIfExists(grayBox)
       removeIfExists(document.querySelector('.header .header-expand_nav_menu'))
     },
-    showAnnotation1234A (t) {
-      const es = document.querySelectorAll('.song_body-lyrics .referent--yellow.referent--highlighted')
-      for (const e of es) {
-        e.classList.remove('referent--yellow', 'referent--highlighted')
-      }
-      t.classList.add('referent--yellow', 'referent--highlighted')
-      if (!('annotations1234' in window)) {
-        if (document.getElementById('annotationsdata1234')) {
-          window.annotations1234 = JSON.parse(document.getElementById('annotationsdata1234').innerHTML)
-        } else {
-          window.annotations1234 = {}
-          console.warn('No annotation data found #annotationsdata1234')
-        }
-      }
-    },
     // Change links to target=_blank
-    targetBlankLinks145A () {
-      const as = document.querySelectorAll('body a:not([href|="#"]):not([target="_blank"])')
-      for (const a of as) {
-        a.target = '_blank'
-      }
-    },
-    targetBlankLinks145B () {
+    targetBlankLinks () {
       const as = document.querySelectorAll('body a[href]:not([href|="#"]):not([target="_blank"])')
       for (const a of as) {
         const href = a.getAttribute('href')
@@ -1044,6 +968,328 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
           }
         }
       }
+    },
+    setScrollUpdateLocation () {
+      document.addEventListener('scroll', scrollUpdateLocationHandler, false)
+    },
+    getAnnotationsContainer (a) {
+      let c = document.getElementById('annotationcontainer958')
+      if (!c) {
+        c = document.body.appendChild(document.createElement('div'))
+        c.setAttribute('id', 'annotationcontainer958')
+        const isChrome = navigator.userAgent.indexOf('Chrome') !== -1
+        document.head.appendChild(document.createElement('style')).innerHTML = `
+        #annotationcontainer958 {
+          opacity:0.0;
+          display:none;
+          transition:opacity 500ms;
+          position:absolute;
+          background:linear-gradient(to bottom, #FFF1, 5px, white);
+          color:black;
+          font: 100 1.125rem / 1.5 "Programme", sans-serif;
+          max-width:95%;
+          min-width:60%;
+          margin:10px;
+          z-index:4;
+        }
+        #annotationcontainer958 .arrow {
+          height:30px;
+          background: white;
+        }
+        #annotationcontainer958 .arrow:before {
+          content: "";
+          position: absolute;
+          width: 0px;
+          height: 0px;
+          margin-top: 6px;
+          ${isChrome ? 'margin-left: calc(50% - 15px);' : 'inset: -1rem 0px 0px 50%;'}
+          border-style: solid;
+          border-width: 0px 25px 20px;
+          border-color: transparent transparent rgb(170, 170, 170);
+        }
+        #annotationcontainer958 .annotationcontent {
+          background-color:#E9E9E9;
+          padding:5px;
+          border-bottom-left-radius: 5px;
+          border-bottom-right-radius: 5px;
+          border-top-right-radius: 0px;
+          border-top-left-radius: 0px;
+          box-shadow: #646464 5px 5px 5px;
+        }
+        #annotationcontainer958 .annotationtab {
+          display:none
+        }
+        #annotationcontainer958 .annotationtab.selected {
+          display:block
+        }
+        #annotationcontainer958 .annotationtabbar .tabbutton {
+          background-color:#d0cece;
+          cursor:pointer;
+          user-select:none;
+          padding: 1px 7px;
+          margin: 0px 3px;
+          border-radius: 5px 5px 0px 0px;
+          box-shadow: #0000004f 2px -2px 3px;
+          float:left
+        }
+        #annotationcontainer958 .annotationtabbar .tabbutton.selected {
+          background-color:#E9E9E9;
+        }
+        #annotationcontainer958 .annotationcontent .annotationfooter {
+          user-select: none;
+        }
+        #annotationcontainer958 .annotationcontent .annotationfooter > div {
+          float: right;
+          min-width: 20%;
+          text-align: center;
+        }
+        #annotationcontainer958 .annotationcontent .redhint {
+          color:#ff146470;
+          padding:.1rem 0.7rem;
+        }
+        #annotationcontainer958 .annotationcontent .annotation-img-parent-p {
+          display: flex;
+          justify-content: center;
+          align-content: center;
+          margin: 6px;
+        }
+        #annotationcontainer958 .annotationcontent .annotation-img-parent-p > img[src][width][height]:only-child{
+          object-fit: contain;
+          height: auto;
+        }
+        #annotationcontainer958[location-dir="down"]{
+          transform: '';
+          top: calc(var(--annotation-container-syrt) + var(--annotation-container-rh) + 3px);
+        }
+        #annotationcontainer958[location-dir="up"]{
+          transform: translateY(-100%);
+          top: calc(var(--annotation-container-syrt) - 3px - 18px);  window.scrollY + rect.top - 3 - 18);
+        }
+      `
+        themeCommon.setScrollUpdateLocation(c)
+      }
+      c.innerHTML = ''
+
+      c.style.display = 'block'
+      c.style.opacity = 1.0
+      setAnnotationsContainerTop(c, a, true)
+
+      const arrow = c.querySelector('.arrow') || c.appendChild(document.createElement('div'))
+      arrow.className = 'arrow'
+
+      let annotationTabBar = c.querySelector('.annotationtabbar')
+      if (!annotationTabBar) {
+        annotationTabBar = c.appendChild(document.createElement('div'))
+        annotationTabBar.classList.add('annotationtabbar')
+      }
+      annotationTabBar.innerHTML = ''
+      annotationTabBar.style.display = 'block'
+
+      let annotationContent = c.querySelector('.annotationcontent')
+      if (!annotationContent) {
+        annotationContent = c.appendChild(document.createElement('div'))
+        annotationContent.classList.add('annotationcontent')
+      }
+      annotationContent.style.display = 'block'
+      annotationContent.innerHTML = ''
+      return [annotationTabBar, annotationContent]
+    },
+    annotationSwitchTab (ev) {
+      const id = this.dataset.annotid
+      const selectedElements = document.querySelectorAll('#annotationcontainer958 .annotationtabbar .tabbutton.selected, #annotationcontainer958 .annotationtab.selected')
+      for (const e of selectedElements) {
+        e.classList.remove('selected')
+      }
+      this.classList.add('selected')
+      document.querySelector(`#annotationcontainer958 .annotationtab[id="annottab_${id}"]`).classList.add('selected')
+    },
+    showAnnotation (ev) {
+      ev.preventDefault()
+
+      // Annotation id
+      const m = this.href.match(/\/(\d+)\//)
+      if (!m) {
+        return
+      }
+      const id = m[1]
+
+      // Highlight
+      const highlightedElements = document.querySelectorAll('.annotated.highlighted')
+      for (const e of highlightedElements) {
+        e.classList.remove('highlighted')
+      }
+      this.classList.add('highlighted')
+
+      // Load all annotations
+      if (!('annotations_userscript' in window)) {
+        if (document.getElementById('annotationsdata_for_userscript')) {
+          window.annotations_userscript = JSON.parse(document.getElementById('annotationsdata_for_userscript').innerHTML)
+        } else {
+          window.annotations_userscript = {}
+          console.log('No annotation data found #annotationsdata_for_userscript')
+        }
+      }
+
+      if (id in window.annotations_userscript) {
+        const [annotationTabBar, annotationContent] = themeCommon.getAnnotationsContainer(this)
+        let innerHTMLAddition = ''
+        for (const annotation of window.annotations_userscript[id]) {
+          // Example for multiple annotations: https://genius.com/72796/
+          const tabButton = annotationTabBar.appendChild(document.createElement('div'))
+          tabButton.dataset.annotid = annotation.id
+          tabButton.classList.add('tabbutton')
+          tabButton.addEventListener('click', themeCommon.switchTab)
+          if (annotation.state === 'verified') {
+            tabButton.textContent = ('Verified annotation')
+          } else {
+            tabButton.textContent = 'Genius annotation'
+          }
+
+          let hint = ''
+          if ('accepted_by' in annotation && !annotation.accepted_by) {
+            hint = '<span class="redhint">⚠ This annotation is unreviewed</span><br>'
+          }
+
+          let header = '<div class="annotationheader" style="float:right">'
+          let author = false
+          if (annotation.authors.length === 1) {
+            if (annotation.authors[0].name) {
+              author = decodeHTML(annotation.authors[0].name)
+              header += `<a href="${annotation.authors[0].url}">${author}</a>`
+            } else {
+              author = decodeHTML(annotation.created_by.name)
+              header += `<a href="${annotation.created_by.url}">${author}</a>`
+            }
+          } else {
+            header += `<span title="Created by ${annotation.created_by.name}">${annotation.authors.length} Contributors</span>`
+          }
+          header += '</div><br style="clear:right">'
+
+          let footer = '<div class="annotationfooter">'
+          footer += `<div title="Direct link to the annotation"><a href="${annotation.share_url}">🔗 Share</a></div>`
+          if (annotation.pyongs_count) {
+            footer += `<div title="Pyongs"> ⚡ ${annotation.pyongs_count}</div>`
+          }
+          if (annotation.comment_count) {
+            footer += `<div title="Comments"> 💬 ${annotation.comment_count}</div>`
+          }
+          footer += '<div title="Total votes">'
+          if (annotation.votes_total > 0) {
+            footer += '+'
+            footer += annotation.votes_total
+            footer += '👍'
+          } else if (annotation.votes_total < 0) {
+            footer += '-'
+            footer += annotation.votes_total
+            footer += '👎'
+          } else {
+            footer += annotation.votes_total + '👍 👎'
+          }
+          footer += '</div>'
+          footer += '<br style="clear:right"></div>'
+
+          let body = ''
+          if ('body' in annotation && annotation.body) {
+            body = decodeHTML(annotation.body.html)
+          }
+          if ('being_created' in annotation && annotation.being_created) {
+            if (author) {
+              body = author + ' is currently annotating this line.<br><br>' + body
+            } else {
+              body = 'This line is currently being annotated.<br><br>' + body
+            }
+          }
+
+          innerHTMLAddition += `
+          <div class="annotationtab" id="annottab_${annotation.id}">
+            ${hint}
+            ${header}
+            ${body}
+            ${footer}
+          </div>`
+        }
+        annotationContent.innerHTML += innerHTMLAddition
+
+        annotationTabBar.appendChild(document.createElement('br')).style.clear = 'left'
+        if (window.annotations_userscript[id].length === 1) {
+          annotationTabBar.style.display = 'none'
+        }
+        annotationTabBar.querySelector('.tabbutton').classList.add('selected')
+        annotationContent.querySelector('.annotationtab').classList.add('selected')
+
+        // Resize iframes and images in frame
+        setTimeout(function () {
+          const maxWidth = (document.body.clientWidth - 40)
+          const elements = annotationContent.querySelectorAll('iframe,img')
+          for (const e of elements) {
+            if (e.parentNode.nodeName === 'P' && e.parentNode.childElementCount === 1) {
+              e.parentNode.classList.add('annotation-img-parent-p')
+              e.style.maxWidth = `${maxWidth - 60}px`
+            } else {
+              e.style.maxWidth = `${maxWidth}px`
+            }
+          }
+          themeCommon.targetBlankLinks() // Change link target to _blank
+        }, 100)
+      }
+    },
+
+    removeAnnotations () {
+      document.querySelectorAll('div[class^="SongPage__Section"] a[class^="ReferentFragment"]').forEach(removeTagsKeepText)
+    },
+    addAnnotationHandling () {
+      try {
+        window.annotations_userscript = JSON.parse(document.getElementById('annotationsdata_for_userscript').innerHTML)
+      } catch (e) {
+        console.log('Could not load annotations data from script tag:', e)
+        return
+      }
+
+      // Add click handler to annotations
+      for (const a of document.querySelectorAll('div[class^="SongPage__Section"] a[class^="ReferentFragment"]')) {
+        a.classList.add('annotated')
+        a.addEventListener('click', themeCommon.showAnnotation)
+      }
+      document.body.addEventListener('click', function (e) {
+        // Hide annotation container on click outside of it
+        const annotationcontainer = document.getElementById('annotationcontainer958')
+        if (annotationcontainer && !e.target.classList.contains('.annotated') && e.target.closest('.annotated') === null) {
+          if (e.target.closest('#annotationcontainer958') === null) {
+            annotationcontainer.style.display = 'none'
+            annotationcontainer.style.opacity = 0.0
+            for (const e of document.querySelectorAll('.annotated.highlighted')) {
+              e.classList.remove('highlighted')
+            }
+          }
+        }
+      })
+    },
+
+    themeError (themeName, errorMsg, originalUrl) {
+      return `<div style="color:black;background:white;font-family:sans-serif">
+      <br>
+      <h1>&#128561; Oops!</h1>
+      <br>
+      Sorry, could not transform the genius page<br>The lyrics cannot be shown with the theme "${themeName}" (yet)<br>
+      Could you inform the author of this program about the problem and provide the following information:<br>
+<pre style="color:black; background:silver; border:1px solid black; width:95%; overflow:auto;margin-left: 5px;padding: 0px 5px;">
+
+themeName:  ${themeName}
+Error:      ${errorMsg}
+URL:        ${document.location.href}
+Genius:     ${originalUrl}
+
+</pre><br>
+      You can simply post the information on github:<br>
+      <a target="_blank" href="https://github.com/cvzi/genius-lyrics-userscript/issues/">https://github.com/cvzi/genius-lyrics-userscript/issues/</a>
+      <br>
+      or via email: <a target="_blank" href="mailto:cuzi@openmail.cc">cuzi@openmail.cc</a>
+      <br>
+      <br>
+      Thanks for your help!
+      <br>
+      <br>
+       </div>`
     }
   }
 
@@ -1064,7 +1310,6 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     --ygl-btn-half-border-size: 7px;
     --ygl-btn-color: #222;
   }
-
   #resumeAutoScrollButtonContainer{
     position: fixed; 
     right: 20px; 
@@ -1074,7 +1319,6 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     flex-direction: row;
     gap: 4px;
   }
-
   #resumeAutoScrollButtonContainer #resumeAutoScrollButton,
   #resumeAutoScrollButtonContainer #resumeAutoScrollFromHereButton{
     cursor: pointer;
@@ -1089,7 +1333,6 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     padding: calc(1.732*var(--ygl-btn-half-border-size) + 3px);
     contain: strict;
   }
-
   #resumeAutoScrollButtonContainer {
     visibility: hidden;
     pointer-events: none;
@@ -1099,7 +1342,6 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     visibility: visible;
     pointer-events: initial;
   }
-
   #resumeAutoScrollButton > div:only-child {
     position: absolute;
     contain: strict;
@@ -1116,7 +1358,6 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     border-bottom: calc(1.732*var(--ygl-btn-half-border-size)) solid var(--ygl-btn-color);
     border-left: var(--ygl-btn-half-border-size) inset transparent;
   }
-
   #resumeAutoScrollFromHereButton > div:only-child {
     position: absolute;
     contain: strict;
@@ -1147,7 +1388,6 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       background-position-x: 2px;
     }
   }
-
   @keyframes appDomAppended2 {
     0% {
       background-position-x: 3px;
@@ -1157,7 +1397,6 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       background-position-x: 4px;
     }
   }
-
   @keyframes songHeaderDomAppended {
     0% {
       background-position-x: 1px;
@@ -1167,15 +1406,12 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       background-position-x: 2px;
     }
   }
-
   #application {
     animation: appDomAppended 1ms linear 0s 1 normal forwards;
   }
-
   #application.app11 {
     animation: appDomAppended2 1ms linear 0s 1 normal forwards;
   }
-
   #application.app11 div[class*="SongHeaderWithPrimis__Container"] > div[class*="SongHeaderWithPrimis__Right"] {
     animation: songHeaderDomAppended 1ms linear 0s 1 normal forwards;
   }
@@ -1265,14 +1501,14 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         }
 
         // Make song title clickable
-        function clickableTitle037 () {
+        function clickableTitle () {
           const url = document.querySelector('meta[property="og:url"]').content
           const h1 = document.querySelector('h1[class^="SongHeader"]')
           h1.innerHTML = '<a target="_blank" href="' + url + '" style="color:black">' + h1.innerHTML + '</a>'
           const div = document.querySelector('div[class^=SongHeader][class*="__CoverArt"]')
           div.innerHTML = '<a target="_blank" href="' + url + '">' + div.innerHTML + '</a>'
         }
-        onload.push(clickableTitle037)
+        onload.push(clickableTitle)
 
         // Show artwork
         onload.push(function showArtwork () {
@@ -1312,305 +1548,15 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
           }
         })
 
-        function setScrollUpdateLocation () {
-          document.addEventListener('scroll', scrollUpdateLocationHandler, false)
-        }
+        onload.push(themeCommon.targetBlankLinks)
+        onload.push(() => setTimeout(themeCommon.targetBlankLinks, 1000))
 
-        // Show annotations function
-        function getAnnotationsContainer (a) {
-          let c = document.getElementById('annotationcontainer958')
-          if (!c) {
-            c = document.body.appendChild(document.createElement('div'))
-            c.setAttribute('id', 'annotationcontainer958')
-            const isChrome = navigator.userAgent.indexOf('Chrome') !== -1
-            document.head.appendChild(document.createElement('style')).innerHTML = `
-            #annotationcontainer958 {
-              opacity:0.0;
-              display:none;
-              transition:opacity 500ms;
-              position:absolute;
-              background:linear-gradient(to bottom, #FFF1, 5px, white);
-              color:black;
-              font: 100 1.125rem / 1.5 "Programme", sans-serif;
-              max-width:95%;
-              min-width:60%;
-              margin:10px;
-              z-index:4;
-            }
-            #annotationcontainer958 .arrow {
-              height:30px;
-              background: white;
-            }
-            #annotationcontainer958 .arrow:before {
-              content: "";
-              position: absolute;
-              width: 0px;
-              height: 0px;
-              margin-top: 6px;
-              ${isChrome ? 'margin-left: calc(50% - 15px);' : 'inset: -1rem 0px 0px 50%;'}
-              border-style: solid;
-              border-width: 0px 25px 20px;
-              border-color: transparent transparent rgb(170, 170, 170);
-            }
-            #annotationcontainer958 .annotationcontent {
-              background-color:#E9E9E9;
-              padding:5px;
-              border-bottom-left-radius: 5px;
-              border-bottom-right-radius: 5px;
-              border-top-right-radius: 0px;
-              border-top-left-radius: 0px;
-              box-shadow: #646464 5px 5px 5px;
-            }
-            #annotationcontainer958 .annotationtab {
-              display:none
-            }
-            #annotationcontainer958 .annotationtab.selected {
-              display:block
-            }
-            #annotationcontainer958 .annotationtabbar .tabbutton {
-              background-color:#d0cece;
-              cursor:pointer;
-              user-select:none;
-              padding: 1px 7px;
-              margin: 0px 3px;
-              border-radius: 5px 5px 0px 0px;
-              box-shadow: #0000004f 2px -2px 3px;
-              float:left
-            }
-            #annotationcontainer958 .annotationtabbar .tabbutton.selected {
-              background-color:#E9E9E9;
-            }
-            #annotationcontainer958 .annotationcontent .annotationfooter {
-              user-select: none;
-            }
-            #annotationcontainer958 .annotationcontent .annotationfooter > div {
-              float: right;
-              min-width: 20%;
-              text-align: center;
-            }
-            #annotationcontainer958 .annotationcontent .redhint {
-              color:#ff146470;
-              padding:.1rem 0.7rem;
-            }
-            #annotationcontainer958 .annotationcontent .annotation-img-parent-p {
-              display: flex;
-              justify-content: center;
-              align-content: center;
-              margin: 6px;
-            }
-            #annotationcontainer958 .annotationcontent .annotation-img-parent-p > img[src][width][height]:only-child{
-              object-fit: contain;
-              height: auto;
-            }
-            #annotationcontainer958[location-dir="down"]{
-              transform: '';
-              top: calc(var(--annotation-container-syrt) + var(--annotation-container-rh) + 3px);         
-            }
-            #annotationcontainer958[location-dir="up"]{
-              transform: translateY(-100%);
-              top: calc(var(--annotation-container-syrt) - 3px - 18px);  window.scrollY + rect.top - 3 - 18);
-            }
-          `
-            setScrollUpdateLocation(c)
-          }
-          c.innerHTML = ''
-
-          c.style.display = 'block'
-          c.style.opacity = 1.0
-          setAnnotationsContainerTop(c, a, true)
-
-          const arrow = c.querySelector('.arrow') || c.appendChild(document.createElement('div'))
-          arrow.className = 'arrow'
-
-          let annotationTabBar = c.querySelector('.annotationtabbar')
-          if (!annotationTabBar) {
-            annotationTabBar = c.appendChild(document.createElement('div'))
-            annotationTabBar.classList.add('annotationtabbar')
-          }
-          annotationTabBar.innerHTML = ''
-          annotationTabBar.style.display = 'block'
-
-          let annotationContent = c.querySelector('.annotationcontent')
-          if (!annotationContent) {
-            annotationContent = c.appendChild(document.createElement('div'))
-            annotationContent.classList.add('annotationcontent')
-          }
-          annotationContent.style.display = 'block'
-          annotationContent.innerHTML = ''
-          return [annotationTabBar, annotationContent]
-        }
-        function switchTab (ev) {
-          const id = this.dataset.annotid
-          const selectedElements = document.querySelectorAll('#annotationcontainer958 .annotationtabbar .tabbutton.selected, #annotationcontainer958 .annotationtab.selected')
-          for (const e of selectedElements) {
-            e.classList.remove('selected')
-          }
-          this.classList.add('selected')
-          document.querySelector(`#annotationcontainer958 .annotationtab[id="annottab_${id}"]`).classList.add('selected')
-        }
-        function showAnnotation4956 (ev) {
-          ev.preventDefault()
-
-          // Annotation id
-          const m = this.href.match(/\/(\d+)\//)
-          if (!m) {
-            return
-          }
-          const id = m[1]
-
-          // Highlight
-          const highlightedElements = document.querySelectorAll('.annotated.highlighted')
-          for (const e of highlightedElements) {
-            e.classList.remove('highlighted')
-          }
-          this.classList.add('highlighted')
-
-          // Load all annotations
-          if (!('annotations1234' in window)) {
-            if (document.getElementById('annotationsdata1234')) {
-              window.annotations1234 = JSON.parse(document.getElementById('annotationsdata1234').innerHTML)
-            } else {
-              window.annotations1234 = {}
-              console.log('No annotation data found #annotationsdata1234')
-            }
-          }
-
-          if (id in window.annotations1234) {
-            const [annotationTabBar, annotationContent] = getAnnotationsContainer(this)
-            let innerHTMLAddition = ''
-            for (const annotation of window.annotations1234[id]) {
-              // Example for multiple annotations: https://genius.com/72796/
-              const tabButton = annotationTabBar.appendChild(document.createElement('div'))
-              tabButton.dataset.annotid = annotation.id
-              tabButton.classList.add('tabbutton')
-              tabButton.addEventListener('click', switchTab)
-              if (annotation.state === 'verified') {
-                tabButton.textContent = ('Verified annotation')
-              } else {
-                tabButton.textContent = 'Genius annotation'
-              }
-
-              let hint = ''
-              if ('accepted_by' in annotation && !annotation.accepted_by) {
-                hint = '<span class="redhint">⚠ This annotation is unreviewed</span><br>'
-              }
-
-              let header = '<div class="annotationheader" style="float:right">'
-              let author = false
-              if (annotation.authors.length === 1) {
-                if (annotation.authors[0].name) {
-                  author = decodeHTML(annotation.authors[0].name)
-                  header += `<a href="${annotation.authors[0].url}">${author}</a>`
-                } else {
-                  author = decodeHTML(annotation.created_by.name)
-                  header += `<a href="${annotation.created_by.url}">${author}</a>`
-                }
-              } else {
-                header += `<span title="Created by ${annotation.created_by.name}">${annotation.authors.length} Contributors</span>`
-              }
-              header += '</div><br style="clear:right">'
-
-              let footer = '<div class="annotationfooter">'
-              footer += `<div title="Direct link to the annotation"><a href="${annotation.share_url}">🔗 Share</a></div>`
-              if (annotation.pyongs_count) {
-                footer += `<div title="Pyongs"> ⚡ ${annotation.pyongs_count}</div>`
-              }
-              if (annotation.comment_count) {
-                footer += `<div title="Comments"> 💬 ${annotation.comment_count}</div>`
-              }
-              footer += '<div title="Total votes">'
-              if (annotation.votes_total > 0) {
-                footer += '+'
-                footer += annotation.votes_total
-                footer += '👍'
-              } else if (annotation.votes_total < 0) {
-                footer += '-'
-                footer += annotation.votes_total
-                footer += '👎'
-              } else {
-                footer += annotation.votes_total + '👍 👎'
-              }
-              footer += '</div>'
-              footer += '<br style="clear:right"></div>'
-
-              let body = ''
-              if ('body' in annotation && annotation.body) {
-                body = decodeHTML(annotation.body.html)
-              }
-              if ('being_created' in annotation && annotation.being_created) {
-                if (author) {
-                  body = author + ' is currently annotating this line.<br><br>' + body
-                } else {
-                  body = 'This line is currently being annotated.<br><br>' + body
-                }
-              }
-
-              innerHTMLAddition += `
-              <div class="annotationtab" id="annottab_${annotation.id}">
-                ${hint}
-                ${header}
-                ${body}
-                ${footer}
-              </div>`
-            }
-            annotationContent.innerHTML += innerHTMLAddition
-
-            annotationTabBar.appendChild(document.createElement('br')).style.clear = 'left'
-            if (window.annotations1234[id].length === 1) {
-              annotationTabBar.style.display = 'none'
-            }
-            annotationTabBar.querySelector('.tabbutton').classList.add('selected')
-            annotationContent.querySelector('.annotationtab').classList.add('selected')
-
-            // Resize iframes and images in frame
-            setTimeout(function () {
-              const maxWidth = (document.body.clientWidth - 40)
-              const elements = annotationContent.querySelectorAll('iframe,img')
-              for (const e of elements) {
-                if (e.parentNode.nodeName === 'P' && e.parentNode.childElementCount === 1) {
-                  e.parentNode.classList.add('annotation-img-parent-p')
-                  e.style.maxWidth = `${maxWidth - 60}px`
-                } else {
-                  e.style.maxWidth = `${maxWidth}px`
-                }
-              }
-              themeCommon.targetBlankLinks145B() // Change link target to _blank
-            }, 100)
-          }
-        }
-        onload.push(function () {
-          if (document.getElementById('annotationsdata1234')) {
-            window.annotations1234 = JSON.parse(document.getElementById('annotationsdata1234').innerHTML)
-          }
-        })
-
-        onload.push(themeCommon.targetBlankLinks145B)
-        onload.push(() => setTimeout(themeCommon.targetBlankLinks145B, 1000))
-
+        // Handle annotations
         if (!annotationsEnabled) {
           // Remove all annotations
-          onload.push(function removeAnnotations135 () {
-            document.querySelectorAll('div[class^="SongPage__Section"] a[class^="ReferentFragment"]').forEach(removeTagsKeepText)
-          })
+          onload.push(themeCommon.removeAnnotations)
         } else {
-          // Add click handler to annotations
-          for (const a of document.querySelectorAll('div[class^="SongPage__Section"] a[class^="ReferentFragment"]')) {
-            a.classList.add('annotated')
-            a.addEventListener('click', showAnnotation4956)
-          }
-          document.body.addEventListener('click', function (e) {
-          // Hide annotation container on click outside of it
-            const annotationcontainer = document.getElementById('annotationcontainer958')
-            if (annotationcontainer && !e.target.classList.contains('.annotated') && e.target.closest('.annotated') === null) {
-              if (e.target.closest('#annotationcontainer958') === null) {
-                annotationcontainer.style.display = 'none'
-                annotationcontainer.style.opacity = 0.0
-                for (const e of document.querySelectorAll('.annotated.highlighted')) {
-                  e.classList.remove('highlighted')
-                }
-              }
-            }
-          })
+          onload.push(themeCommon.addAnnotationHandling)
         }
 
         // Adapt width
@@ -1631,9 +1577,6 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       combine: function themeGeniusCombineGeniusResources (song, html, annotations, cb) {
         let headhtml = ''
 
-        // Make annotations clickable
-        html = html.replace(/annotation-fragment="(\d+)"/g, '$0 data-annotationid="$1"')
-
         // Change design
         html = html.split('<div class="leaderboard_ad_container">').join('<div class="leaderboard_ad_container" style="width:0px;height:0px">')
 
@@ -1644,8 +1587,9 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         headhtml += '\n<base href="https://genius.com/" target="_blank">'
 
         // Add annotation data
-        headhtml += '\n<script id="annotationsdata1234" type="application/json">' + JSON.stringify(annotations).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</script>'
-
+        if (annotationsEnabled) {
+          headhtml += '\n<script id="annotationsdata_for_userscript" type="application/json">' + JSON.stringify(annotations).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</script>'
+        }
         // Scrollbar colors
         // Highlight annotated lines on hover
         headhtml += `
@@ -1682,159 +1626,46 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       scripts: function themeCleanWhiteScripts () {
         const onload = []
 
-        // Hide cookies box function
-        // var iv45
-        // function hideCookieBox458 () {if(document.querySelector(".optanon-allow-all")){document.querySelector(".optanon-allow-all").click(); clearInterval(iv458)}}
-        // onload.push(function() { iv458 = setInterval(hideCookieBox458, 500) }
+        onload.push(themeCommon.targetBlankLinks)
+        onload.push(() => setTimeout(themeCommon.targetBlankLinks, 1000))
 
-        onload.push(themeCommon.hideFooter895)
-        onload.push(themeCommon.hideSecondaryFooter895)
-        onload.push(themeCommon.hideStuff235)
-
-        // Show annotations function
-        function showAnnotation1234 (ev) {
-          ev.preventDefault()
-          const id = this.dataset.annotationid
-          themeCommon.showAnnotation1234A(this)
-          if (id in window.annotations1234) {
-            const annotation = window.annotations1234[id][0]
-            const main = document.querySelector('.annotationbox')
-            main.innerHTML = ''
-            main.style.display = 'block'
-            const bodyRect = document.body.getBoundingClientRect()
-            const elemRect = this.getBoundingClientRect()
-            const top = elemRect.top - bodyRect.top + elemRect.height
-            main.style.top = top + 'px'
-            main.style.left = '5px'
-            const div0 = document.createElement('div')
-            div0.className = 'annotationcontent'
-            main.appendChild(div0)
-            let html = '<div class="annotationlabel">$author</div><div class="annotation_rich_text_formatting">$body</div>'
-            html = html.replace(/\$body/g, decodeHTML(annotation.body.html)).replace(/\$author/g, decodeHTML(annotation.created_by.name))
-            div0.innerHTML = html
-            themeCommon.targetBlankLinks145A() // Change link target to _blank
-            setTimeout(function () { // hide on click
-              document.body.addEventListener('click', hideAnnotationOnClick1234)
-            }, 100)
-            setTimeout(function () { // Resize iframes and images in frame
-              const maxWidth = (document.body.clientWidth - 40) + 'px'
-              const elements = main.querySelectorAll('iframe,img')
-              for (const e of elements) {
-                e.style.maxWidth = maxWidth
-              }
-            }, 100)
-          }
-        }
-        function hideAnnotationOnClick1234 (ev) {
-          let target = ev.target
-          while (target) {
-            if (target.id === 'annotationbox') {
-              return
-            }
-            if (target.className && target.className.indexOf('referent') !== -1) {
-              const id = parseInt(target.dataset.id)
-              return showAnnotation1234.call(target, ev, id)
-            }
-            target = target.parentNode
-          }
-          document.body.removeEventListener('click', hideAnnotationOnClick1234)
-          const main = document.querySelector('.annotationbox')
-          main.style.display = 'none'
-        }
-
-        // Make song title clickable
-        function clickableTitle037 () {
-          if (!document.querySelector('.header_with_cover_art-primary_info-title')) {
-            return
-          }
-          const url = document.querySelector('meta[property="og:url"]').content
-          const h1 = document.querySelector('.header_with_cover_art-primary_info-title')
-          h1.innerHTML = '<a target="_blank" href="' + url + '">' + h1.innerHTML + '</a>'
-          // Featuring and album name
-          const h2 = document.querySelector('.header_with_cover_art-primary_info-primary_artist').parentNode
-          let s1 = ''
-          let s2 = ''
-          for (const el of document.querySelectorAll('.metadata_unit-label')) {
-            if (el.innerText.toLowerCase().indexOf('feat') !== -1) {
-              s1 += ' ' + el.parentNode.innerText.trim()
-            } else if (el.innerText.toLowerCase().indexOf('album') !== -1) {
-              s2 += ' \u2022 ' + el.parentNode.querySelector('a').parentNode.innerHTML.trim()
-            }
-          }
-          h1.innerHTML += s1
-          h2.innerHTML += s2
-          // Remove other meta like Producer
-          removeElements(document.querySelectorAll('h3'))
-        }
-        onload.push(clickableTitle037)
-
-        onload.push(themeCommon.targetBlankLinks145A)
-        onload.push(() => setTimeout(themeCommon.targetBlankLinks145A, 500))
-
+        // Handle annotations
         if (!annotationsEnabled) {
           // Remove all annotations
-          onload.push(themeCommon.annotationsRemoveAll)
+          onload.push(themeCommon.removeAnnotations)
         } else {
-          // Add click handler to annotations
-          for (const a of document.querySelectorAll('*[data-annotationid]')) {
-            a.addEventListener('click', showAnnotation1234)
-          }
+          onload.push(themeCommon.addAnnotationHandling)
         }
-
-        // Open real page if not in frame
-        onload.push(function () {
-          if (window.top === window) {
-            document.location.href = document.querySelector('meta[property="og:url"]').content
-          }
-        })
-
         return onload
       },
+
       combine: function themeCleanWhiteCombineGeniusResources (song, html, annotations, onCombine) {
+        const doc = new window.DOMParser().parseFromString(html, 'text/html')
+        const originalUrl = doc.querySelector('meta[property="og:url"]') ? doc.querySelector('meta[property="og:url"]').content : null
+        if (html.indexOf('class="Lyrics__Container') === -1) {
+          return onCombine(themeCommon.themeError(theme.name, 'html.indexOf(\'class="Lyrics__Container\') === -1', originalUrl))
+        }
         let headhtml = ''
         const bodyWidth = document.getElementById('lyricsiframe').style.width || (document.getElementById('lyricsiframe').getBoundingClientRect().width + 'px')
 
-        if (html.indexOf('class="lyrics">') === -1) {
-          const doc = new window.DOMParser().parseFromString(html, 'text/html')
-          const originalUrl = doc.querySelector('meta[property="og:url"]').content
+        const parts = html.split('class="Lyrics__Container')[1].split('>')
+        parts.shift()
 
-          if (html.indexOf('class="Lyrics__Container') !== -1) {
-            const parts = html.split('class="Lyrics__Container')[1].split('>')
-            parts.shift()
-            const lyricsContainerHTML = '<div>' + parts.join('>').split('<div class="RightSidebar')[0]
+        const lyricshtml = '<div class="SongPage__Section"><div class="Lyrics__Container">' + parts.join('>').split('<div class="RightSidebar')[0] + '</div>'
 
-            const root = document.createElement('div')
-            root.innerHTML = lyricsContainerHTML
+        const h1 = doc.querySelector('div[class^=SongHeader][class*=Column] h1')
+        const titleNode = h1.firstChild
+        const titleA = h1.appendChild(document.createElement('a'))
+        titleA.href = originalUrl
+        titleA.target = '_blank'
+        titleA.appendChild(titleNode)
+        h1.classList.add('mytitle')
 
-            /*
-           if (html.indexOf('__PRELOADED_STATE__ = JSON.parse(\'') !== -1) {
-            const jsonStr = html.split('__PRELOADED_STATE__ = JSON.parse(\'')[1].split('\');\n')[0].replace(/\\([^\\])/g, '$1').replace(/\\\\/g, '\\')
-            const jData = JSON.parse(jsonStr)
-            const root = parsePreloadedStateData(jData.songPage.lyricsData.body, document.createElement('div'))
-*/
-            parsePreloadedStateData({})
+        removeIfExists(h1.parentNode.querySelector('div[class^="HeaderTracklist"]'))
 
-            // Annotations
-            for (const a of root.querySelectorAll('a[data-id]')) {
-              a.dataset.annotationid = a.dataset.id
-              a.classList.add('referent--yellow')
-            }
+        const titlehtml = '<div class="myheader">' + h1.parentNode.outerHTML + '</div>'
 
-            const lyricshtml = root.innerHTML
-
-            const h1 = doc.querySelector('div[class^=SongHeader][class*=Column] h1')
-            const titleNode = h1.firstChild
-            const titleA = h1.appendChild(document.createElement('a'))
-            titleA.href = originalUrl
-            titleA.target = '_blank'
-            titleA.appendChild(titleNode)
-            h1.classList.add('mytitle')
-
-            removeIfExists(h1.parentNode.querySelector('div[class^="HeaderTracklist"]'))
-
-            const titlehtml = '<div class="myheader">' + h1.parentNode.outerHTML + '</div>'
-
-            headhtml = `<style>
+        headhtml = `<style>
             body {
               background:#ffffff linear-gradient(to bottom, #fafafa, #ffffff) fixed;
               color:black;
@@ -1842,13 +1673,10 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
               max-width:${bodyWidth - 20}px;
               overflow-x:hidden;
             }
-            .mylyrics {color: black; font-size: 1.3em; line-height: 1.3em;font-weight: 300; padding:0.1em;}
-            .mylyrics a:link,.mylyrics a:visited,.mylyrics a:hover{color:black; padding:0; line-height: 1.3em; box-shadow: none;}
-            .myheader {font-size: 1.0em; font-weight:300}
-            .myheader a:link,.myheader a:visited {color: rgb(96, 96, 96);; font-size:1.0em; font-weight:300; text-decoration:none}
-            h1.mytitle {font-size: 1.1em;}
-            h1.mytitle a:link,h1.mytitle a:visited {color: rgb(96, 96, 96);; text-decoration:none}
-            .referent--yellow.referent--highlighted { opacity:1.0; background-color: transparent; box-shadow: none; color:#1ed760; transition: color .2s linear;transition-property: color;transition-duration: 0.2s;transition-timing-function: linear;transition-delay: 0s;}
+            .mylyrics {color: black;}
+            .mylyrics a:link,.mylyrics a:visited,.mylyrics a:hover{color:black; }
+            .myheader a:link,.myheader a:visited {color: rgb(96, 96, 96);}
+            h1.mytitle a:link,h1.mytitle a:visited {color: rgb(96, 96, 96);}
             .annotationbox {position:absolute; display:none; max-width:95%; min-width: 160px;padding: 3px 7px;margin: 2px 0 0;background-color: rgba(245, 245, 245, 0.98);background-clip: padding-box;border: 1px solid rgba(0,0,0,.15);border-radius: .25rem;}
             .annotationbox .annotationlabel {display:block;color:rgb(10, 10, 10);border-bottom:1px solid rgb(200,200,200);padding: 0;font-weight:600}
             .annotationbox .annotation_rich_text_formatting {color: black}
@@ -1856,10 +1684,10 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
             ${iframeCSSCommon}
           </style>`
 
-            // Add annotation data
-            headhtml += '\n<script id="annotationsdata1234" type="application/json">' + JSON.stringify(annotations).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</script>'
+        // Add annotation data
+        headhtml += '\n<script id="annotationsdata_for_userscript" type="application/json">' + JSON.stringify(annotations).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</script>'
 
-            return onCombine(`
+        return onCombine(`
           <html>
           <head>
            ${headhtml}
@@ -1873,90 +1701,6 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
           </body>
           </html>
           `)
-          }
-
-          return onCombine(`<div style="color:black;background:white;font-family:sans-serif">
-        <br>
-        <h1>&#128561; Oops!</h1>
-        <br>
-        Sorry, these lyrics seem to use new genius page design.<br>They cannot be shown with the "Clean white theme" (yet)<br>
-        Could you inform the author of this program about the problem and provide the following information:<br>
-<pre style="color:black; background:silver; border:1px solid black; width:95%; overflow:auto;margin-left: 5px;padding: 0px 5px;">
-
-Error:   Unknown genius page design
-URL:     ${document.location.href}
-Genius:  ${originalUrl}
-
-</pre><br>
-        You can simply post the information on github:<br>
-        <a target="_blank" href="https://github.com/cvzi/genius-lyrics-userscript/issues/1">https://github.com/cvzi/genius-lyrics-userscript/issues/1</a>
-        <br>
-        or via email: <a target="_blank" href="mailto:cuzi@openmail.cc">cuzi@openmail.cc</a>
-        <br>
-        <br>
-        Thanks for your help!
-        <br>
-        <br>
-         </div>`)
-        }
-
-        // Make annotations clickable
-        const regex = /annotation-fragment="(\d+)"/g
-        html = html.replace(regex, '$0 data-annotationid="$1"')
-
-        // Remove cookie consent
-        html = html.replace(/<script defer="true" src="https:\/\/cdn.cookielaw.org.+?"/, '<script ')
-
-        // Extract lyrics
-        const lyrics = '<div class="mylyrics song_body-lyrics">' + html.split('class="lyrics">')[1].split('</div>')[0] + '</div>'
-
-        // Extract title
-        const title = '<div class="header_with_cover_art-primary_info">' + html.split('class="header_with_cover_art-primary_info">')[1].split('</div>').slice(0, 3).join('</div>') + '</div></div>'
-
-        // Remove body content, hide horizontal scroll bar, add lyrics
-        const parts = html.split('<body', 2)
-        html = parts[0] + '<body' + parts[1].split('>')[0] + '>\n\n' +
-      title + '\n\n' + lyrics +
-      '\n\n<div class="annotationbox" id="annotationbox"></div><div style="height:5em"></div></body></html>'
-
-        // Add annotation data
-        headhtml += '\n<script id="annotationsdata1234" type="application/json">' + JSON.stringify(annotations).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</script>'
-
-        // CSS
-        headhtml += `<style>
-          body {
-            background:#ffffff linear-gradient(to bottom, #fafafa, #ffffff) fixed;
-            color:black;
-            font-family:Roboto, Arial, sans-serif;
-            overflow-x:hidden;
-            max-width:${bodyWidth}px;
-          }
-          .mylyrics {color: black; font-size: 1.3em; line-height: 1.1em;font-weight: 300; padding:0.1em;}
-          .referent {background-color:inherit;box-shadow: none; line-height: 1.1em !important; }
-          .windows a.referent {padding:0; line-height: 1.1em; background-color:inherit;box-shadow: none;}
-          .windows a.referent:hover {background-color: rgb(230,230,230);border-radius: 2px;}
-          .referent:hover {background-color: rgb(230,230,230);border-radius: 2px;}
-          .windows a.referent:not(.referent--green):not(.referent--red):not(.referent--highlighted):not(.referent--image) { opacity:1.0; background-color: inherit; box-shadow: none; color:rgb(6, 95, 212); transition: color .2s linear;transition-property: color;transition-duration: 0.2s;transition-timing-function: linear;transition-delay: 0s;}
-          .referent:not(.referent--green):not(.referent--red):not(.referent--highlighted):not(.referent--image) { opacity:1.0; background-color: inherit; box-shadow: none; color:#2c1cb7; transition: color .2s linear;transition-property: color;transition-duration: 0.2s;transition-timing-function: linear;transition-delay: 0s;}
-          .windows a.referent:hover:not(.referent--green):not(.referent--red):not(.referent--highlighted):not(.referent--image) { background-color: rgb(230,230,230);border-radius: 2px;}
-          .referent--yellow.referent--highlighted { opacity:1.0; background-color: inherit; box-shadow: none; color:#2c1cb7; transition: color .2s linear;transition-property: color;transition-duration: 0.2s;transition-timing-function: linear;transition-delay: 0s;}
-          .annotationbox {position:absolute; display:none; max-width:95%; min-width: 160px;padding: 3px 7px;margin: 2px 0 0;background-color: rgba(245, 245, 245, 0.98);background-clip: padding-box;border: 1px solid rgba(0,0,0,.15);border-radius: .25rem;}
-          .annotationbox .annotationlabel {display:block;color:rgb(10, 10, 10);border-bottom:1px solid rgb(200,200,200);padding: 0;font-weight:600}
-          .annotationbox .annotation_rich_text_formatting {color: black}
-          .annotationbox .annotation_rich_text_formatting a {color: rgb(6, 95, 212)}
-          .header_with_cover_art-primary_info h1,.header_with_cover_art-primary_info h2,.header_with_cover_art-primary_info h3 {color: gray; font-size: 0.9em; line-height: 1.0em;font-weight: 300; }
-          h1.header_with_cover_art-primary_info-title {line-height: 1.1em;}
-          h1.header_with_cover_art-primary_info-title a {color: gray; font-size:1.1em}
-          h2 a,h2 a.header_with_cover_art-primary_info-primary_artist {color: gray; font-size:1.0em; font-weight:300}
-          .header_with_cover_art-primary_info {display:inline-block;color: black;border-radius: 2px;padding:7px 10px 0px 5px;}
-        
-          ${iframeCSSCommon}
-        </style>`
-
-        // Add to <head>
-        html = appendHeadText(html, headhtml)
-
-        return onCombine(html)
       },
       scrollLyrics: scrollLyricsFunction('.mylyrics', -200)
     },
@@ -1972,60 +1716,12 @@ Genius:  ${originalUrl}
         // function hideCookieBox458 () {if(document.querySelector(".optanon-allow-all")){document.querySelector(".optanon-allow-all").click(); clearInterval(iv458)}}
         // onload.push(function() { iv458 = setInterval(hideCookieBox458, 500) })
 
-        onload.push(themeCommon.hideFooter895)
-        onload.push(themeCommon.hideSecondaryFooter895)
+        onload.push(themeCommon.hideFooter)
+        onload.push(themeCommon.hideSecondaryFooter)
         onload.push(themeCommon.hideStuff235)
 
-        // Show annotations function
-        function showAnnotation1234 (ev) {
-          ev.preventDefault()
-          const id = this.dataset.annotationid
-          themeCommon.showAnnotation1234A(this)
-          if (id in window.annotations1234) {
-            const annotation = window.annotations1234[id][0]
-            const main = document.querySelector('.annotationbox')
-            main.innerHTML = ''
-            main.style.display = 'block'
-            const bodyRect = document.body.getBoundingClientRect()
-            const elemRect = this.getBoundingClientRect()
-            const top = elemRect.top - bodyRect.top + elemRect.height
-            main.style.top = top + 'px'
-            main.style.left = '5px'
-            const div0 = document.createElement('div')
-            div0.className = 'annotationcontent'
-            main.appendChild(div0)
-            let html = '<div class="annotationlabel">$author</div><div class="annotation_rich_text_formatting">$body</div>'
-            html = html.replace(/\$body/g, decodeHTML(annotation.body.html)).replace(/\$author/g, decodeHTML(annotation.created_by.name))
-            div0.innerHTML = html
-            themeCommon.targetBlankLinks145A() // Change link target to _blank
-            setTimeout(function () { document.body.addEventListener('click', hideAnnotationOnClick1234) }, 100) // hide on click
-          }
-        }
-        function hideAnnotationOnClick1234 (ev) {
-          let target = ev.target
-          while (target) {
-            if (target.id === 'annotationbox') {
-              return
-            }
-            if (target.className && target.className.indexOf('referent') !== -1) {
-              const id = parseInt(target.dataset.id)
-              return showAnnotation1234.call(target, ev, id)
-            }
-            target = target.parentNode
-          }
-          document.body.removeEventListener('click', hideAnnotationOnClick1234)
-          const main = document.querySelector('.annotationbox')
-          main.style.display = 'none'
-        }
-
-        onload.push(function () {
-          if (document.getElementById('annotationsdata1234')) {
-            window.annotations1234 = JSON.parse(document.getElementById('annotationsdata1234').innerHTML)
-          }
-        })
-
         // Make song title clickable
-        function clickableTitle037 () {
+        function clickableTitle () {
           if (!document.querySelector('.header_with_cover_art-primary_info-title')) {
             return
           }
@@ -2048,18 +1744,17 @@ Genius:  ${originalUrl}
           // Remove other meta like Producer
           removeElements(document.querySelectorAll('h3'))
         }
-        onload.push(clickableTitle037)
+        onload.push(clickableTitle)
 
-        onload.push(() => setTimeout(themeCommon.targetBlankLinks145A, 1000))
+        onload.push(themeCommon.targetBlankLinks)
+        onload.push(() => setTimeout(themeCommon.targetBlankLinks, 1000))
 
+        // Handle annotations
         if (!annotationsEnabled) {
           // Remove all annotations
-          onload.push(themeCommon.annotationsRemoveAll)
+          onload.push(themeCommon.removeAnnotations)
         } else {
-          // Add click handler to annotations
-          for (const a of document.querySelectorAll('*[data-annotationid]')) {
-            a.addEventListener('click', showAnnotation1234)
-          }
+          onload.push(themeCommon.addAnnotationHandling)
         }
 
         // Open real page if not in frame
@@ -2075,77 +1770,58 @@ Genius:  ${originalUrl}
         let headhtml = ''
         const bodyWidth = document.getElementById('lyricsiframe').style.width || (document.getElementById('lyricsiframe').getBoundingClientRect().width + 'px')
 
-        if (html.indexOf('class="lyrics">') === -1) {
-          const doc = new window.DOMParser().parseFromString(html, 'text/html')
-          const originalUrl = doc.querySelector('meta[property="og:url"]').content
+        const doc = new window.DOMParser().parseFromString(html, 'text/html')
+        const originalUrl = doc.querySelector('meta[property="og:url"]').content
 
-          if (html.indexOf('class="Lyrics__Container') !== -1) {
-            const parts = html.split('class="Lyrics__Container')[1].split('>')
-            parts.shift()
-            const lyricsContainerHTML = '<div>' + parts.join('>').split('<div class="RightSidebar')[0]
+        if (html.indexOf('class="Lyrics__Container') === -1) {
+          return onCombine(themeCommon.themeError(theme.name, 'html.indexOf(\'class="Lyrics__Container\') === -1', originalUrl))
+        }
 
-            const root = document.createElement('div')
-            root.innerHTML = lyricsContainerHTML
+        const parts = html.split('class="Lyrics__Container')[1].split('>')
+        parts.shift()
 
-            /*
-           if (html.indexOf('__PRELOADED_STATE__ = JSON.parse(\'') !== -1) {
-            const jsonStr = html.split('__PRELOADED_STATE__ = JSON.parse(\'')[1].split('\');\n')[0].replace(/\\([^\\])/g, '$1').replace(/\\\\/g, '\\')
-            const jData = JSON.parse(jsonStr)
-            const root = parsePreloadedStateData(jData.songPage.lyricsData.body, document.createElement('div'))
-*/
+        const lyricshtml = '<div class="SongPage__Section"><div class="Lyrics__Container">' + parts.join('>').split('<div class="RightSidebar')[0] + '</div>'
 
-            // Annotations
-            for (const a of root.querySelectorAll('a[data-id]')) {
-              a.dataset.annotationid = a.dataset.id
-              a.classList.add('referent--yellow')
-            }
+        const h1 = doc.querySelector('div[class^=SongHeader][class*=Column] h1')
+        const titleNode = h1.firstChild
+        const titleA = h1.appendChild(document.createElement('a'))
+        titleA.href = originalUrl
+        titleA.target = '_blank'
+        titleA.appendChild(titleNode)
+        h1.classList.add('mytitle')
 
-            const lyricshtml = root.innerHTML
+        removeIfExists(h1.parentNode.querySelector('div[class^="HeaderTracklist"]'))
 
-            const h1 = doc.querySelector('div[class^=SongHeader][class*=Column] h1')
-            const titleNode = h1.firstChild
-            const titleA = h1.appendChild(document.createElement('a'))
-            titleA.href = originalUrl
-            titleA.target = '_blank'
-            titleA.appendChild(titleNode)
-            h1.classList.add('mytitle')
+        const titlehtml = '<div class="myheader">' + h1.parentNode.outerHTML + '</div>'
 
-            removeIfExists(h1.parentNode.querySelector('div[class^="HeaderTracklist"]'))
-
-            const titlehtml = '<div class="myheader">' + h1.parentNode.outerHTML + '</div>'
-
-            headhtml = `<style>
+        headhtml = `<style>
             @font-face{font-family:spotify-circular;src:url("https://open.scdn.co/fonts/CircularSpUIv3T-Light.woff2") format("woff2"),url(https://open.scdn.co/fonts/CircularSpUIv3T-Light.woff) format("woff"),url(https://open.scdn.co/fonts/CircularSpUIv3T-Light.ttf) format("truetype");font-weight:200;font-style:normal;font-display:swap}@font-face{font-family:spotify-circular;src:url("https://open.scdn.co/fonts/CircularSpUIv3T-Book.woff2") format("woff2"),url(https://open.scdn.co/fonts/CircularSpUIv3T-Book.woff) format("woff"),url(https://open.scdn.co/fonts/CircularSpUIv3T-Book.ttf) format("truetype");font-weight:400;font-style:normal;font-display:swap}@font-face{font-family:spotify-circular;src:url("https://open.scdn.co/fonts/CircularSpUIv3T-Bold.woff2") format("woff2"),url(https://open.scdn.co/fonts/CircularSpUIv3T-Bold.woff) format("woff"),url(https://open.scdn.co/fonts/CircularSpUIv3T-Bold.ttf) format("truetype");font-weight:600;font-style:normal;font-display:swap}@font-face{font-family:spotify-circular-arabic;src:url("https://open.scdn.co/fonts/CircularSpUIAraOnly-Light.woff2") format("woff2"),url(https://open.scdn.co/fonts/CircularSpUIAraOnly-Light.woff) format("woff"),url(https://open.scdn.co/fonts/CircularSpUIAraOnly-Light.otf) format("opentype");font-weight:200;font-style:normal;font-display:swap}@font-face{font-family:spotify-circular-arabic;src:url("https://open.scdn.co/fonts/CircularSpUIAraOnly-Book.woff2") format("woff2"),url(https://open.scdn.co/fonts/CircularSpUIAraOnly-Book.woff) format("woff"),url(https://open.scdn.co/fonts/CircularSpUIAraOnly-Book.otf) format("opentype");font-weight:400;font-style:normal;font-display:swap}@font-face{font-family:spotify-circular-arabic;src:url("https://open.scdn.co/fonts/CircularSpUIAraOnly-Bold.woff2") format("woff2"),url(https://open.scdn.co/fonts/CircularSpUIAraOnly-Bold.woff) format("woff"),url(https://open.scdn.co/fonts/CircularSpUIAraOnly-Bold.otf) format("opentype");font-weight:600;font-style:normal;font-display:swap}@font-face{font-family:spotify-circular-hebrew;src:url("https://open.scdn.co/fonts/CircularSpUIHbrOnly-Light.woff2") format("woff2"),url(https://open.scdn.co/fonts/CircularSpUIHbrOnly-Light.woff) format("woff"),url(https://open.scdn.co/fonts/CircularSpUIHbrOnly-Light.otf) format("opentype");font-weight:200;font-style:normal;font-display:swap}@font-face{font-family:spotify-circular-hebrew;src:url("https://open.scdn.co/fonts/CircularSpUIHbrOnly-Book.woff2") format("woff2"),url(https://open.scdn.co/fonts/CircularSpUIHbrOnly-Book.woff) format("woff"),url(https://open.scdn.co/fonts/CircularSpUIHbrOnly-Book.otf) format("opentype");font-weight:400;font-style:normal;font-display:swap}@font-face{font-family:spotify-circular-hebrew;src:url("https://open.scdn.co/fonts/CircularSpUIHbrOnly-Bold.woff2") format("woff2"),url(https://open.scdn.co/fonts/CircularSpUIHbrOnly-Bold.woff) format("woff"),url(https://open.scdn.co/fonts/CircularSpUIHbrOnly-Bold.otf) format("opentype");font-weight:600;font-style:normal;font-display:swap}@font-face{font-family:spotify-circular-cyrillic;src:url("https://open.scdn.co/fonts/CircularSpUICyrOnly-Light.woff2") format("woff2"),url(https://open.scdn.co/fonts/CircularSpUICyrOnly-Light.woff) format("woff"),url(https://open.scdn.co/fonts/CircularSpUICyrOnly-Light.otf) format("opentype");font-weight:200;font-style:normal;font-display:swap}@font-face{font-family:spotify-circular-cyrillic;src:url("https://open.scdn.co/fonts/CircularSpUICyrOnly-Book.woff2") format("woff2"),url(https://open.scdn.co/fonts/CircularSpUICyrOnly-Book.woff) format("woff"),url(https://open.scdn.co/fonts/CircularSpUICyrOnly-Book.otf) format("opentype");font-weight:400;font-style:normal;font-display:swap}@font-face{font-family:spotify-circular-cyrillic;src:url("https://open.scdn.co/fonts/CircularSpUICyrOnly-Bold.woff2") format("woff2"),url(https://open.scdn.co/fonts/CircularSpUICyrOnly-Bold.woff) format("woff"),url(https://open.scdn.co/fonts/CircularSpUICyrOnly-Bold.otf) format("opentype");font-weight:600;font-style:normal;font-display:swap}
             html{
               scrollbar-color:hsla(0,0%,100%,.3) transparent;
               scrollbar-width:auto; }
             body {
-              background-color: rgba(0, 0, 0, 0);
+              background-color: rgb(21, 21, 21);
               color:white;
               max-width: ${bodyWidth - 20}px;
               overflow-x:hidden;
               font-family:spotify-circular,spotify-circular-cyrillic,spotify-circular-arabic,spotify-circular-hebrew,Helvetica Neue,Helvetica,Arial,Hiragino Kaku Gothic Pro,Meiryo,MS Gothic,sans-serif;
             }
-            .mylyrics {color: rgb(255,255,255,0.85); font-size: 1.3em; line-height: 1.1em;font-weight: 300; padding:0px 0.1em 0.1em 0.1em;}
-            .mylyrics a:link,.mylyrics a:visited,.mylyrics a:hover{color:rgba(255,255,255,0.95)}
-            .myheader {font-size: 1.0em; font-weight:300}
-            .myheader a:link,.myheader a:visited {color: rgb(255,255,255,0.9); font-size:1.0em; font-weight:300; text-decoration:none}
-            h1.mytitle {font-size: 1.1em;}
-            h1.mytitle a:link,h1.mytitle a:visited {color: rgb(255,255,255,0.9); text-decoration:none}
-            ::-webkit-scrollbar {width: 16px;}
+            .mylyrics {color: #bebebe}
+            .mylyrics a:link,.mylyrics a:visited,.mylyrics a:hover{color:#f3f3f3}
+            .myheader a:link,.myheader a:visited {color: #f3f3f3; }
+            h1.mytitle a:link,h1.mytitle a:visited {color: #bebebe; }
             ::-webkit-scrollbar-thumb {background-color: hsla(0,0%,100%,.3);}
-            .referent--yellow.referent--highlighted { opacity:1.0; background-color: transparent; box-shadow: none; color:#1ed760; transition: color .2s linear;transition-property: color;transition-duration: 0.2s;transition-timing-function: linear;transition-delay: 0s;}
             .annotationbox {position:absolute; display:none; max-width:95%; min-width: 160px;padding: 3px 7px;margin: 2px 0 0;background-color: #282828;background-clip: padding-box;border: 1px solid rgba(0,0,0,.15);border-radius: .25rem;}
             .annotationbox .annotationlabel {display:inline-block;background-color: hsla(0,0%,100%,.6);color: #000;border-radius: 2px;padding: 0 .3em;}
-            .annotationbox .annotation_rich_text_formatting {color: rgb(255,255,255,0.6)}
-            .annotationbox .annotation_rich_text_formatting a {color: rgb(255,255,255,0.9)}
+            .annotationbox .annotation_rich_text_formatting {color: black}
+            .annotationbox .annotation_rich_text_formatting a {color: black)}
             ${iframeCSSCommon}
           </style>`
 
-            // Add annotation data
-            headhtml += '\n<script id="annotationsdata1234" type="application/json">' + JSON.stringify(annotations).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</script>'
+        // Add annotation data
+        headhtml += '\n<script id="annotationsdata_for_userscript" type="application/json">' + JSON.stringify(annotations).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</script>'
 
-            return onCombine(`
+        return onCombine(`
           <html>
           <head>
            ${headhtml}
@@ -2159,94 +1835,6 @@ Genius:  ${originalUrl}
           </body>
           </html>
           `)
-          }
-
-          return onCombine(`<div style="color:black;background:white;font-family:sans-serif">
-        <br>
-        <h1>&#128561; Oops!</h1>
-        <br>
-        Sorry, these lyrics seem to use new genius page design.<br>They cannot be shown with the "Spotify theme" (yet)<br>
-        Could you inform the author of this program about the problem and provide the following information:<br>
-<pre style="color:black; background:silver; border:1px solid black; width:95%; overflow:auto;margin-left: 5px;padding: 0px 5px;">
-
-Error:   Unknown genius page design
-Genius:  ${originalUrl}
-
-</pre><br>
-        You can simply post the information on github:<br>
-        <a target="_blank" href="https://github.com/cvzi/Spotify-Genius-Lyrics-userscript/issues/4">https://github.com/cvzi/Spotify-Genius-Lyrics-userscript/issues/4</a>
-        <br>
-        or via email: <a target="_blank" href="mailto:cuzi@openmail.cc">cuzi@openmail.cc</a>
-        <br>
-        <br>
-        Thanks for your help!
-        <br>
-        <br>
-         </div>`)
-        }
-
-        // Make annotations clickable
-        const regex = /annotation-fragment="(\d+)"/g
-        html = html.replace(regex, '$0 data-annotationid="$1"')
-
-        // Remove cookie consent
-        html = html.replace(/<script defer="true" src="https:\/\/cdn.cookielaw.org.+?"/, '<script ')
-
-        // Extract lyrics
-        const lyrics = '<div class="mylyrics song_body-lyrics">' + html.split('class="lyrics">')[1].split('</div>')[0] + '</div>'
-
-        // Extract title
-        const title = '<div class="header_with_cover_art-primary_info">' + html.split('class="header_with_cover_art-primary_info">')[1].split('</div>').slice(0, 3).join('</div>') + '</div></div>'
-
-        // Remove body content, hide horizontal scroll bar, add lyrics
-        const parts = html.split('<body', 2)
-        html = parts[0] + '<body style="overflow-x:hidden;width:100%;" ' + parts[1].split('>')[0] + '>\n\n' +
-      title + '\n\n' + lyrics +
-      '\n\n<div class="annotationbox" id="annotationbox"></div><div style="height:5em"></div></body></html>'
-
-        // Add annotation data
-        headhtml += '\n<script id="annotationsdata1234" type="application/json">' + JSON.stringify(annotations).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</script>'
-
-        // CSS
-        headhtml += `<style>
-          @font-face{font-family:spotify-circular;src:url("https://open.scdn.co/fonts/CircularSpUIv3T-Light.woff2") format("woff2"),url(https://open.scdn.co/fonts/CircularSpUIv3T-Light.woff) format("woff"),url(https://open.scdn.co/fonts/CircularSpUIv3T-Light.ttf) format("truetype");font-weight:200;font-style:normal;font-display:swap}@font-face{font-family:spotify-circular;src:url("https://open.scdn.co/fonts/CircularSpUIv3T-Book.woff2") format("woff2"),url(https://open.scdn.co/fonts/CircularSpUIv3T-Book.woff) format("woff"),url(https://open.scdn.co/fonts/CircularSpUIv3T-Book.ttf) format("truetype");font-weight:400;font-style:normal;font-display:swap}@font-face{font-family:spotify-circular;src:url("https://open.scdn.co/fonts/CircularSpUIv3T-Bold.woff2") format("woff2"),url(https://open.scdn.co/fonts/CircularSpUIv3T-Bold.woff) format("woff"),url(https://open.scdn.co/fonts/CircularSpUIv3T-Bold.ttf) format("truetype");font-weight:600;font-style:normal;font-display:swap}@font-face{font-family:spotify-circular-arabic;src:url("https://open.scdn.co/fonts/CircularSpUIAraOnly-Light.woff2") format("woff2"),url(https://open.scdn.co/fonts/CircularSpUIAraOnly-Light.woff) format("woff"),url(https://open.scdn.co/fonts/CircularSpUIAraOnly-Light.otf) format("opentype");font-weight:200;font-style:normal;font-display:swap}@font-face{font-family:spotify-circular-arabic;src:url("https://open.scdn.co/fonts/CircularSpUIAraOnly-Book.woff2") format("woff2"),url(https://open.scdn.co/fonts/CircularSpUIAraOnly-Book.woff) format("woff"),url(https://open.scdn.co/fonts/CircularSpUIAraOnly-Book.otf) format("opentype");font-weight:400;font-style:normal;font-display:swap}@font-face{font-family:spotify-circular-arabic;src:url("https://open.scdn.co/fonts/CircularSpUIAraOnly-Bold.woff2") format("woff2"),url(https://open.scdn.co/fonts/CircularSpUIAraOnly-Bold.woff) format("woff"),url(https://open.scdn.co/fonts/CircularSpUIAraOnly-Bold.otf) format("opentype");font-weight:600;font-style:normal;font-display:swap}@font-face{font-family:spotify-circular-hebrew;src:url("https://open.scdn.co/fonts/CircularSpUIHbrOnly-Light.woff2") format("woff2"),url(https://open.scdn.co/fonts/CircularSpUIHbrOnly-Light.woff) format("woff"),url(https://open.scdn.co/fonts/CircularSpUIHbrOnly-Light.otf) format("opentype");font-weight:200;font-style:normal;font-display:swap}@font-face{font-family:spotify-circular-hebrew;src:url("https://open.scdn.co/fonts/CircularSpUIHbrOnly-Book.woff2") format("woff2"),url(https://open.scdn.co/fonts/CircularSpUIHbrOnly-Book.woff) format("woff"),url(https://open.scdn.co/fonts/CircularSpUIHbrOnly-Book.otf) format("opentype");font-weight:400;font-style:normal;font-display:swap}@font-face{font-family:spotify-circular-hebrew;src:url("https://open.scdn.co/fonts/CircularSpUIHbrOnly-Bold.woff2") format("woff2"),url(https://open.scdn.co/fonts/CircularSpUIHbrOnly-Bold.woff) format("woff"),url(https://open.scdn.co/fonts/CircularSpUIHbrOnly-Bold.otf) format("opentype");font-weight:600;font-style:normal;font-display:swap}@font-face{font-family:spotify-circular-cyrillic;src:url("https://open.scdn.co/fonts/CircularSpUICyrOnly-Light.woff2") format("woff2"),url(https://open.scdn.co/fonts/CircularSpUICyrOnly-Light.woff) format("woff"),url(https://open.scdn.co/fonts/CircularSpUICyrOnly-Light.otf) format("opentype");font-weight:200;font-style:normal;font-display:swap}@font-face{font-family:spotify-circular-cyrillic;src:url("https://open.scdn.co/fonts/CircularSpUICyrOnly-Book.woff2") format("woff2"),url(https://open.scdn.co/fonts/CircularSpUICyrOnly-Book.woff) format("woff"),url(https://open.scdn.co/fonts/CircularSpUICyrOnly-Book.otf) format("opentype");font-weight:400;font-style:normal;font-display:swap}@font-face{font-family:spotify-circular-cyrillic;src:url("https://open.scdn.co/fonts/CircularSpUICyrOnly-Bold.woff2") format("woff2"),url(https://open.scdn.co/fonts/CircularSpUICyrOnly-Bold.woff) format("woff"),url(https://open.scdn.co/fonts/CircularSpUICyrOnly-Bold.otf) format("opentype");font-weight:600;font-style:normal;font-display:swap}
-          html{
-            scrollbar-color:hsla(0,0%,100%,.3) transparent;
-            scrollbar-width:auto; }
-          body {
-            background-color: rgba(0, 0, 0, 0);
-            color:white;
-            max-width:${bodyWidth - 20}px;
-            overflow-x:hidden;
-            font-family:spotify-circular,spotify-circular-cyrillic,spotify-circular-arabic,spotify-circular-hebrew,Helvetica Neue,Helvetica,Arial,Hiragino Kaku Gothic Pro,Meiryo,MS Gothic,sans-serif;
-          }
-          .mylyrics {color: rgb(255,255,255,0.6); font-size: 1.3em; line-height: 1.1em;font-weight: 300; padding:0.1em;}
-          .referent {background-color:transparent;box-shadow: none;  line-height: 1.1em !important; }
-          .windows a.referent {padding:0; line-height: 1.1em; background-color:transparent;box-shadow: none;}
-          .windows a.referent:hover {background-color: hsla(0,0%,0%,.2);border-radius: 2px;}
-          .referent:hover {background-color: hsla(0,0%,0%,.2);border-radius: 2px;}
-          .windows a.referent:not(.referent--green):not(.referent--red):not(.referent--highlighted):not(.referent--image) { opacity:1.0; background-color: transparent; box-shadow: none; color:white; transition: color .2s linear;transition-property: color;transition-duration: 0.2s;transition-timing-function: linear;transition-delay: 0s;}
-          .referent:not(.referent--green):not(.referent--red):not(.referent--highlighted):not(.referent--image) { opacity:1.0; background-color: transparent; box-shadow: none; color:white; transition: color .2s linear;transition-property: color;transition-duration: 0.2s;transition-timing-function: linear;transition-delay: 0s;}
-          .windows a.referent:hover:not(.referent--green):not(.referent--red):not(.referent--highlighted):not(.referent--image) { background-color: hsla(0,0%,0%,.2);border-radius: 2px;}
-          .referent--yellow.referent--highlighted { opacity:1.0; background-color: transparent; box-shadow: none; color:#1ed760; transition: color .2s linear;transition-property: color;transition-duration: 0.2s;transition-timing-function: linear;transition-delay: 0s;}
-          .annotationbox {position:absolute; display:none; max-width:95%; min-width: 160px;padding: 3px 7px;margin: 2px 0 0;background-color: #282828;background-clip: padding-box;border: 1px solid rgba(0,0,0,.15);border-radius: .25rem;}
-          .annotationbox .annotationlabel {display:inline-block;background-color: hsla(0,0%,100%,.6);color: #000;border-radius: 2px;padding: 0 .3em;}
-          .annotationbox .annotation_rich_text_formatting {color: rgb(255,255,255,0.6)}
-          .annotationbox .annotation_rich_text_formatting a {color: rgb(255,255,255,0.9)}
-          .header_with_cover_art-primary_info h1,.header_with_cover_art-primary_info h2,.header_with_cover_art-primary_info h3 {color: rgb(255,255,255,0.5); font-size: 0.9em; line-height: 1.0em;font-weight: 300; }
-          h1.header_with_cover_art-primary_info-title {line-height: 1.1em;}
-          h1.header_with_cover_art-primary_info-title a {color: rgb(255,255,255,0.9); font-size:1.1em}
-          h2 a,h2 a.header_with_cover_art-primary_info-primary_artist {color: rgb(255,255,255,0.9); font-size:1.0em; font-weight:300}
-          .header_with_cover_art-primary_info {display:inline-block;background-color: hsla(0,0%,0%,.2);color: #000;border-radius: 2px;padding:7px 10px 0px 5px;}
-          ::-webkit-scrollbar {width: 16px;}
-          ::-webkit-scrollbar-thumb {background-color: hsla(0,0%,100%,.3);}
-          ${iframeCSSCommon}
-        </style>`
-
-        // Add to <head>
-        html = appendHeadText(html, headhtml)
-
-        return onCombine(html)
       },
       scrollLyrics: scrollLyricsFunction('.mylyrics', -200)
     }
@@ -2837,73 +2425,73 @@ pre{white-space:pre-wrap}
       padding-bottom: 50vh;
       /* this is intended to give some space to see the last line at the vertical center */
     }
-    
+
     main,
     #application {
       --egl-container-display: none;
       /* default hide; override by info conatiner */
     }
-    
+
     #application {
       padding: 28px;
       /* looks better to give some space away from the iframe */
     }
-    
+
     div[data-lyrics-container] {
       font-size: var(--egl-font-size);
       /* adjust font to smaller size */
     }
-    
+
     #application:not(:hover) [data-lyrics-container="true"]::selection {
       /* no selection when the cursor moved out */
       color: inherit;
       background: inherit;
     }
-    
+
     div[class*="SongPageGrid"],
     div[class*="SongHeader"] {
       background-color: transparent;
       padding: 0;
       color: var(--egl-color);
     }
-    
+
     div[class*="SongPageGrid"],
     div[class*="SongHeaderWithPrimis__Container"] {
       background-image: none;
       /* no header background image */
     }
-    
+
     div[data-exclude-from-selection] {
       display: none;
     }
-    
+
     main[class*="Container"] a[href] {
       color: var(--egl-color) !important;
     }
-    
+
     main[class*="Container"] h1[font-size][class] {
       color: var(--egl-color);
     }
-    
+
     main[class*="Container"] h1[font-size][class*="SongHeaderWithPrimis__Title"] {
       margin-bottom: 8px;
     }
-    
+
     div[class*="MetadataStats__Container"] {
       display: block;
       /* not flexbox */
       width: 100%;
     }
-    
+
     div[class*="SongHeaderWithPrimis__Left"] {
       display: none;
       /* just empty space */
     }
-    
+
     div[class*="SongPageGriddesktop"] {
       display: block;
     }
-    
+
     span[class*="LabelWithIcon"]>svg,
     button[class*="LabelWithIcon"]>svg,
     div[class*="Tooltip__Container"] svg,
@@ -2911,7 +2499,7 @@ pre{white-space:pre-wrap}
       fill: currentColor;
       /* dynamic color instead of black */
     }
-    
+
     p[class*="__Label"],
     span[class*="__Label"],
     div[class*="__Section"],
@@ -2922,12 +2510,12 @@ pre{white-space:pre-wrap}
       cursor: inherit;
       /* follow parent styles */
     }
-    
+
     div[class*="MetadataStats"] {
       cursor: default;
       /* no pointer */
     }
-    
+
     div[class*="SongHeaderWithPrimis__Information"] div[class*="HeaderCreditsPrimis__Container"] {
       /* using flexbox with wrapping */
       display: flex;
@@ -2937,7 +2525,7 @@ pre{white-space:pre-wrap}
       align-items: center;
       justify-items: center;
     }
-    
+
     div[class*="SongHeaderWithPrimis__Information"] {
       margin: 0;
       padding: 0;
@@ -2946,23 +2534,23 @@ pre{white-space:pre-wrap}
       display: flex;
       flex-direction: column;
     }
-    
+
     div[class*="SongHeaderWithPrimis__Bottom"] a[href] {
       padding: 0;
       margin: 0;
     }
-    
+
     div[class*="SongHeaderWithPrimis__Right"] {
       background-color: var(--egl-infobox-background);
       /* give some color to info container background */
       padding: 18px 26px;
       /* looks better */
     }
-    
+
     div[data-lyrics-container][class*="Lyrics__Container"] {
       padding: 0;
     }
-    
+
     body .annotated span,
     body .annotated span:hover,
     body a[href],
@@ -2976,7 +2564,7 @@ pre{white-space:pre-wrap}
       background-color: transparent;
       outline: none;
     }
-    
+
     body .annotated span:hover,
     body .annotated a[href]:hover,
     body .annotated a[href]:focus-visible,
@@ -2984,20 +2572,20 @@ pre{white-space:pre-wrap}
     body .annotated.highlighted span {
       text-decoration: underline;
     }
-    
+
     a[href][class],
     span[class*="PortalTooltip"],
     div[class*="HeaderCreditsPrimis"],
     div[class*="HeaderArtistAndTracklistPrimis"] {
       font-size: inherit;
     }
-    
+
     div[class*="SongHeaderWithPrimis__Information"] h1+div[class*="HeaderArtistAndTracklistPrimis"] {
       font-size: 80%;
       margin-top: 10px;
       margin-bottom: 3px;
     }
-    
+
     div[class*="MetadataStats__Stats"] {
       /* using flexbox with wrapping */
       display: flex;
@@ -3011,12 +2599,12 @@ pre{white-space:pre-wrap}
       width: 100%;
       /* force the div to be full width */
     }
-    
+
     h1,
     div[class*="SongPage__LyricsWrapper"] {
       white-space: normal;
     }
-    
+
     div[class*="MetadataStats__Stats"]>[class] {
       margin-right: 0;
       display: flex;
@@ -3024,26 +2612,26 @@ pre{white-space:pre-wrap}
       align-items: center;
       column-gap: 2px;
     }
-    
+
     div[class*="SongHeaderWithPrimis__Information"] div[class*="HeaderCreditsPrimis__List"] {
       font-size: 85%;
     }
-    
+
     div[class*="SongHeaderWithPrimis__Information"]~div[class*="SongHeaderWithPrimis__PrimisContainer"] {
       display: none;
     }
-    
+
     div[class*="SongHeaderWithPrimis__Information"] {
       --egl-container-display: '-NULL-';
       /* all under info would not hide */
     }
-    
+
     div[class*="Footer"],
     div[class*="Leaderboard"] {
       display: none;
       /* unnessary info */
     }
-    
+
     div[class*="SongPage__Section"] #about,
     div[class*="SongPage__Section"] #about~*,
     div[class*="SongPage__Section"] #comments,
@@ -3051,29 +2639,29 @@ pre{white-space:pre-wrap}
       display: none;
       /* unnessary info */
     }
-    
+
     div[class*="SongPage__Section"] #lyrics-root-pin-spacer {
       padding-top: 12px;
       /* look better */
     }
-    
+
     div[class*="Header"] {
       max-width: unset;
       /* default just 50%; want full width */
     }
-    
+
     div[class*="SongHeader"] h1[font-size="medium"] {
       font-size: 140%;
       /* make song header title smaller */
       white-space: break-spaces;
     }
-    
+
     div[class*="SongHeader"] h1[font-size="xSmallHeadline"] {
       font-size: 120%;
       /* make song header title bigger */
       white-space: break-spaces;
     }
-    
+
     /* the following shall apply with padding-top: 80vh */
     /* the content might be hidden if height > 80vh */
     /* the max-height allow the header box to be scrolled if height > 80vh */
@@ -3081,14 +2669,14 @@ pre{white-space:pre-wrap}
       position: relative;
       /* set 100% width for inner absolute box */
     }
-    
+
     .genius-lyrics-header-container>* {
       /* main purpose for adding class using CSS event triggering; avoid :has() */
       --genius-lyrics-header-content-display: none;
       display: var(--genius-lyrics-header-content-display);
       /* none by default */
     }
-    
+
     .genius-lyrics-header-container>.genius-lyrics-header-content {
       --genius-lyrics-header-content-display: '--NULL--';
       /* override none */
@@ -3099,21 +2687,21 @@ pre{white-space:pre-wrap}
       /* 100% height refer to the element itself dim */
       max-height: 80vh;
     }
-    
+
     div[class*="SongHeaderWithPrimis__Container"]>div[class*="SongHeaderWithPrimis__Right"].genius-lyrics-header-content {
       display: flex;
       flex-direction: column;
     }
-    
+
     div[class*="SongHeaderWithPrimis__Container"]>div[class*="SongHeaderWithPrimis__Right"].genius-lyrics-header-content>div {
       overflow: auto;
     }
-    
+
     div[class*="Lyrics__Container"][data-lyrics-container="true"] {
       word-break: keep-all;
       /* not only a single lyrics character get wrapped. the whole lyrics word will be wrapped */
     }
-    
+
     div[class*="HeaderCreditsPrimis__Section"] {
       /* flexbox for header info */
       display: flex;
@@ -3125,57 +2713,57 @@ pre{white-space:pre-wrap}
       justify-content: start;
       padding: 4px 0px;
     }
-    
+
     div[class*="LyricsEditdesktop__"] {
       display: none;
     }
-    
+
     div[class*="HeaderArtistAndTracklistPrimis__Container"] {
       flex-wrap: wrap;
       column-gap: 6px;
       row-gap: 2p;
       x
     }
-    
+
     div[class*="HeaderArtistAndTracklistPrimis__Container"] div[class*="HeaderArtistAndTracklistPrimis__Tracklist"]>a[href] {
       margin: 6px;
     }
-    
+
     body button {
       color: inherit;
     }
-    
+
     div[class*="SongHeaderWithPrimis__Information"] div[class*="SongHeaderWithPrimis__Bottom"] {
       display: flex;
       flex-direction: column;
     }
-    
+
     div[class*="SongHeaderWithPrimis__Information"] div[class*="SongHeaderWithPrimis__Bottom"] a[href="#about"] {
       font-weight: 300;
       font-size: 85%;
       opacity: 0.65;
       /* coloring only */
     }
-    
+
     button[class*="LabelWithIcon__Container"] {
       display: flex;
       justify-content: center;
       cursor: default;
     }
-    
+
     body #annotationcontainer958 {
       font-size: var(--egl-font-size);
     }
-    
+
     .annotationcontent {
       max-height: 30vh;
       overflow: auto;
     }
-    
+
     [class*="SongHeaderWithPrimis"] a[href][class*="Link__"] {
       --egl-color: var(--egl-link-color);
     }
-    
+
     [class*="HeaderCreditsPrimis__List"] {
       justify-content: center;
       align-items: center;
@@ -4062,6 +3650,15 @@ pre{white-space:pre-wrap}
     theme = themes[genius.option.themeKey]
     annotationsEnabled = !!values[2]
     autoScrollEnabled = !!values[3]
+
+    // If debug mode, clear cache
+    if (genius.debug) {
+      await Promise.all([custom.GM.setValue('selectioncache', '{}'), custom.GM.setValue('requestcache', '{}')]).then(function () {
+        selectionCache = cleanSelectionCache()
+        requestCache = {}
+        console.log('selectionCache and requestCache cleared')
+      })
+    }
 
     const isMessaging = document.location.href.startsWith(`${custom.emptyURL}#html:post`)
 
