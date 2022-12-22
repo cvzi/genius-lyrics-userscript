@@ -1484,17 +1484,13 @@ Genius:     ${originalUrl}
   }
 
   function scrollToBegining () {
-    //if (theme && typeof theme.scrollLyrics === 'function') {
-    //theme.scrollLyrics(0)
-    //} else if (typeof theme.scrollableContainer === 'string') {
     let selector = theme.scrollableContainer
-    if (document.querySelector("style#egl-contentstyles")) {
+    if (document.querySelector('style#egl-contentstyles')) {
       selector = 'body'
       theme.scrollableContainer = selector
       theme.scrollLyrics = scrollLyricsFunction('body', 0)
     }
     document.querySelector(selector).scrollIntoView()
-    //}
   }
 
   const themes = {
@@ -3762,7 +3758,7 @@ Link__StyledLink
         custom.GM.setValue('theme', genius.option.themeKey).then(() => {
           if (genius.onThemeChanged) {
             for (const f of genius.onThemeChanged) {
-              f();
+              f()
             }
           }
           custom.addLyrics(true)
