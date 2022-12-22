@@ -2438,9 +2438,9 @@ pre{white-space:pre-wrap}
     if (!contentStyle) return html
     const css = `
     body {
-      ${contentStyle.includes("--egl-background") ? "background-color: var(--egl-background);" : ''}
-      ${contentStyle.includes("--egl-color") ? "color: var(--egl-color);" : ''}
-      ${contentStyle.includes("--egl-font-size") ? "font-size: var(--egl-font-size);" : ''}
+      ${contentStyle.includes('--egl-background') ? 'background-color: var(--egl-background);' : ''}
+      ${contentStyle.includes('--egl-color') ? 'color: var(--egl-color);' : ''}
+      ${contentStyle.includes('--egl-font-size') ? 'font-size: var(--egl-font-size);' : ''}
       margin: 0;
       padding: 0;
       padding-top: 80vh;
@@ -2486,7 +2486,7 @@ pre{white-space:pre-wrap}
     }
 
     body #annotationcontainer958 {
-      ${contentStyle.includes("--egl-font-size") ? "font-size: var(--egl-font-size);" : ''}
+      ${contentStyle.includes('--egl-font-size') ? 'font-size: var(--egl-font-size);' : ''}
     }
 
     .annotationcontent {
@@ -2751,7 +2751,7 @@ pre{white-space:pre-wrap}
 
     .genius-lyrics-header-container > .genius-lyrics-header-content {
 
-      ${contentStyle.includes("--egl-infobox-background") ? "background-color: var(--egl-infobox-background);" : ''}
+      ${contentStyle.includes('--egl-infobox-background') ? 'background-color: var(--egl-infobox-background);' : ''}
       /* give some color to info container background */
       padding: 18px 26px;
       /* looks better */
