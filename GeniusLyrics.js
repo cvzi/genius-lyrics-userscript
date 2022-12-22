@@ -1564,13 +1564,6 @@ Genius:     ${originalUrl}
           document.querySelector('div[class^="Lyrics__Container"]').style.maxWidth = `calc(${bodyWidth}px - 1.5em)`
           document.querySelector('#lyrics-root').style.gridTemplateColumns = 'auto' // class="SongPageGriddesktop__TwoColumn-
         })
-
-        // Open real page if not in frame
-        onload.push(function () {
-          if (window.top === window) {
-            document.location.href = document.querySelector('meta[property="og:url"]').content
-          }
-        })
         return onload
       },
       combine: function themeGeniusCombineGeniusResources (song, html, annotations, cb) {
@@ -1664,11 +1657,13 @@ Genius:     ${originalUrl}
 
         const titlehtml = '<div class="myheader">' + h1.parentNode.outerHTML + '</div>'
 
-        headhtml = `<style>
+        headhtml += `
+        <link rel="stylesheet" href="//fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=YouTube+Sans:wght@300..900&display=swap">
+        <style>
             body {
               background:#ffffff linear-gradient(to bottom, #fafafa, #ffffff) fixed !important;
               color:black;
-              font-family:Roboto, Arial, sans-serif;
+              font-family:'Youtube Sans', Roboto, Arial, sans-serif;
               max-width:${bodyWidth - 20}px;
               overflow-x:hidden;
             }
@@ -1762,14 +1757,6 @@ Genius:     ${originalUrl}
         } else {
           onload.push(themeCommon.addAnnotationHandling)
         }
-
-        // Open real page if not in frame
-        onload.push(function () {
-          if (window.top === window) {
-            document.location.href = document.querySelector('meta[property="og:url"]').content
-          }
-        })
-
         return onload
       },
       combine: function themeSpotifyCombineGeniusResources (song, html, annotations, onCombine) {
@@ -1800,9 +1787,15 @@ Genius:     ${originalUrl}
 
         const titlehtml = '<div class="myheader">' + h1.parentNode.outerHTML + '</div>'
 
-        headhtml = `<style>
-            @font-face{font-family:spotify-circular;src:url("https://open.scdn.co/fonts/CircularSpUIv3T-Light.woff2") format("woff2"),url(https://open.scdn.co/fonts/CircularSpUIv3T-Light.woff) format("woff"),url(https://open.scdn.co/fonts/CircularSpUIv3T-Light.ttf) format("truetype");font-weight:200;font-style:normal;font-display:swap}@font-face{font-family:spotify-circular;src:url("https://open.scdn.co/fonts/CircularSpUIv3T-Book.woff2") format("woff2"),url(https://open.scdn.co/fonts/CircularSpUIv3T-Book.woff) format("woff"),url(https://open.scdn.co/fonts/CircularSpUIv3T-Book.ttf) format("truetype");font-weight:400;font-style:normal;font-display:swap}@font-face{font-family:spotify-circular;src:url("https://open.scdn.co/fonts/CircularSpUIv3T-Bold.woff2") format("woff2"),url(https://open.scdn.co/fonts/CircularSpUIv3T-Bold.woff) format("woff"),url(https://open.scdn.co/fonts/CircularSpUIv3T-Bold.ttf) format("truetype");font-weight:600;font-style:normal;font-display:swap}@font-face{font-family:spotify-circular-arabic;src:url("https://open.scdn.co/fonts/CircularSpUIAraOnly-Light.woff2") format("woff2"),url(https://open.scdn.co/fonts/CircularSpUIAraOnly-Light.woff) format("woff"),url(https://open.scdn.co/fonts/CircularSpUIAraOnly-Light.otf) format("opentype");font-weight:200;font-style:normal;font-display:swap}@font-face{font-family:spotify-circular-arabic;src:url("https://open.scdn.co/fonts/CircularSpUIAraOnly-Book.woff2") format("woff2"),url(https://open.scdn.co/fonts/CircularSpUIAraOnly-Book.woff) format("woff"),url(https://open.scdn.co/fonts/CircularSpUIAraOnly-Book.otf) format("opentype");font-weight:400;font-style:normal;font-display:swap}@font-face{font-family:spotify-circular-arabic;src:url("https://open.scdn.co/fonts/CircularSpUIAraOnly-Bold.woff2") format("woff2"),url(https://open.scdn.co/fonts/CircularSpUIAraOnly-Bold.woff) format("woff"),url(https://open.scdn.co/fonts/CircularSpUIAraOnly-Bold.otf) format("opentype");font-weight:600;font-style:normal;font-display:swap}@font-face{font-family:spotify-circular-hebrew;src:url("https://open.scdn.co/fonts/CircularSpUIHbrOnly-Light.woff2") format("woff2"),url(https://open.scdn.co/fonts/CircularSpUIHbrOnly-Light.woff) format("woff"),url(https://open.scdn.co/fonts/CircularSpUIHbrOnly-Light.otf) format("opentype");font-weight:200;font-style:normal;font-display:swap}@font-face{font-family:spotify-circular-hebrew;src:url("https://open.scdn.co/fonts/CircularSpUIHbrOnly-Book.woff2") format("woff2"),url(https://open.scdn.co/fonts/CircularSpUIHbrOnly-Book.woff) format("woff"),url(https://open.scdn.co/fonts/CircularSpUIHbrOnly-Book.otf) format("opentype");font-weight:400;font-style:normal;font-display:swap}@font-face{font-family:spotify-circular-hebrew;src:url("https://open.scdn.co/fonts/CircularSpUIHbrOnly-Bold.woff2") format("woff2"),url(https://open.scdn.co/fonts/CircularSpUIHbrOnly-Bold.woff) format("woff"),url(https://open.scdn.co/fonts/CircularSpUIHbrOnly-Bold.otf) format("opentype");font-weight:600;font-style:normal;font-display:swap}@font-face{font-family:spotify-circular-cyrillic;src:url("https://open.scdn.co/fonts/CircularSpUICyrOnly-Light.woff2") format("woff2"),url(https://open.scdn.co/fonts/CircularSpUICyrOnly-Light.woff) format("woff"),url(https://open.scdn.co/fonts/CircularSpUICyrOnly-Light.otf) format("opentype");font-weight:200;font-style:normal;font-display:swap}@font-face{font-family:spotify-circular-cyrillic;src:url("https://open.scdn.co/fonts/CircularSpUICyrOnly-Book.woff2") format("woff2"),url(https://open.scdn.co/fonts/CircularSpUICyrOnly-Book.woff) format("woff"),url(https://open.scdn.co/fonts/CircularSpUICyrOnly-Book.otf) format("opentype");font-weight:400;font-style:normal;font-display:swap}@font-face{font-family:spotify-circular-cyrillic;src:url("https://open.scdn.co/fonts/CircularSpUICyrOnly-Bold.woff2") format("woff2"),url(https://open.scdn.co/fonts/CircularSpUICyrOnly-Bold.woff) format("woff"),url(https://open.scdn.co/fonts/CircularSpUICyrOnly-Bold.otf) format("opentype");font-weight:600;font-style:normal;font-display:swap}
-            html{
+        const spotifyOriginalCSS = document.head.querySelector('link[rel="stylesheet"][href*="spotifycdn.com"][href*="web-player"]')
+        console.log(document.head)
+        console.log(spotifyOriginalCSS)
+        if (spotifyOriginalCSS) {
+          console.log(spotifyOriginalCSS.outerHTML)
+          headhtml += spotifyOriginalCSS.outerHTML
+        }
+        headhtml += `<style>
+           html{
               scrollbar-color:hsla(0,0%,100%,.3) transparent;
               scrollbar-width:auto; }
             body {
@@ -1810,7 +1803,8 @@ Genius:     ${originalUrl}
               color:white;
               max-width: ${bodyWidth - 20}px;
               overflow-x:hidden;
-              font-family:spotify-circular,spotify-circular-cyrillic,spotify-circular-arabic,spotify-circular-hebrew,Helvetica Neue,Helvetica,Arial,Hiragino Kaku Gothic Pro,Meiryo,MS Gothic,sans-serif;
+              font-family:CircularSp,CircularSp-Arab,CircularSp-Hebr,CircularSp-Cyrl,CircularSp-Grek,CircularSp-Deva,'HelveticaNeue',Arial,sans-serif;
+              padding:10px;
             }
             .mylyrics {color: #bebebe}
             .mylyrics a:link,.mylyrics a:visited,.mylyrics a:hover{color:#f3f3f3}
@@ -1828,6 +1822,9 @@ Genius:     ${originalUrl}
             div[class*="HeaderCreditsPrimis__Container"] {
               display:none;
             }
+            .emptyspacer {
+              padding-top:50px;
+            }
             ${iframeCSSCommon}
           </style>`
 
@@ -1844,6 +1841,7 @@ Genius:     ${originalUrl}
             <div class="mylyrics song_body-lyrics">
             ${lyricshtml}
             </div>
+            <div class="emptyspacer"></div>
             <div class="annotationbox" id="annotationbox"></div>
           </body>
           </html>
