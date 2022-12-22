@@ -1,0 +1,3402 @@
+{
+  "type": "DOCUMENT_FRAGMENT_NODE",
+  "childs": [
+    {
+      "type": "TEXT_NODE",
+      "text": "   "
+    },
+    {
+      "type": "ELEMENT_NODE",
+      "selector": "title",
+      "text": "Now United – Nobody Fools Me Twice Lyrics | Genius Lyrics"
+    },
+    {
+      "type": "ELEMENT_NODE",
+      "selector": "style"
+    },
+    {
+      "type": "ELEMENT_NODE",
+      "selector": "style",
+      "[data-styled]": "true",
+      "[data-styled-version]": "5.1.0"
+    },
+    {
+      "type": "TEXT_NODE",
+      "text": " "
+    },
+    {
+      "type": "ELEMENT_NODE",
+      "selector": "meta[property]",
+      "content": "https://genius.com/Now-united-nobody-fools-me-twice-lyrics",
+      "noChild": true
+    },
+    {
+      "type": "TEXT_NODE",
+      "text": "  "
+    },
+    {
+      "type": "ELEMENT_NODE",
+      "selector": "div#application",
+      "childs": [
+        {
+          "type": "ELEMENT_NODE",
+          "selector": "div.LeaderboardOrMarquee__Sticky-yjd3i4-0.dIgauN.Leaderboard__LeaderboardOrMarquee-da326u-0.jOhzET",
+          "child": {
+            "type": "ELEMENT_NODE",
+            "selector": "div.LeaderboardOrMarquee__Container-yjd3i4-1.cLZLgM",
+            "child": {
+              "type": "ELEMENT_NODE",
+              "selector": "div.DfpAd__Container-sc-1tnbv7f-0.kiNXoS",
+              "childs": [
+                {
+                  "type": "ELEMENT_NODE",
+                  "selector": "div#div-gpt-ad-desktop_song_combined_leaderboard-desktop_song_combined_leaderboard-1",
+                  "noChild": true
+                },
+                {
+                  "type": "ELEMENT_NODE",
+                  "selector": "div.DfpAd__Placeholder-sc-1tnbv7f-1.ilfajN",
+                  "noChild": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "ELEMENT_NODE",
+          "selector": "div#sticky-nav.StickyNavdesktop__Container-sc-60o25r-0.eWpXMk",
+          "childs": [
+            {
+              "type": "ELEMENT_NODE",
+              "selector": "div.StickyNavdesktop__Left-sc-60o25r-1.cpvLYi",
+              "childs": [
+                {
+                  "type": "ELEMENT_NODE",
+                  "selector": "a.PageHeaderLogo__Link-sc-13m4mcv-0.lbozyU[height]",
+                  "href": "https://genius.com",
+                  "child": {
+                    "type": "ELEMENT_NODE",
+                    "selector": "svg[viewBox]",
+                    "child": {
+                      "type": "ELEMENT_NODE",
+                      "selector": "svg-repx0[v1]",
+                      "noChild": true
+                    }
+                  }
+                },
+                {
+                  "type": "ELEMENT_NODE",
+                  "selector": "div.StickyNavdesktop__Subnavigation-sc-60o25r-6.leLkHK",
+                  "childs": [
+                    {
+                      "type": "ELEMENT_NODE",
+                      "selector": "a.Link__StyledLink-h3isu4-0.gLmHNs.StickyNavdesktop__SiteLink-sc-60o25r-4.kphUUq",
+                      "[font-weight]": "light",
+                      "href": "/#featured-stories",
+                      "child": {
+                        "type": "ELEMENT_NODE",
+                        "selector": "span.TextLabel-sc-8kw9oj-0.kNjZBr",
+                        "[font-weight]": "light",
+                        "text": "Featured"
+                      }
+                    },
+                    {
+                      "type": "ELEMENT_NODE",
+                      "selector": "a.Link__StyledLink-h3isu4-0.gLmHNs.StickyNavdesktop__SiteLink-sc-60o25r-4.kphUUq",
+                      "[font-weight]": "light",
+                      "href": "/#top-songs",
+                      "child": {
+                        "type": "ELEMENT_NODE",
+                        "selector": "span.TextLabel-sc-8kw9oj-0.kNjZBr",
+                        "[font-weight]": "light",
+                        "text": "Charts"
+                      }
+                    },
+                    {
+                      "type": "ELEMENT_NODE",
+                      "selector": "a.Link__StyledLink-h3isu4-0.gLmHNs.StickyNavdesktop__SiteLink-sc-60o25r-4.kphUUq",
+                      "[font-weight]": "light",
+                      "href": "/#videos",
+                      "child": {
+                        "type": "ELEMENT_NODE",
+                        "selector": "span.TextLabel-sc-8kw9oj-0.kNjZBr",
+                        "[font-weight]": "light",
+                        "text": "Videos"
+                      }
+                    },
+                    {
+                      "type": "ELEMENT_NODE",
+                      "selector": "a.Link__StyledLink-h3isu4-0.gLmHNs.StickyNavdesktop__SiteLink-sc-60o25r-4.kphUUq[target]",
+                      "[font-weight]": "light",
+                      "href": "https://promote.genius.com",
+                      "child": {
+                        "type": "ELEMENT_NODE",
+                        "selector": "span.TextLabel-sc-8kw9oj-0.kNjZBr",
+                        "[font-weight]": "light",
+                        "text": "Promote Your Music"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "ELEMENT_NODE",
+              "selector": "div.StickyNavdesktop__Right-sc-60o25r-2.kMDkxm",
+              "childs": [
+                {
+                  "type": "ELEMENT_NODE",
+                  "selector": "button.TextButton-sc-192nsqv-0.hVAZmF.StickyNavSignUp__Button-sc-1o3jy1m-0.ikBeYr.StickyNavdesktop__AuthTextButton-sc-60o25r-5.kYaBCH[type]",
+                  "text": "Sign Up"
+                },
+                {
+                  "type": "ELEMENT_NODE",
+                  "selector": "form.PageHeaderSearchdesktop__Form-sc-1o6zub0-0.dawSPu[action][method]",
+                  "childs": [
+                    {
+                      "type": "ELEMENT_NODE",
+                      "selector": "input.PageHeaderSearchdesktop__Input-sc-1o6zub0-2.hTPksM[name][required]",
+                      "[placeholder]": "Search lyrics & more",
+                      "[autocomplete]": "off",
+                      "noChild": true
+                    },
+                    {
+                      "type": "ELEMENT_NODE",
+                      "selector": "div.PageHeaderSearchdesktop__Icon-sc-1o6zub0-1.cmIqeW",
+                      "child": {
+                        "type": "ELEMENT_NODE",
+                        "selector": "svg[viewBox]",
+                        "child": {
+                          "type": "ELEMENT_NODE",
+                          "selector": "svg-repx1[v1]",
+                          "noChild": true
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "ELEMENT_NODE",
+          "selector": "main.SongPage__Container-sc-19xhmoi-0.buKnHw",
+          "childs": [
+            {
+              "type": "ELEMENT_NODE",
+              "selector": "div.SongPageGriddesktop-sc-1px5b71-0.jecoie.SongHeaderWithPrimis__Container-r0647n-0.kPbOSh",
+              "childs": [
+                {
+                  "type": "ELEMENT_NODE",
+                  "selector": "div.SongHeaderWithPrimis__Sentinel-r0647n-12.fmRrc",
+                  "noChild": true
+                },
+                {
+                  "type": "ELEMENT_NODE",
+                  "selector": "div.SongHeaderWithPrimis__Left-r0647n-1.jiZgac",
+                  "child": {
+                    "type": "ELEMENT_NODE",
+                    "selector": "div.SongHeaderWithPrimis__CoverArtContainer-r0647n-6.hudniQ",
+                    "child": {
+                      "type": "ELEMENT_NODE",
+                      "selector": "div.SongHeaderWithPrimis__CoverArt-r0647n-7.dnpvgJ",
+                      "child": {
+                        "type": "ELEMENT_NODE",
+                        "selector": "img.SizedImage__Image-sc-1hyeaua-1.iMdmgx[alt]",
+                        "noChild": true
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "ELEMENT_NODE",
+                  "selector": "div.SongHeaderWithPrimis__Right-r0647n-2.brVVKA",
+                  "childs": [
+                    {
+                      "type": "ELEMENT_NODE",
+                      "selector": "div.SongHeaderWithPrimis__Information-r0647n-5.iFxQsP",
+                      "childs": [
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "div.SongHeaderWithPrimis__Top-r0647n-3.iaqpZK",
+                          "childs": [
+                            {
+                              "type": "ELEMENT_NODE",
+                              "selector": "h1.SongHeaderWithPrimis__Title-r0647n-8.iSqTbp[font-size]",
+                              "child": {
+                                "type": "ELEMENT_NODE",
+                                "selector": "span.SongHeaderWithPrimis__HiddenMask-r0647n-11.jSgIpQ",
+                                "text": "Nobody Fools Me Twice"
+                              }
+                            },
+                            {
+                              "type": "ELEMENT_NODE",
+                              "selector": "div.HeaderArtistAndTracklistPrimis__Container-sc-1uakih7-0.fqAixv",
+                              "child": {
+                                "type": "ELEMENT_NODE",
+                                "selector": "a.Link__StyledLink-h3isu4-0.PcIZE.HeaderArtistAndTracklistPrimis__Artist-sc-1uakih7-1.cVGQZE[font-size]",
+                                "[font-weight]": "light",
+                                "href": "https://genius.com/artists/Now-united",
+                                "text": "Now United"
+                              }
+                            },
+                            {
+                              "type": "ELEMENT_NODE",
+                              "selector": "div.HeaderCreditsPrimis__Container-dl42pr-0.eRbhLo",
+                              "child": {
+                                "type": "ELEMENT_NODE",
+                                "selector": "div.HeaderCreditsPrimis__Section-dl42pr-1.hxSUxL",
+                                "childs": [
+                                  {
+                                    "type": "ELEMENT_NODE",
+                                    "selector": "p.HeaderCreditsPrimis__Label-dl42pr-2.repVv",
+                                    "text": "Produced by"
+                                  },
+                                  {
+                                    "type": "ELEMENT_NODE",
+                                    "selector": "div.HeaderCreditsPrimis__List-dl42pr-3.eOxYeV",
+                                    "child": {
+                                      "type": "ELEMENT_NODE",
+                                      "selector": "span.PortalTooltip__Container-yc1x8c-0.bOCNdp",
+                                      "child": {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "span.PortalTooltip__Trigger-yc1x8c-1.ekJBqv",
+                                        "child": {
+                                          "type": "ELEMENT_NODE",
+                                          "selector": "a.Link__StyledLink-h3isu4-0.fUgcxf",
+                                          "[font-weight]": "light",
+                                          "href": "https://genius.com/artists/Big-taste",
+                                          "text": "Big Taste"
+                                        }
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "div.SongHeaderWithPrimis__Bottom-r0647n-4.iMmhUH",
+                          "childs": [
+                            {
+                              "type": "ELEMENT_NODE",
+                              "selector": "a.Link__StyledLink-h3isu4-0.kAsGrA.HeaderBio__Wrapper-oaxemt-0.eFqCnd.SongHeaderWithPrimis__HeaderBio-r0647n-13.iEXgTT",
+                              "[font-weight]": "light",
+                              "href": "#about",
+                              "childs": [
+                                {
+                                  "type": "TEXT_NODE",
+                                  "text": "“Nobody Fools Me Twice” is among a few songs by the group that aren’t primarily sung in English. With main vocals by the group’s representative from South Korea, Heyoon… "
+                                },
+                                {
+                                  "type": "ELEMENT_NODE",
+                                  "selector": "span.HeaderBio__ViewBio-oaxemt-1.hTbbsa",
+                                  "childs": [
+                                    {
+                                      "type": "TEXT_NODE",
+                                      "text": "Read More"
+                                    },
+                                    {
+                                      "type": "ELEMENT_NODE",
+                                      "selector": "span.InlineSvg__Wrapper-b788hd-0.xQwqG",
+                                      "child": {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "svg[viewBox]",
+                                        "child": {
+                                          "type": "ELEMENT_NODE",
+                                          "selector": "svg-repx2[v1]",
+                                          "noChild": true
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "ELEMENT_NODE",
+                              "selector": "div.MetadataStats__Container-sc-1t7d8ac-0.eQViPi",
+                              "childs": [
+                                {
+                                  "type": "ELEMENT_NODE",
+                                  "selector": "div.MetadataStats__Stats-sc-1t7d8ac-4.fcQQLw",
+                                  "childs": [
+                                    {
+                                      "type": "ELEMENT_NODE",
+                                      "selector": "span.LabelWithIcon__Container-sc-1ri57wg-0.exCHLx.MetadataStats__LabelWithIcon-sc-1t7d8ac-5.fzwKEO[height]",
+                                      "childs": [
+                                        {
+                                          "type": "ELEMENT_NODE",
+                                          "selector": "svg[width][height][viewBox][fill]",
+                                          "child": {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "svg-repx3[v1]",
+                                            "noChild": true
+                                          }
+                                        },
+                                        {
+                                          "type": "ELEMENT_NODE",
+                                          "selector": "span.LabelWithIcon__Label-sc-1ri57wg-1.kMItKF",
+                                          "text": "Aug. 8, 2020"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "type": "ELEMENT_NODE",
+                                      "selector": "span.LabelWithIcon__Container-sc-1ri57wg-0.exCHLx.MetadataStats__LabelWithIcon-sc-1t7d8ac-5.fzwKEO[height]",
+                                      "childs": [
+                                        {
+                                          "type": "ELEMENT_NODE",
+                                          "selector": "svg[viewBox]",
+                                          "child": {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "svg-repx4[v1]",
+                                            "noChild": true
+                                          }
+                                        },
+                                        {
+                                          "type": "ELEMENT_NODE",
+                                          "selector": "span.LabelWithIcon__Label-sc-1ri57wg-1.kMItKF",
+                                          "text": "1"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "type": "ELEMENT_NODE",
+                                      "selector": "span.LabelWithIcon__Container-sc-1ri57wg-0.exCHLx.MetadataStats__LabelWithIcon-sc-1t7d8ac-5.fzwKEO[height]",
+                                      "childs": [
+                                        {
+                                          "type": "ELEMENT_NODE",
+                                          "selector": "svg[viewBox]",
+                                          "child": {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "svg-repx25[v1]",
+                                            "noChild": true
+                                          }
+                                        },
+                                        {
+                                          "type": "ELEMENT_NODE",
+                                          "selector": "span.LabelWithIcon__Label-sc-1ri57wg-1.kMItKF",
+                                          "text": "5.8K"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "type": "ELEMENT_NODE",
+                                      "selector": "button.LabelWithIcon__Container-sc-1ri57wg-0.exCHLx.MetadataStats__LabelWithIcon-sc-1t7d8ac-5.fzwKEO[height]",
+                                      "childs": [
+                                        {
+                                          "type": "ELEMENT_NODE",
+                                          "selector": "svg[viewBox]",
+                                          "child": {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "svg-repx5[v1]",
+                                            "noChild": true
+                                          }
+                                        },
+                                        {
+                                          "type": "ELEMENT_NODE",
+                                          "selector": "span.LabelWithIcon__Label-sc-1ri57wg-1.gjSNHg",
+                                          "text": "4"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "type": "ELEMENT_NODE",
+                                      "selector": "div.Pyong__Container-yq95kq-0.eMjKRh.MetadataStats__Pyong-sc-1t7d8ac-6.gAieh",
+                                      "child": {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "div.Tooltip__Container-sc-1uvy5c2-0.cRrFdP",
+                                        "child": {
+                                          "type": "ELEMENT_NODE",
+                                          "selector": "div.Tooltip__Children-sc-1uvy5c2-2.dvOJud",
+                                          "child": {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "button.LabelWithIcon__Container-sc-1ri57wg-0.exCHLx[height]",
+                                            "childs": [
+                                              {
+                                                "type": "ELEMENT_NODE",
+                                                "selector": "svg[viewBox]",
+                                                "child": {
+                                                  "type": "ELEMENT_NODE",
+                                                  "selector": "svg-repx6[v1]",
+                                                  "noChild": true
+                                                }
+                                              },
+                                              {
+                                                "type": "ELEMENT_NODE",
+                                                "selector": "span.LabelWithIcon__Label-sc-1ri57wg-1.IVJjV",
+                                                "text": "1"
+                                              }
+                                            ]
+                                          }
+                                        }
+                                      }
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "ELEMENT_NODE",
+                                  "selector": "div.MetadataStats__Controls-sc-1t7d8ac-3.ctylSH",
+                                  "noChild": true
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ELEMENT_NODE",
+                      "selector": "div.SongHeaderWithPrimis__PrimisContainer-r0647n-14.heddkF",
+                      "child": {
+                        "type": "ELEMENT_NODE",
+                        "selector": "div.PrimisPlayer__Container-sc-1tvdtf7-1.csMTdh",
+                        "noChild": true
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "ELEMENT_NODE",
+              "selector": "div.SongPage__Section-sc-19xhmoi-3.cXvCRB",
+              "childs": [
+                {
+                  "type": "ELEMENT_NODE",
+                  "selector": "div.SectionScrollSentinel__Element-sc-1c8cvz5-0.ENCiS",
+                  "noChild": true
+                },
+                {
+                  "type": "ELEMENT_NODE",
+                  "selector": "div#annotation-portal-target.SongPage__LyricsWrapper-sc-19xhmoi-5.UKjRP",
+                  "childs": [
+                    {
+                      "type": "ELEMENT_NODE",
+                      "selector": "div#lyrics.SongPage__SectionAnchor-sc-19xhmoi-4.bcJzkW",
+                      "noChild": true
+                    },
+                    {
+                      "type": "ELEMENT_NODE",
+                      "selector": "div#lyrics-root-pin-spacer",
+                      "child": {
+                        "type": "ELEMENT_NODE",
+                        "selector": "div#lyrics-root.SongPageGriddesktop-sc-1px5b71-0.Lyrics__Root-sc-1ynbvzw-1.fHdUT[font-size]",
+                        "childs": [
+                          {
+                            "type": "ELEMENT_NODE",
+                            "selector": "div.LyricsControls__Container-sghmdv-0.iwZJzz",
+                            "childs": [
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "div.LyricsControls__Flex-sghmdv-10.bBMTMQ",
+                                "child": {
+                                  "type": "ELEMENT_NODE",
+                                  "selector": "div.Dropdown__Container-aitjcr-0.fxOdHk",
+                                  "childs": [
+                                    {
+                                      "type": "ELEMENT_NODE",
+                                      "selector": "button.Dropdown__Toggle-aitjcr-2.chZLLf",
+                                      "child": {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "span.SmallButton__Container-mg33hl-0.kviCal.LyricsControls__SmallButton-sghmdv-8.smKwV[type]",
+                                        "childs": [
+                                          {
+                                            "type": "TEXT_NODE",
+                                            "text": "Translations"
+                                          },
+                                          {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "span.LyricsControls__SmallButtonIcon-sghmdv-5.dLSCVn",
+                                            "child": {
+                                              "type": "ELEMENT_NODE",
+                                              "selector": "svg[viewBox]",
+                                              "child": {
+                                                "type": "ELEMENT_NODE",
+                                                "selector": "svg-repx8[v1]",
+                                                "noChild": true
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    },
+                                    {
+                                      "type": "ELEMENT_NODE",
+                                      "selector": "div.Dropdown__ContentContainer-aitjcr-1.hIOhEv",
+                                      "child": {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "ul.LyricsControls__DropdownContents-sghmdv-1.kEyJXB",
+                                        "childs": [
+                                          {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "li.LyricsControls__DropdownItem-sghmdv-2.enfGY",
+                                            "child": {
+                                              "type": "ELEMENT_NODE",
+                                              "selector": "a.TextButton-sc-192nsqv-0.hVAZmF.LyricsControls__TextButton-sghmdv-6.hXTHjZ[title][type]",
+                                              "href": "https://genius.com/Genius-brasil-traducoes-now-united-nobody-fools-me-twice-traducao-em-portugues-lyrics",
+                                              "child": {
+                                                "type": "ELEMENT_NODE",
+                                                "selector": "div.LyricsControls__TextEllipsis-sghmdv-9.fuMyZH",
+                                                "text": "Português"
+                                              }
+                                            }
+                                          },
+                                          {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "li.LyricsControls__DropdownItem-sghmdv-2.enfGY",
+                                            "child": {
+                                              "type": "ELEMENT_NODE",
+                                              "selector": "a.TextButton-sc-192nsqv-0.hVAZmF.LyricsControls__TextButton-sghmdv-6.hXTHjZ[title][type]",
+                                              "href": "https://genius.com/Genius-english-translations-now-united-nobody-fools-me-twice-english-translation-lyrics",
+                                              "child": {
+                                                "type": "ELEMENT_NODE",
+                                                "selector": "div.LyricsControls__TextEllipsis-sghmdv-9.fuMyZH",
+                                                "text": "English"
+                                              }
+                                            }
+                                          },
+                                          {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "li.LyricsControls__DropdownItem-sghmdv-2.enfGY",
+                                            "child": {
+                                              "type": "ELEMENT_NODE",
+                                              "selector": "a.TextButton-sc-192nsqv-0.hVAZmF.LyricsControls__TextButton-sghmdv-6.hXTHjZ[title][type]",
+                                              "href": "https://genius.com/Genius-romanizations-now-united-nobody-fools-me-twice-romanized-lyrics",
+                                              "child": {
+                                                "type": "ELEMENT_NODE",
+                                                "selector": "div.LyricsControls__TextEllipsis-sghmdv-9.fuMyZH",
+                                                "text": "Romanization"
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "div.LyricsControls__Flex-sghmdv-10.bBMTMQ",
+                                "noChild": true
+                              }
+                            ]
+                          },
+                          {
+                            "type": "ELEMENT_NODE",
+                            "selector": "h2.TextLabel-sc-8kw9oj-0.Lyrics__Title-sc-1ynbvzw-0.fdEmdh",
+                            "[font-weight]": "light",
+                            "text": "Nobody Fools Me Twice Lyrics"
+                          },
+                          {
+                            "type": "ELEMENT_NODE",
+                            "selector": "div.Lyrics__Container-sc-1ynbvzw-6.YYrds",
+                            "[data-lyrics-container]": "true",
+                            "childs": [
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "[Intro: Heyoon]"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "(Ah-ah-ah-ah)"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "(Ah-ah-ah-ah)"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "[Verse 1: Heyoon]"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "장미 만송이를 보내고"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "내게 시간 투자를 해가며"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "널 용서하길 (널 용서하길)"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "그냥 잊고 넘어가길"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "아무일도 없었다고"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "내가 이상한거라고"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "널 믿었는데 (널 믿었는데)"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "결국 넌 다시"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "[Pre-Chorus: Heyoon with Bailey]"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "I know you're sorry, sorry, sorry, sorry"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "니 잘난 사과는 다른 사람 위해 아껴둬"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "I know you love me, love me, love me, love me"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "그래도 넌 나 보다 네가 더 중요해"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "[Chorus: Heyoon with Any, Sabina & Bailey]"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "너 그 거짓말 난 눈을 감아"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "Well, nobody, nobody fools me twice"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "난 이제 안녕을 말해"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "'Cause nobody, nobody fools me twice"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              }
+                            ]
+                          },
+                          {
+                            "type": "ELEMENT_NODE",
+                            "selector": "div.RightSidebar__Container-pajcl2-0.jOFKJt",
+                            "childs": [
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "div.SidebarAd__Container-sc-1cw85h6-0.fraZOY",
+                                "child": {
+                                  "type": "ELEMENT_NODE",
+                                  "selector": "div.SidebarAd__StickyContainer-sc-1cw85h6-1.hQgDBO",
+                                  "child": {
+                                    "type": "ELEMENT_NODE",
+                                    "selector": "div.DfpAd__Container-sc-1tnbv7f-0.kiNXoS",
+                                    "childs": [
+                                      {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "div#div-gpt-ad-desktop_song_lyrics_sidebar-desktop_song_lyrics_sidebar-1",
+                                        "noChild": true
+                                      },
+                                      {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "div.DfpAd__Placeholder-sc-1tnbv7f-1.ilfajN",
+                                        "noChild": true
+                                      }
+                                    ]
+                                  }
+                                }
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "aside.RecommendedSongs__Container-fhtuij-0.fUyrrM.Lyrics__Recommendations-sc-1ynbvzw-18.fMoZxb",
+                                "childs": [
+                                  {
+                                    "type": "ELEMENT_NODE",
+                                    "selector": "div.RecommendedSongs__Header-fhtuij-2.lfAvEQ",
+                                    "text": "You might also like"
+                                  },
+                                  {
+                                    "type": "ELEMENT_NODE",
+                                    "selector": "div.RecommendedSongs__Body-fhtuij-1.fVWWod",
+                                    "noChild": true
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "ELEMENT_NODE",
+                            "selector": "div.InreadContainer__Container-sc-19040w5-0.cujBpY",
+                            "[data-exclude-from-selection]": "true",
+                            "child": {
+                              "type": "ELEMENT_NODE",
+                              "selector": "div.DfpAd__Container-sc-1tnbv7f-0.hOMcjE",
+                              "childs": [
+                                {
+                                  "type": "ELEMENT_NODE",
+                                  "selector": "div#div-gpt-ad-desktop_song_lyrics_inread-desktop_song_lyrics_inread-1",
+                                  "noChild": true
+                                },
+                                {
+                                  "type": "ELEMENT_NODE",
+                                  "selector": "div.DfpAd__Placeholder-sc-1tnbv7f-1.hoVEOg",
+                                  "noChild": true
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "type": "ELEMENT_NODE",
+                            "selector": "div.Lyrics__Container-sc-1ynbvzw-6.YYrds",
+                            "[data-lyrics-container]": "true",
+                            "childs": [
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "[Post-Chorus: Heyoon]"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "(Ah-ah-ah-ah)"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "(Ah-ah-ah-ah)"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "'Cause nobody, nobody fools me twice"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "(Ah-ah-ah-ah)"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "(Ah-ah-ah-ah)"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "[Verse 2: Heyoon]"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "기다릴 필요도 없고"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "끝난걸 모른척은 마"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "난 노력 하지 (난 노력 하지)"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "않아 이젠 지쳤어"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "[Pre-Chorus: Heyoon & Bailey]"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "I know you're sorry, sorry, sorry, sorry"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "니 잘난 사과는 다른 사람 위해 아껴둬"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "I know you love me, love me, love me, love me"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "그래도 넌 나 보다 네가 더 중요해"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "[Chorus: Heyoon with Any, Sabina & Bailey]"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "너 그 거짓말 난 눈을 감아"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "Well, nobody, nobody fools me twice"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "난 이제 안녕을 말해"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "'Cause nobody, nobody fools me twice"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "[Post-Chorus: Heyoon, "
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "i",
+                                "text": "Heyoon with Any, Sabina & Bailey"
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "]"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "(Ah-ah-ah-ah)"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "(Ah-ah-ah-ah)"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "i",
+                                "text": "'Cause nobody, nobody fools me twice"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "(Ah-ah-ah-ah) (Oh twice)"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "(Ah-ah-ah-ah) (Oh)"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "br",
+                                "noChild": true
+                              },
+                              {
+                                "type": "TEXT_NODE",
+                                "text": "'Cause nobody, nobody fools me twice"
+                              }
+                            ]
+                          },
+                          {
+                            "type": "ELEMENT_NODE",
+                            "selector": "div.RightSidebar__Container-pajcl2-0.jOFKJt",
+                            "child": {
+                              "type": "ELEMENT_NODE",
+                              "selector": "div.SidebarAd__Container-sc-1cw85h6-0.cFlBmm",
+                              "child": {
+                                "type": "ELEMENT_NODE",
+                                "selector": "div.SidebarAd__StickyContainer-sc-1cw85h6-1.bZuAng",
+                                "child": {
+                                  "type": "ELEMENT_NODE",
+                                  "selector": "div.DfpAd__Container-sc-1tnbv7f-0.kiNXoS",
+                                  "childs": [
+                                    {
+                                      "type": "ELEMENT_NODE",
+                                      "selector": "div#div-gpt-ad-desktop_song_lyrics_sidebar2-desktop_song_lyrics_sidebar2-1",
+                                      "noChild": true
+                                    },
+                                    {
+                                      "type": "ELEMENT_NODE",
+                                      "selector": "div.DfpAd__Placeholder-sc-1tnbv7f-1.ilfajN",
+                                      "noChild": true
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "type": "ELEMENT_NODE",
+                            "selector": "div.Lyrics__Footer-sc-1ynbvzw-2.jrjShc",
+                            "child": {
+                              "type": "ELEMENT_NODE",
+                              "selector": "div.ShareButtons__Root-jws18q-0.dyewdM.Lyrics__FooterShareButtons-sc-1ynbvzw-3.kuxJDq",
+                              "child": {
+                                "type": "ELEMENT_NODE",
+                                "selector": "div.ShareButtons__Container-jws18q-1.ePvBqA",
+                                "childs": [
+                                  {
+                                    "type": "ELEMENT_NODE",
+                                    "selector": "div.ShareButtons__ButtonWrapper-jws18q-3.ueUKD",
+                                    "child": {
+                                      "type": "ELEMENT_NODE",
+                                      "selector": "button.react-share__ShareButton[style]",
+                                      "[aria-label]": "facebook",
+                                      "child": {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "div.Button__Container-sc-1874dbw-0.cLBJdA.ShareButtons__Button-jws18q-2.kJxpEi[type]",
+                                        "child": {
+                                          "type": "ELEMENT_NODE",
+                                          "selector": "svg[viewBox]",
+                                          "child": {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "svg-repx9[v1]",
+                                            "noChild": true
+                                          }
+                                        }
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "type": "ELEMENT_NODE",
+                                    "selector": "div.ShareButtons__ButtonWrapper-jws18q-3.ueUKD",
+                                    "child": {
+                                      "type": "ELEMENT_NODE",
+                                      "selector": "button.react-share__ShareButton[style]",
+                                      "[aria-label]": "twitter",
+                                      "child": {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "div.Button__Container-sc-1874dbw-0.cLBJdA.ShareButtons__Button-jws18q-2.kJxpEi[type]",
+                                        "child": {
+                                          "type": "ELEMENT_NODE",
+                                          "selector": "svg[viewBox]",
+                                          "child": {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "svg-repx10[v1]",
+                                            "noChild": true
+                                          }
+                                        }
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "type": "ELEMENT_NODE",
+                                    "selector": "div.ShareButtons__ButtonWrapper-jws18q-3.ueUKD",
+                                    "child": {
+                                      "type": "ELEMENT_NODE",
+                                      "selector": "div.Button__Container-sc-1874dbw-0.cLBJdA.ShareButtons__Button-jws18q-2.kJxpEi[type]",
+                                      "child": {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "div.Pyong__Container-yq95kq-0.eMjKRh",
+                                        "child": {
+                                          "type": "ELEMENT_NODE",
+                                          "selector": "div.Tooltip__Container-sc-1uvy5c2-0.cRrFdP",
+                                          "child": {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "div.Tooltip__Children-sc-1uvy5c2-2.dvOJud",
+                                            "child": {
+                                              "type": "ELEMENT_NODE",
+                                              "selector": "button.LabelWithIcon__Container-sc-1ri57wg-0.dCKKNS[height]",
+                                              "childs": [
+                                                {
+                                                  "type": "ELEMENT_NODE",
+                                                  "selector": "svg[viewBox]",
+                                                  "child": {
+                                                    "type": "ELEMENT_NODE",
+                                                    "selector": "svg-repx6[v1]",
+                                                    "noChild": true
+                                                  }
+                                                },
+                                                {
+                                                  "type": "ELEMENT_NODE",
+                                                  "selector": "span.LabelWithIcon__Label-sc-1ri57wg-1.IVJjV",
+                                                  "text": "1"
+                                                }
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "type": "ELEMENT_NODE",
+                                    "selector": "button.ShareButtons__ButtonWrapper-jws18q-3.ueUKD",
+                                    "child": {
+                                      "type": "ELEMENT_NODE",
+                                      "selector": "div.Button__Container-sc-1874dbw-0.cLBJdA.ShareButtons__Button-jws18q-2.kJxpEi[type]",
+                                      "text": "Embed"
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "type": "ELEMENT_NODE",
+                      "selector": "form.SongPageGriddesktop-sc-1px5b71-0.jecoie.LyricsEditdesktop__Container-sc-19lxrhp-0.kkpCaw",
+                      "childs": [
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "div.SongPageGriddesktop-sc-1px5b71-0.jecoie.LyricsEditdesktop__Header-sc-19lxrhp-1.eqRvkr",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "div.LyricsEditdesktop__HeaderLeft-sc-19lxrhp-2.bcLwQh",
+                            "noChild": true
+                          }
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "div.LyricsEditdesktop__Editor-sc-19lxrhp-3.hFPGxa",
+                          "noChild": true
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "div.LyricsEditdesktop__ControlsContainer-sc-19lxrhp-4.lbdVJq",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "div.LyricsEditdesktop__Controls-sc-19lxrhp-5.hGLtDM",
+                            "childs": [
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "button.Button__Container-sc-1874dbw-0.cLBJdA.LyricsEditdesktop__Button-sc-19lxrhp-6.bXbziL[type]",
+                                "text": "Cancel"
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "div.LyricsEditExplainer__Container-sc-1aeph76-0.hXQMRu.LyricsEditdesktop__Explainer-sc-19lxrhp-8.ldjaSd",
+                                "childs": [
+                                  {
+                                    "type": "ELEMENT_NODE",
+                                    "selector": "p",
+                                    "text": "How to Format Lyrics:"
+                                  },
+                                  {
+                                    "type": "ELEMENT_NODE",
+                                    "selector": "ul",
+                                    "childs": [
+                                      {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "li",
+                                        "text": "Type out all lyrics, even repeating song parts like the chorus"
+                                      },
+                                      {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "li",
+                                        "text": "Lyrics should be broken down into individual lines"
+                                      },
+                                      {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "li",
+                                        "text": "Use section headers above different song parts like [Verse], [Chorus], etc."
+                                      },
+                                      {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "li",
+                                        "childs": [
+                                          {
+                                            "type": "TEXT_NODE",
+                                            "text": "Use "
+                                          },
+                                          {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "span.LyricsEditExplainer__Italic-sc-1aeph76-2.rncXA",
+                                            "text": "italics"
+                                          },
+                                          {
+                                            "type": "TEXT_NODE",
+                                            "text": " (<i>lyric</i>) and "
+                                          },
+                                          {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "span.LyricsEditExplainer__Bold-sc-1aeph76-1.eDBQeK",
+                                            "text": "bold"
+                                          },
+                                          {
+                                            "type": "TEXT_NODE",
+                                            "text": " (<b>lyric</b>) to distinguish between different vocalists in the same song part"
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "li",
+                                        "text": "If you don’t understand a lyric, use [?]"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "ELEMENT_NODE",
+                                    "selector": "p",
+                                    "childs": [
+                                      {
+                                        "type": "TEXT_NODE",
+                                        "text": "To learn more, check out our "
+                                      },
+                                      {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "a.Link__StyledLink-h3isu4-0.fTLMop",
+                                        "[font-weight]": "light",
+                                        "href": "https://genius.com/Genius-how-to-add-songs-to-genius-annotated",
+                                        "text": "transcription guide"
+                                      },
+                                      {
+                                        "type": "TEXT_NODE",
+                                        "text": " or visit our "
+                                      },
+                                      {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "a.Link__StyledLink-h3isu4-0.fTLMop",
+                                        "[font-weight]": "light",
+                                        "href": "https://genius.com/transcribers",
+                                        "text": "transcribers forum"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "ELEMENT_NODE",
+                  "selector": "div.SectionLeaderboard__Container-sc-1pjk0bw-0.cSKAwQ",
+                  "child": {
+                    "type": "ELEMENT_NODE",
+                    "selector": "div.SectionLeaderboard__Center-sc-1pjk0bw-1.fPpEQG",
+                    "child": {
+                      "type": "ELEMENT_NODE",
+                      "selector": "div.DfpAd__Container-sc-1tnbv7f-0.dTXQYT",
+                      "childs": [
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "div#div-gpt-ad-desktop_song_about_leaderboard-desktop_song_about_leaderboard-1",
+                          "noChild": true
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "div.DfpAd__Placeholder-sc-1tnbv7f-1.bIwkeM",
+                          "noChild": true
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "type": "ELEMENT_NODE",
+              "selector": "div.SongPage__Section-sc-19xhmoi-3.cXvCRB",
+              "childs": [
+                {
+                  "type": "ELEMENT_NODE",
+                  "selector": "div.SectionScrollSentinel__Element-sc-1c8cvz5-0.ENCiS",
+                  "noChild": true
+                },
+                {
+                  "type": "ELEMENT_NODE",
+                  "selector": "div#about.SongPage__SectionAnchor-sc-19xhmoi-4.bcJzkW",
+                  "noChild": true
+                },
+                {
+                  "type": "ELEMENT_NODE",
+                  "selector": "div.SongPageGriddesktop-sc-1px5b71-0.jecoie.About__Grid-ut4i9m-0.jqChBa",
+                  "childs": [
+                    {
+                      "type": "ELEMENT_NODE",
+                      "selector": "div.About__Container-ut4i9m-1.eSiFpi",
+                      "childs": [
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "h1.About__Title-ut4i9m-2.kcXwIY[font-size]",
+                          "text": "About"
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "div.SongDescription__Container-sc-615rvk-0.hYPlhL",
+                          "childs": [
+                            {
+                              "type": "ELEMENT_NODE",
+                              "selector": "div.Attribution__Container-sc-1nmry9o-0.dhIhSa",
+                              "child": {
+                                "type": "ELEMENT_NODE",
+                                "selector": "div.Attribution__Header-sc-1nmry9o-1.iPNsXE",
+                                "childs": [
+                                  {
+                                    "type": "ELEMENT_NODE",
+                                    "selector": "span",
+                                    "text": "Genius Annotation"
+                                  },
+                                  {
+                                    "type": "ELEMENT_NODE",
+                                    "selector": "button.TextButton-sc-192nsqv-0.ixMmYX[type]",
+                                    "[text-decoration]": "underline",
+                                    "text": "2 contributors"
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "type": "ELEMENT_NODE",
+                              "selector": "div.ExpandableContent__Container-sc-1165iv-0.ikywhQ",
+                              "childs": [
+                                {
+                                  "type": "ELEMENT_NODE",
+                                  "selector": "div.ExpandableContent__Content-sc-1165iv-4.huhsMa",
+                                  "child": {
+                                    "type": "ELEMENT_NODE",
+                                    "selector": "div.SongDescription__Content-sc-615rvk-2.kRzyD",
+                                    "child": {
+                                      "type": "ELEMENT_NODE",
+                                      "selector": "div.RichText__Container-oz284w-0.jHCRmQ",
+                                      "childs": [
+                                        {
+                                          "type": "ELEMENT_NODE",
+                                          "selector": "p",
+                                          "childs": [
+                                            {
+                                              "type": "TEXT_NODE",
+                                              "text": "“Nobody Fools Me Twice” is among a few songs by the group that aren’t primarily sung in English. With main vocals by the group’s representative from South Korea, "
+                                            },
+                                            {
+                                              "type": "ELEMENT_NODE",
+                                              "selector": "a",
+                                              "[data-api_path]": "/artists/1943247",
+                                              "href": "https://genius.com/artists/Heyoon-jeong",
+                                              "text": "Heyoon Jeong"
+                                            },
+                                            {
+                                              "type": "TEXT_NODE",
+                                              "text": ", the track talks about how she won’t be fooled by someone again, after being hurt by someone she loved, more specifically a romantic interest."
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "type": "TEXT_NODE",
+                                          "text": " "
+                                        },
+                                        {
+                                          "type": "ELEMENT_NODE",
+                                          "selector": "p",
+                                          "childs": [
+                                            {
+                                              "type": "TEXT_NODE",
+                                              "text": "The track also features fellow members "
+                                            },
+                                            {
+                                              "type": "ELEMENT_NODE",
+                                              "selector": "a",
+                                              "[data-api_path]": "/artists/1029655",
+                                              "href": "https://genius.com/artists/Any-gabrielly",
+                                              "text": "Any Gabrielly"
+                                            },
+                                            {
+                                              "type": "TEXT_NODE",
+                                              "text": " (who represents Brazil), and "
+                                            },
+                                            {
+                                              "type": "ELEMENT_NODE",
+                                              "selector": "a",
+                                              "[data-api_path]": "/artists/1943246",
+                                              "href": "https://genius.com/artists/Sabina-hidalgo",
+                                              "text": "Sabina Hidalgo"
+                                            },
+                                            {
+                                              "type": "TEXT_NODE",
+                                              "text": " (who represents Mexico), on the background vocals. The music video, which was recorded at home, also features the group, although the prime focus of the video is "
+                                            },
+                                            {
+                                              "type": "ELEMENT_NODE",
+                                              "selector": "a",
+                                              "[data-api_path]": "/artists/1943247",
+                                              "href": "https://genius.com/artists/Heyoon-jeong",
+                                              "text": "Heyoon"
+                                            },
+                                            {
+                                              "type": "TEXT_NODE",
+                                              "text": "."
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  }
+                                },
+                                {
+                                  "type": "ELEMENT_NODE",
+                                  "selector": "div.ExpandableContent__ButtonContainer-sc-1165iv-3.jzPNvv",
+                                  "child": {
+                                    "type": "ELEMENT_NODE",
+                                    "selector": "button.Button__Container-sc-1874dbw-0.kPiSeV.ExpandableContent__Button-sc-1165iv-1.gBcitk[type]",
+                                    "childs": [
+                                      {
+                                        "type": "TEXT_NODE",
+                                        "text": "Expand"
+                                      },
+                                      {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "span.InlineSvg__Wrapper-b788hd-0.xQwqG",
+                                        "child": {
+                                          "type": "ELEMENT_NODE",
+                                          "selector": "svg[viewBox]",
+                                          "child": {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "svg-repx2[v1]",
+                                            "noChild": true
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              ]
+                            },
+                            {
+                              "type": "ELEMENT_NODE",
+                              "selector": "div.AnnotationActions__Container-sc-1597gb-0.tqfBP.SongDescription__AnnotationActions-sc-615rvk-7.bEHmko",
+                              "childs": [
+                                {
+                                  "type": "ELEMENT_NODE",
+                                  "selector": "div.VotingActions__Container-sc-1w1brao-0.eQBXrC",
+                                  "childs": [
+                                    {
+                                      "type": "ELEMENT_NODE",
+                                      "selector": "svg.VotingActions__ThumbsUp-sc-1w1brao-3.hEQpIA[viewBox]",
+                                      "[aria-label]": "upvote",
+                                      "[aria-pressed]": "false",
+                                      "child": {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "svg-repx21[v1]",
+                                        "noChild": true
+                                      }
+                                    },
+                                    {
+                                      "type": "ELEMENT_NODE",
+                                      "selector": "button.VotingActions__Button-sc-1w1brao-1.VotingActions__VotingModalButton-sc-1w1brao-2.hPgYeJ",
+                                      "text": "+1"
+                                    },
+                                    {
+                                      "type": "ELEMENT_NODE",
+                                      "selector": "svg.VotingActions__ThumbsDown-sc-1w1brao-4.hKZXIk[viewBox]",
+                                      "[aria-label]": "downvote",
+                                      "[aria-pressed]": "false",
+                                      "child": {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "svg-repx22[v1]",
+                                        "noChild": true
+                                      }
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "ELEMENT_NODE",
+                                  "selector": "div.AnnotationActions__FlexSpace-sc-1597gb-1.kljthJ",
+                                  "noChild": true
+                                },
+                                {
+                                  "type": "ELEMENT_NODE",
+                                  "selector": "button.LabelWithIcon__Container-sc-1ri57wg-0.kshnWN[height]",
+                                  "childs": [
+                                    {
+                                      "type": "ELEMENT_NODE",
+                                      "selector": "svg[viewBox]",
+                                      "child": {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "svg-repx23[v1]",
+                                        "noChild": true
+                                      }
+                                    },
+                                    {
+                                      "type": "ELEMENT_NODE",
+                                      "selector": "span.LabelWithIcon__Label-sc-1ri57wg-1.IVJjV",
+                                      "noChild": true
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "ELEMENT_NODE",
+                                  "selector": "div.Pyong__Container-yq95kq-0.eMjKRh.AnnotationActions__Pyong-sc-1597gb-2.jQIgzS",
+                                  "child": {
+                                    "type": "ELEMENT_NODE",
+                                    "selector": "div.Tooltip__Container-sc-1uvy5c2-0.cRrFdP",
+                                    "child": {
+                                      "type": "ELEMENT_NODE",
+                                      "selector": "div.Tooltip__Children-sc-1uvy5c2-2.dvOJud",
+                                      "child": {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "button.LabelWithIcon__Container-sc-1ri57wg-0.kshnWN[height]",
+                                        "child": {
+                                          "type": "ELEMENT_NODE",
+                                          "selector": "svg[viewBox]",
+                                          "child": {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "svg-repx6[v1]",
+                                            "noChild": true
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                {
+                                  "type": "ELEMENT_NODE",
+                                  "selector": "button.LabelWithIcon__Container-sc-1ri57wg-0.kshnWN[height]",
+                                  "childs": [
+                                    {
+                                      "type": "ELEMENT_NODE",
+                                      "selector": "svg[viewBox]",
+                                      "child": {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "svg-repx24[v1]",
+                                        "noChild": true
+                                      }
+                                    },
+                                    {
+                                      "type": "ELEMENT_NODE",
+                                      "selector": "span.LabelWithIcon__Label-sc-1ri57wg-1.IVJjV",
+                                      "text": "Share"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "div.InnerSectionDivider-sc-1x4onqw-0.iyrTpw",
+                          "noChild": true
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "div.QuestionList__Container-sc-1a58vti-1.gatDgA",
+                          "childs": [
+                            {
+                              "type": "ELEMENT_NODE",
+                              "selector": "div#questions.QuestionList__SectionAnchor-sc-1a58vti-2.uEMeZ",
+                              "noChild": true
+                            },
+                            {
+                              "type": "ELEMENT_NODE",
+                              "selector": "div.QuestionList__Title-sc-1a58vti-0.esoPOn",
+                              "text": "Ask us a question about this song"
+                            },
+                            {
+                              "type": "ELEMENT_NODE",
+                              "selector": "label.QuestionForm__FakeFieldLabel-wsr2cj-2.fyUjsz[for]",
+                              "text": "Ask a question*"
+                            },
+                            {
+                              "type": "ELEMENT_NODE",
+                              "selector": "button.QuestionForm__FakeTextField-wsr2cj-3.llwCwW",
+                              "noChild": true
+                            },
+                            {
+                              "type": "ELEMENT_NODE",
+                              "selector": "div.QuestionList__Table-sc-1a58vti-4.gqXKZC",
+                              "child": {
+                                "type": "ELEMENT_NODE",
+                                "selector": "div.QuestionTemplate__Container-sc-1is5n1p-1.jKZGgD",
+                                "childs": [
+                                  {
+                                    "type": "ELEMENT_NODE",
+                                    "selector": "div.QuestionTemplate__Title-sc-1is5n1p-4.cXjUcf",
+                                    "childs": [
+                                      {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "span",
+                                        "text": "Translations"
+                                      },
+                                      {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "button.TextButton-sc-192nsqv-0.hVAZmF.QuestionTemplate__ExpandButton-sc-1is5n1p-5.hNJTPz[type]",
+                                        "child": {
+                                          "type": "ELEMENT_NODE",
+                                          "selector": "svg[width][height][viewBox]",
+                                          "child": {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "svg-repx18[v1]",
+                                            "noChild": true
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "ELEMENT_NODE",
+                                    "selector": "div.Answer__Container-sc-2neq6u-0.iHvEbL",
+                                    "childs": [
+                                      {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "div.Attribution__Container-sc-1nmry9o-0.dhIhSa",
+                                        "child": {
+                                          "type": "ELEMENT_NODE",
+                                          "selector": "div.Attribution__Header-sc-1nmry9o-1.iPNsXE",
+                                          "childs": [
+                                            {
+                                              "type": "ELEMENT_NODE",
+                                              "selector": "span",
+                                              "text": "Genius Answer"
+                                            },
+                                            {
+                                              "type": "ELEMENT_NODE",
+                                              "selector": "button.TextButton-sc-192nsqv-0.ixMmYX[type]",
+                                              "[text-decoration]": "underline",
+                                              "text": "2 contributors"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "div.Answer__Body-sc-2neq6u-1.fzIWba",
+                                        "child": {
+                                          "type": "ELEMENT_NODE",
+                                          "selector": "div.RichText__Container-oz284w-0.jHCRmQ",
+                                          "child": {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "ul",
+                                            "childs": [
+                                              {
+                                                "type": "TEXT_NODE",
+                                                "text": " "
+                                              },
+                                              {
+                                                "type": "ELEMENT_NODE",
+                                                "selector": "li",
+                                                "child": {
+                                                  "type": "ELEMENT_NODE",
+                                                  "selector": "a",
+                                                  "[data-api_path]": "/songs/5849201",
+                                                  "href": "https://genius.com/Genius-romanizations-now-united-nobody-fools-me-twice-romanized-lyrics",
+                                                  "text": "Romanization"
+                                                }
+                                              },
+                                              {
+                                                "type": "TEXT_NODE",
+                                                "text": " "
+                                              },
+                                              {
+                                                "type": "ELEMENT_NODE",
+                                                "selector": "li",
+                                                "child": {
+                                                  "type": "ELEMENT_NODE",
+                                                  "selector": "a",
+                                                  "[data-api_path]": "/songs/5961553",
+                                                  "href": "https://genius.com/Genius-english-translations-now-united-nobody-fools-me-twice-english-translation-lyrics",
+                                                  "text": "English Translation"
+                                                }
+                                              },
+                                              {
+                                                "type": "TEXT_NODE",
+                                                "text": " "
+                                              },
+                                              {
+                                                "type": "ELEMENT_NODE",
+                                                "selector": "li",
+                                                "child": {
+                                                  "type": "ELEMENT_NODE",
+                                                  "selector": "a",
+                                                  "[data-api_path]": "/songs/5848199",
+                                                  "href": "https://genius.com/Genius-brasil-traducoes-now-united-nobody-fools-me-twice-traducao-em-portugues-lyrics",
+                                                  "text": "Portuguese Translation"
+                                                }
+                                              },
+                                              {
+                                                "type": "TEXT_NODE",
+                                                "text": " "
+                                              }
+                                            ]
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "ELEMENT_NODE",
+                                    "selector": "div.QuestionAnswerActions__Container-sc-6ne2ji-0.dTXIVU",
+                                    "noChild": true
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "div.InnerSectionDivider-sc-1x4onqw-0.iyrTpw",
+                          "noChild": true
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "div.ExpandableContent__Container-sc-1165iv-0.ikywhQ",
+                          "childs": [
+                            {
+                              "type": "ELEMENT_NODE",
+                              "selector": "div.ExpandableContent__Content-sc-1165iv-4.huhsMa",
+                              "child": {
+                                "type": "ELEMENT_NODE",
+                                "selector": "div.SongInfo__Container-nekw6x-0.kJtCmu",
+                                "childs": [
+                                  {
+                                    "type": "ELEMENT_NODE",
+                                    "selector": "div#song-info.SongInfo__SectionAnchor-nekw6x-5.lopKUj",
+                                    "noChild": true
+                                  },
+                                  {
+                                    "type": "ELEMENT_NODE",
+                                    "selector": "div.SongInfo__Title-nekw6x-1.iRKrFW",
+                                    "text": "Credits"
+                                  },
+                                  {
+                                    "type": "ELEMENT_NODE",
+                                    "selector": "div.SongInfo__Columns-nekw6x-2.dWcYSx",
+                                    "childs": [
+                                      {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "div.SongInfo__Credit-nekw6x-3.fognin",
+                                        "childs": [
+                                          {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "div.SongInfo__Label-nekw6x-4.kOJa-dB",
+                                            "text": "Produced By"
+                                          },
+                                          {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "div",
+                                            "child": {
+                                              "type": "ELEMENT_NODE",
+                                              "selector": "span.PortalTooltip__Container-yc1x8c-0.bOCNdp",
+                                              "child": {
+                                                "type": "ELEMENT_NODE",
+                                                "selector": "span.PortalTooltip__Trigger-yc1x8c-1.ekJBqv",
+                                                "child": {
+                                                  "type": "ELEMENT_NODE",
+                                                  "selector": "a.Link__StyledLink-h3isu4-0.fUgcxf",
+                                                  "[font-weight]": "light",
+                                                  "href": "https://genius.com/artists/Big-taste",
+                                                  "text": "Big Taste"
+                                                }
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "div.SongInfo__Credit-nekw6x-3.fognin",
+                                        "childs": [
+                                          {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "div.SongInfo__Label-nekw6x-4.kOJa-dB",
+                                            "text": "Written By"
+                                          },
+                                          {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "div",
+                                            "childs": [
+                                              {
+                                                "type": "ELEMENT_NODE",
+                                                "selector": "span.PortalTooltip__Container-yc1x8c-0.bOCNdp",
+                                                "child": {
+                                                  "type": "ELEMENT_NODE",
+                                                  "selector": "span.PortalTooltip__Trigger-yc1x8c-1.ekJBqv",
+                                                  "child": {
+                                                    "type": "ELEMENT_NODE",
+                                                    "selector": "a.Link__StyledLink-h3isu4-0.fUgcxf",
+                                                    "[font-weight]": "light",
+                                                    "href": "https://genius.com/artists/Steph-jones",
+                                                    "text": "Steph Jones"
+                                                  }
+                                                }
+                                              },
+                                              {
+                                                "type": "TEXT_NODE",
+                                                "text": ", "
+                                              },
+                                              {
+                                                "type": "ELEMENT_NODE",
+                                                "selector": "span.PortalTooltip__Container-yc1x8c-0.bOCNdp",
+                                                "child": {
+                                                  "type": "ELEMENT_NODE",
+                                                  "selector": "span.PortalTooltip__Trigger-yc1x8c-1.ekJBqv",
+                                                  "child": {
+                                                    "type": "ELEMENT_NODE",
+                                                    "selector": "a.Link__StyledLink-h3isu4-0.fUgcxf",
+                                                    "[font-weight]": "light",
+                                                    "href": "https://genius.com/artists/Sarah-hudson",
+                                                    "text": "Sarah Hudson"
+                                                  }
+                                                }
+                                              },
+                                              {
+                                                "type": "TEXT_NODE",
+                                                "text": " & "
+                                              },
+                                              {
+                                                "type": "ELEMENT_NODE",
+                                                "selector": "span.PortalTooltip__Container-yc1x8c-0.bOCNdp",
+                                                "child": {
+                                                  "type": "ELEMENT_NODE",
+                                                  "selector": "span.PortalTooltip__Trigger-yc1x8c-1.ekJBqv",
+                                                  "child": {
+                                                    "type": "ELEMENT_NODE",
+                                                    "selector": "a.Link__StyledLink-h3isu4-0.fUgcxf",
+                                                    "[font-weight]": "light",
+                                                    "href": "https://genius.com/artists/Big-taste",
+                                                    "text": "Big Taste"
+                                                  }
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "div.SongInfo__Credit-nekw6x-3.fognin",
+                                        "childs": [
+                                          {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "div.SongInfo__Label-nekw6x-4.kOJa-dB",
+                                            "text": "Keyboards Programmer"
+                                          },
+                                          {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "div",
+                                            "child": {
+                                              "type": "ELEMENT_NODE",
+                                              "selector": "span.PortalTooltip__Container-yc1x8c-0.bOCNdp",
+                                              "child": {
+                                                "type": "ELEMENT_NODE",
+                                                "selector": "span.PortalTooltip__Trigger-yc1x8c-1.ekJBqv",
+                                                "child": {
+                                                  "type": "ELEMENT_NODE",
+                                                  "selector": "a.Link__StyledLink-h3isu4-0.fUgcxf",
+                                                  "[font-weight]": "light",
+                                                  "href": "https://genius.com/artists/Big-taste",
+                                                  "text": "Big Taste"
+                                                }
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "div.SongInfo__Credit-nekw6x-3.fognin",
+                                        "childs": [
+                                          {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "div.SongInfo__Label-nekw6x-4.kOJa-dB",
+                                            "text": "Vocals"
+                                          },
+                                          {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "div",
+                                            "childs": [
+                                              {
+                                                "type": "ELEMENT_NODE",
+                                                "selector": "span.PortalTooltip__Container-yc1x8c-0.bOCNdp",
+                                                "child": {
+                                                  "type": "ELEMENT_NODE",
+                                                  "selector": "span.PortalTooltip__Trigger-yc1x8c-1.ekJBqv",
+                                                  "child": {
+                                                    "type": "ELEMENT_NODE",
+                                                    "selector": "a.Link__StyledLink-h3isu4-0.fUgcxf",
+                                                    "[font-weight]": "light",
+                                                    "href": "https://genius.com/artists/Bailey-may",
+                                                    "text": "Bailey May"
+                                                  }
+                                                }
+                                              },
+                                              {
+                                                "type": "TEXT_NODE",
+                                                "text": ", "
+                                              },
+                                              {
+                                                "type": "ELEMENT_NODE",
+                                                "selector": "span.PortalTooltip__Container-yc1x8c-0.bOCNdp",
+                                                "child": {
+                                                  "type": "ELEMENT_NODE",
+                                                  "selector": "span.PortalTooltip__Trigger-yc1x8c-1.ekJBqv",
+                                                  "child": {
+                                                    "type": "ELEMENT_NODE",
+                                                    "selector": "a.Link__StyledLink-h3isu4-0.fUgcxf",
+                                                    "[font-weight]": "light",
+                                                    "href": "https://genius.com/artists/Heyoon-jeong",
+                                                    "text": "Heyoon Jeong (정혜윤)"
+                                                  }
+                                                }
+                                              },
+                                              {
+                                                "type": "TEXT_NODE",
+                                                "text": ", "
+                                              },
+                                              {
+                                                "type": "ELEMENT_NODE",
+                                                "selector": "span.PortalTooltip__Container-yc1x8c-0.bOCNdp",
+                                                "child": {
+                                                  "type": "ELEMENT_NODE",
+                                                  "selector": "span.PortalTooltip__Trigger-yc1x8c-1.ekJBqv",
+                                                  "child": {
+                                                    "type": "ELEMENT_NODE",
+                                                    "selector": "a.Link__StyledLink-h3isu4-0.fUgcxf",
+                                                    "[font-weight]": "light",
+                                                    "href": "https://genius.com/artists/Sabina-hidalgo",
+                                                    "text": "Sabina Hidalgo"
+                                                  }
+                                                }
+                                              },
+                                              {
+                                                "type": "TEXT_NODE",
+                                                "text": " & "
+                                              },
+                                              {
+                                                "type": "ELEMENT_NODE",
+                                                "selector": "span.PortalTooltip__Container-yc1x8c-0.bOCNdp",
+                                                "child": {
+                                                  "type": "ELEMENT_NODE",
+                                                  "selector": "span.PortalTooltip__Trigger-yc1x8c-1.ekJBqv",
+                                                  "child": {
+                                                    "type": "ELEMENT_NODE",
+                                                    "selector": "a.Link__StyledLink-h3isu4-0.fUgcxf",
+                                                    "[font-weight]": "light",
+                                                    "href": "https://genius.com/artists/Any-gabrielly",
+                                                    "text": "Any Gabrielly"
+                                                  }
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "div.SongInfo__Credit-nekw6x-3.fognin",
+                                        "childs": [
+                                          {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "div.SongInfo__Label-nekw6x-4.kOJa-dB",
+                                            "text": "Mixing Engineer"
+                                          },
+                                          {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "div",
+                                            "child": {
+                                              "type": "ELEMENT_NODE",
+                                              "selector": "span.PortalTooltip__Container-yc1x8c-0.bOCNdp",
+                                              "child": {
+                                                "type": "ELEMENT_NODE",
+                                                "selector": "span.PortalTooltip__Trigger-yc1x8c-1.ekJBqv",
+                                                "child": {
+                                                  "type": "ELEMENT_NODE",
+                                                  "selector": "a.Link__StyledLink-h3isu4-0.fUgcxf",
+                                                  "[font-weight]": "light",
+                                                  "href": "https://genius.com/artists/Anders-hvenare",
+                                                  "text": "Anders Hvenare"
+                                                }
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "div.SongInfo__Credit-nekw6x-3.fognin",
+                                        "childs": [
+                                          {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "div.SongInfo__Label-nekw6x-4.kOJa-dB",
+                                            "text": "Guitar"
+                                          },
+                                          {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "div",
+                                            "child": {
+                                              "type": "ELEMENT_NODE",
+                                              "selector": "span.PortalTooltip__Container-yc1x8c-0.bOCNdp",
+                                              "child": {
+                                                "type": "ELEMENT_NODE",
+                                                "selector": "span.PortalTooltip__Trigger-yc1x8c-1.ekJBqv",
+                                                "child": {
+                                                  "type": "ELEMENT_NODE",
+                                                  "selector": "a.Link__StyledLink-h3isu4-0.fUgcxf",
+                                                  "[font-weight]": "light",
+                                                  "href": "https://genius.com/artists/Big-taste",
+                                                  "text": "Big Taste"
+                                                }
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "div.SongInfo__Credit-nekw6x-3.fognin",
+                                        "childs": [
+                                          {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "div.SongInfo__Label-nekw6x-4.kOJa-dB",
+                                            "text": "Drums"
+                                          },
+                                          {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "div",
+                                            "child": {
+                                              "type": "ELEMENT_NODE",
+                                              "selector": "span.PortalTooltip__Container-yc1x8c-0.bOCNdp",
+                                              "child": {
+                                                "type": "ELEMENT_NODE",
+                                                "selector": "span.PortalTooltip__Trigger-yc1x8c-1.ekJBqv",
+                                                "child": {
+                                                  "type": "ELEMENT_NODE",
+                                                  "selector": "a.Link__StyledLink-h3isu4-0.fUgcxf",
+                                                  "[font-weight]": "light",
+                                                  "href": "https://genius.com/artists/Big-taste",
+                                                  "text": "Big Taste"
+                                                }
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "div.SongInfo__Credit-nekw6x-3.fognin",
+                                        "childs": [
+                                          {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "div.SongInfo__Label-nekw6x-4.kOJa-dB",
+                                            "text": "Video Director"
+                                          },
+                                          {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "div",
+                                            "childs": [
+                                              {
+                                                "type": "ELEMENT_NODE",
+                                                "selector": "span.PortalTooltip__Container-yc1x8c-0.bOCNdp",
+                                                "child": {
+                                                  "type": "ELEMENT_NODE",
+                                                  "selector": "span.PortalTooltip__Trigger-yc1x8c-1.ekJBqv",
+                                                  "child": {
+                                                    "type": "ELEMENT_NODE",
+                                                    "selector": "a.Link__StyledLink-h3isu4-0.fUgcxf",
+                                                    "[font-weight]": "light",
+                                                    "href": "https://genius.com/artists/Hayley-costey",
+                                                    "text": "Hayley Costey"
+                                                  }
+                                                }
+                                              },
+                                              {
+                                                "type": "TEXT_NODE",
+                                                "text": ", "
+                                              },
+                                              {
+                                                "type": "ELEMENT_NODE",
+                                                "selector": "span.PortalTooltip__Container-yc1x8c-0.bOCNdp",
+                                                "child": {
+                                                  "type": "ELEMENT_NODE",
+                                                  "selector": "span.PortalTooltip__Trigger-yc1x8c-1.ekJBqv",
+                                                  "child": {
+                                                    "type": "ELEMENT_NODE",
+                                                    "selector": "a.Link__StyledLink-h3isu4-0.fUgcxf",
+                                                    "[font-weight]": "light",
+                                                    "href": "https://genius.com/artists/Heyoon-jeong",
+                                                    "text": "Heyoon Jeong (정혜윤)"
+                                                  }
+                                                }
+                                              },
+                                              {
+                                                "type": "TEXT_NODE",
+                                                "text": " & "
+                                              },
+                                              {
+                                                "type": "ELEMENT_NODE",
+                                                "selector": "span.PortalTooltip__Container-yc1x8c-0.bOCNdp",
+                                                "child": {
+                                                  "type": "ELEMENT_NODE",
+                                                  "selector": "span.PortalTooltip__Trigger-yc1x8c-1.ekJBqv",
+                                                  "child": {
+                                                    "type": "ELEMENT_NODE",
+                                                    "selector": "a.Link__StyledLink-h3isu4-0.fUgcxf",
+                                                    "[font-weight]": "light",
+                                                    "href": "https://genius.com/artists/Dima-kovalchuk",
+                                                    "text": "Dima Kovalchuk"
+                                                  }
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "div.SongInfo__Credit-nekw6x-3.fognin",
+                                        "childs": [
+                                          {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "div.SongInfo__Label-nekw6x-4.kOJa-dB",
+                                            "text": "Video Shooter"
+                                          },
+                                          {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "div",
+                                            "child": {
+                                              "type": "ELEMENT_NODE",
+                                              "selector": "span.PortalTooltip__Container-yc1x8c-0.bOCNdp",
+                                              "child": {
+                                                "type": "ELEMENT_NODE",
+                                                "selector": "span.PortalTooltip__Trigger-yc1x8c-1.ekJBqv",
+                                                "child": {
+                                                  "type": "ELEMENT_NODE",
+                                                  "selector": "a.Link__StyledLink-h3isu4-0.fUgcxf",
+                                                  "[font-weight]": "light",
+                                                  "href": "https://genius.com/artists/Dima-kovalchuk",
+                                                  "text": "Dima Kovalchuk"
+                                                }
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "div.SongInfo__Credit-nekw6x-3.fognin",
+                                        "childs": [
+                                          {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "div.SongInfo__Label-nekw6x-4.kOJa-dB",
+                                            "text": "Video Editor"
+                                          },
+                                          {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "div",
+                                            "childs": [
+                                              {
+                                                "type": "ELEMENT_NODE",
+                                                "selector": "span.PortalTooltip__Container-yc1x8c-0.bOCNdp",
+                                                "child": {
+                                                  "type": "ELEMENT_NODE",
+                                                  "selector": "span.PortalTooltip__Trigger-yc1x8c-1.ekJBqv",
+                                                  "child": {
+                                                    "type": "ELEMENT_NODE",
+                                                    "selector": "a.Link__StyledLink-h3isu4-0.fUgcxf",
+                                                    "[font-weight]": "light",
+                                                    "href": "https://genius.com/artists/Leo-akagi",
+                                                    "text": "Leo Akagi"
+                                                  }
+                                                }
+                                              },
+                                              {
+                                                "type": "TEXT_NODE",
+                                                "text": " & "
+                                              },
+                                              {
+                                                "type": "ELEMENT_NODE",
+                                                "selector": "span.PortalTooltip__Container-yc1x8c-0.bOCNdp",
+                                                "child": {
+                                                  "type": "ELEMENT_NODE",
+                                                  "selector": "span.PortalTooltip__Trigger-yc1x8c-1.ekJBqv",
+                                                  "child": {
+                                                    "type": "ELEMENT_NODE",
+                                                    "selector": "a.Link__StyledLink-h3isu4-0.fUgcxf",
+                                                    "[font-weight]": "light",
+                                                    "href": "https://genius.com/artists/Dima-kovalchuk",
+                                                    "text": "Dima Kovalchuk"
+                                                  }
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "div.SongInfo__Credit-nekw6x-3.fognin",
+                                        "childs": [
+                                          {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "div.SongInfo__Label-nekw6x-4.kOJa-dB",
+                                            "text": "Recorded At"
+                                          },
+                                          {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "div",
+                                            "text": "Los Angeles, California, USA"
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "div.SongInfo__Credit-nekw6x-3.fognin",
+                                        "childs": [
+                                          {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "div.SongInfo__Label-nekw6x-4.kOJa-dB",
+                                            "text": "Release Date"
+                                          },
+                                          {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "div",
+                                            "text": "August 8, 2020"
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "div.SongInfo__Credit-nekw6x-3.fognin",
+                                        "childs": [
+                                          {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "div.SongInfo__Label-nekw6x-4.kOJa-dB",
+                                            "text": "Nobody Fools Me Twice Remixes"
+                                          },
+                                          {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "div",
+                                            "child": {
+                                              "type": "ELEMENT_NODE",
+                                              "selector": "a.Link__StyledLink-h3isu4-0.fUgcxf",
+                                              "[font-weight]": "light",
+                                              "href": "https://genius.com/Now-united-nobody-fools-me-twice-english-version-lyrics",
+                                              "text": "Nobody Fools Me Twice (English Version) by Now United"
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "div.SongInfo__Credit-nekw6x-3.fognin",
+                                        "childs": [
+                                          {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "div.SongInfo__Label-nekw6x-4.kOJa-dB",
+                                            "text": "Nobody Fools Me Twice Translations"
+                                          },
+                                          {
+                                            "type": "ELEMENT_NODE",
+                                            "selector": "div",
+                                            "childs": [
+                                              {
+                                                "type": "ELEMENT_NODE",
+                                                "selector": "a.Link__StyledLink-h3isu4-0.fUgcxf",
+                                                "[font-weight]": "light",
+                                                "href": "https://genius.com/Genius-brasil-traducoes-now-united-nobody-fools-me-twice-traducao-em-portugues-lyrics",
+                                                "text": "Now United - Nobody Fools Me Twice (Tradução em Português) by Genius Brasil Traduções"
+                                              },
+                                              {
+                                                "type": "TEXT_NODE",
+                                                "text": ", "
+                                              },
+                                              {
+                                                "type": "ELEMENT_NODE",
+                                                "selector": "a.Link__StyledLink-h3isu4-0.fUgcxf",
+                                                "[font-weight]": "light",
+                                                "href": "https://genius.com/Genius-english-translations-now-united-nobody-fools-me-twice-english-translation-lyrics",
+                                                "text": "Now United - Nobody Fools Me Twice (English Translation) by Genius English Translations"
+                                              },
+                                              {
+                                                "type": "TEXT_NODE",
+                                                "text": " & "
+                                              },
+                                              {
+                                                "type": "ELEMENT_NODE",
+                                                "selector": "a.Link__StyledLink-h3isu4-0.fUgcxf",
+                                                "[font-weight]": "light",
+                                                "href": "https://genius.com/Genius-romanizations-now-united-nobody-fools-me-twice-romanized-lyrics",
+                                                "text": "Now United - Nobody Fools Me Twice (Romanized) by Genius Romanizations"
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "ELEMENT_NODE",
+                                    "selector": "div.SongTags__Title-xixwg3-0.ceKRFE",
+                                    "text": "Tags"
+                                  },
+                                  {
+                                    "type": "ELEMENT_NODE",
+                                    "selector": "div.SongTags__Container-xixwg3-1.bZsZHM",
+                                    "childs": [
+                                      {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "a.SongTags__Tag-xixwg3-2.evrydK",
+                                        "href": "https://genius.com/tags/pop",
+                                        "text": "Pop"
+                                      },
+                                      {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "a.SongTags__Tag-xixwg3-2.kykqAa",
+                                        "href": "https://genius.com/tags/teen-pop",
+                                        "text": "Teen Pop"
+                                      },
+                                      {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "a.SongTags__Tag-xixwg3-2.kykqAa",
+                                        "href": "https://genius.com/tags/south-korea",
+                                        "text": "South Korea"
+                                      },
+                                      {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "a.SongTags__Tag-xixwg3-2.kykqAa",
+                                        "href": "https://genius.com/tags/k-pop",
+                                        "text": "K-Pop (케이팝)"
+                                      },
+                                      {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "a.SongTags__Tag-xixwg3-2.kykqAa",
+                                        "href": "https://genius.com/tags/genius-korea",
+                                        "text": "Genius Korea"
+                                      },
+                                      {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "a.SongTags__Tag-xixwg3-2.kykqAa",
+                                        "href": "https://genius.com/tags/korean",
+                                        "text": "Korean"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "type": "ELEMENT_NODE",
+                              "selector": "div.ExpandableContent__ButtonContainer-sc-1165iv-3.jzPNvv",
+                              "child": {
+                                "type": "ELEMENT_NODE",
+                                "selector": "button.Button__Container-sc-1874dbw-0.kPiSeV.ExpandableContent__Button-sc-1165iv-1.gBcitk[type]",
+                                "childs": [
+                                  {
+                                    "type": "TEXT_NODE",
+                                    "text": "Expand"
+                                  },
+                                  {
+                                    "type": "ELEMENT_NODE",
+                                    "selector": "span.InlineSvg__Wrapper-b788hd-0.xQwqG",
+                                    "child": {
+                                      "type": "ELEMENT_NODE",
+                                      "selector": "svg[viewBox]",
+                                      "child": {
+                                        "type": "ELEMENT_NODE",
+                                        "selector": "svg-repx2[v1]",
+                                        "noChild": true
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "div.InnerSectionDivider-sc-1x4onqw-0.iyrTpw",
+                          "noChild": true
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "div.MusicVideo__Container-sc-1980jex-0.cYtdTH",
+                          "noChild": true
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ELEMENT_NODE",
+                      "selector": "div.RightSidebar__Container-pajcl2-0.jOFKJt",
+                      "child": {
+                        "type": "ELEMENT_NODE",
+                        "selector": "div.SidebarAd__Container-sc-1cw85h6-0.kMKmmz",
+                        "child": {
+                          "type": "ELEMENT_NODE",
+                          "selector": "div.SidebarAd__StickyContainer-sc-1cw85h6-1.hQgDBO",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "div.DfpAd__Container-sc-1tnbv7f-0.kiNXoS",
+                            "childs": [
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "div#div-gpt-ad-desktop_song_about_sidebar-desktop_song_about_sidebar-1",
+                                "noChild": true
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "div.DfpAd__Placeholder-sc-1tnbv7f-1.bUnLfZ",
+                                "noChild": true
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "ELEMENT_NODE",
+                  "selector": "div.SectionLeaderboard__Container-sc-1pjk0bw-0.cSKAwQ",
+                  "child": {
+                    "type": "ELEMENT_NODE",
+                    "selector": "div.SectionLeaderboard__Center-sc-1pjk0bw-1.fPpEQG",
+                    "child": {
+                      "type": "ELEMENT_NODE",
+                      "selector": "div.DfpAd__Container-sc-1tnbv7f-0.dTXQYT",
+                      "childs": [
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "div#div-gpt-ad-desktop_song_comments_leaderboard-desktop_song_comments_leaderboard-1",
+                          "noChild": true
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "div.DfpAd__Placeholder-sc-1tnbv7f-1.bIwkeM",
+                          "noChild": true
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "type": "ELEMENT_NODE",
+              "selector": "div.SongPage__Section-sc-19xhmoi-3.cXvCRB",
+              "childs": [
+                {
+                  "type": "ELEMENT_NODE",
+                  "selector": "div#comments.SongPage__SectionAnchor-sc-19xhmoi-4.bcJzkW",
+                  "noChild": true
+                },
+                {
+                  "type": "ELEMENT_NODE",
+                  "selector": "div.SectionScrollSentinel__Element-sc-1c8cvz5-0.ENCiS",
+                  "noChild": true
+                },
+                {
+                  "type": "ELEMENT_NODE",
+                  "selector": "div.SongPageGriddesktop-sc-1px5b71-0.jecoie.SongComments__Grid-sc-131p4fy-0.bIlJhm",
+                  "childs": [
+                    {
+                      "type": "ELEMENT_NODE",
+                      "selector": "div.SongComments__Container-sc-131p4fy-1.lgbAKX",
+                      "childs": [
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "div.SongComments__Title-sc-131p4fy-2.kojbqH[font-size]",
+                          "text": "Comments"
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "div.CommentForm__Container-sc-1rfrnj0-0.cVjBCj",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "form.CommentForm__Form-sc-1rfrnj0-2.frgRKG",
+                            "child": {
+                              "type": "ELEMENT_NODE",
+                              "selector": "label.Fieldshared__FieldContainer-dxskot-0.hNAtee.FloatingField-sc-187lo5b-0.cabqMy",
+                              "child": {
+                                "type": "ELEMENT_NODE",
+                                "selector": "div.Fieldshared__FieldControlWithLabel-dxskot-1.cpCLCX",
+                                "child": {
+                                  "type": "ELEMENT_NODE",
+                                  "selector": "textarea.TextInput-sc-2wssth-0.Textarea__Input-u7wct2-0.itbKya[rows][name][type]",
+                                  "[placeholder]": "Add a comment",
+                                  "[aria-required]": "true",
+                                  "[aria-label]": "undefined (required)",
+                                  "noChild": true
+                                }
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "div.SongComments__SpinnerContainer-sc-131p4fy-9.gRiFtA",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "div.SongComments__InitialLoadSpinner-sc-131p4fy-10.fOsBvT",
+                            "child": {
+                              "type": "ELEMENT_NODE",
+                              "selector": "div.PlaceholderSpinner__Container-r4gz6r-0.jDxAhO",
+                              "child": {
+                                "type": "ELEMENT_NODE",
+                                "selector": "svg[viewBox]",
+                                "child": {
+                                  "type": "ELEMENT_NODE",
+                                  "selector": "svg-repx13[v1]",
+                                  "noChild": true
+                                }
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "div.InnerSectionDivider-sc-1x4onqw-0.vrxkS",
+                          "noChild": true
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "div.SongComments__Footer-sc-131p4fy-11.gTBWpu",
+                          "childs": [
+                            {
+                              "type": "ELEMENT_NODE",
+                              "selector": "div.SongComments__CTASubHeading-sc-131p4fy-3.jZrfsi",
+                              "text": "Sign Up And Drop Knowledge 🤓"
+                            },
+                            {
+                              "type": "ELEMENT_NODE",
+                              "selector": "div.SongComments__CTA-sc-131p4fy-6.euQZer",
+                              "text": "Genius is the ultimate source of music knowledge, created by scholars like you who share facts and insight about the songs and artists they love."
+                            },
+                            {
+                              "type": "ELEMENT_NODE",
+                              "selector": "button.Button__Container-sc-1874dbw-0.cLBJdA.SongComments__SignUpButton-sc-131p4fy-12.fHiIPi[type]",
+                              "text": "Sign Up"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ELEMENT_NODE",
+                      "selector": "div.RightSidebar__Container-pajcl2-0.jOFKJt",
+                      "child": {
+                        "type": "ELEMENT_NODE",
+                        "selector": "div.SidebarAd__Container-sc-1cw85h6-0.kMKmmz",
+                        "child": {
+                          "type": "ELEMENT_NODE",
+                          "selector": "div.SidebarAd__StickyContainer-sc-1cw85h6-1.hQgDBO",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "div.DfpAd__Container-sc-1tnbv7f-0.kiNXoS",
+                            "childs": [
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "div#div-gpt-ad-desktop_song_comments_sidebar-desktop_song_comments_sidebar-1",
+                                "noChild": true
+                              },
+                              {
+                                "type": "ELEMENT_NODE",
+                                "selector": "div.DfpAd__Placeholder-sc-1tnbv7f-1.ilfajN",
+                                "noChild": true
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "ELEMENT_NODE",
+              "selector": "div.MediaPlayersContainer__Container-sc-1tibexe-0.iXrcWP",
+              "noChild": true
+            }
+          ]
+        },
+        {
+          "type": "ELEMENT_NODE",
+          "selector": "div.PageFooterdesktop__Container-hz1fx1-0.boDKcJ.SongPage__PageFooter-sc-19xhmoi-6.iTrjDY",
+          "childs": [
+            {
+              "type": "ELEMENT_NODE",
+              "selector": "div.PageGriddesktop-a6v82w-0.PageFooterdesktop__Section-hz1fx1-2.gUdeqB",
+              "childs": [
+                {
+                  "type": "ELEMENT_NODE",
+                  "selector": "div.PageFooterdesktop__Half-hz1fx1-3.mJdfj",
+                  "childs": [
+                    {
+                      "type": "ELEMENT_NODE",
+                      "selector": "h1.PageFooterSocial__Slogan-sc-14u22mq-0.uGviF",
+                      "text": "Genius is the world’s biggest collection of song lyrics and musical knowledge"
+                    },
+                    {
+                      "type": "ELEMENT_NODE",
+                      "selector": "div.SocialLinks__Container-jwyj6b-2.iuNSEV",
+                      "childs": [
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "a.SocialLinks__Link-jwyj6b-1.cziiuX[height][target]",
+                          "href": "https://www.facebook.com/Genius/",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "svg[viewBox]",
+                            "child": {
+                              "type": "ELEMENT_NODE",
+                              "selector": "svg-repx9[v1]",
+                              "noChild": true
+                            }
+                          }
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "a.SocialLinks__Link-jwyj6b-1.cziiuX[height][target]",
+                          "href": "https://twitter.com/Genius",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "svg[viewBox]",
+                            "child": {
+                              "type": "ELEMENT_NODE",
+                              "selector": "svg-repx10[v1]",
+                              "noChild": true
+                            }
+                          }
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "a.SocialLinks__Link-jwyj6b-1.cziiuX[height][target]",
+                          "href": "https://www.instagram.com/genius/",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "svg[viewBox]",
+                            "child": {
+                              "type": "ELEMENT_NODE",
+                              "selector": "svg-repx16[v1]",
+                              "noChild": true
+                            }
+                          }
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "a.SocialLinks__Link-jwyj6b-1.fRTMWj[height][target]",
+                          "href": "https://www.youtube.com/genius",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "svg[viewBox]",
+                            "child": {
+                              "type": "ELEMENT_NODE",
+                              "selector": "svg-repx17[v1]",
+                              "noChild": true
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "ELEMENT_NODE",
+                  "selector": "div.PageFooterdesktop__Quarter-hz1fx1-4.hMUvCn",
+                  "childs": [
+                    {
+                      "type": "ELEMENT_NODE",
+                      "selector": "a.PageFooterdesktop__Link-hz1fx1-1.gwrcCS",
+                      "href": "/about",
+                      "text": "About Genius"
+                    },
+                    {
+                      "type": "ELEMENT_NODE",
+                      "selector": "a.PageFooterdesktop__Link-hz1fx1-1.gwrcCS",
+                      "href": "/contributor_guidelines",
+                      "text": "Contributor Guidelines"
+                    },
+                    {
+                      "type": "ELEMENT_NODE",
+                      "selector": "a.PageFooterdesktop__Link-hz1fx1-1.gwrcCS",
+                      "href": "/press",
+                      "text": "Press"
+                    },
+                    {
+                      "type": "ELEMENT_NODE",
+                      "selector": "a.PageFooterdesktop__Link-hz1fx1-1.gwrcCS",
+                      "href": "https://shop.genius.com",
+                      "text": "Shop"
+                    },
+                    {
+                      "type": "ELEMENT_NODE",
+                      "selector": "a.PageFooterdesktop__Link-hz1fx1-1.gwrcCS",
+                      "href": "mailto:inquiry@genius.com",
+                      "text": "Advertise"
+                    },
+                    {
+                      "type": "ELEMENT_NODE",
+                      "selector": "a.PageFooterdesktop__Link-hz1fx1-1.gwrcCS",
+                      "href": "/static/privacy_policy",
+                      "text": "Privacy Policy"
+                    }
+                  ]
+                },
+                {
+                  "type": "ELEMENT_NODE",
+                  "selector": "div.PageFooterdesktop__Quarter-hz1fx1-4.hMUvCn",
+                  "childs": [
+                    {
+                      "type": "ELEMENT_NODE",
+                      "selector": "a.PageFooterdesktop__Link-hz1fx1-1.gwrcCS",
+                      "href": "/static/licensing",
+                      "text": "Licensing"
+                    },
+                    {
+                      "type": "ELEMENT_NODE",
+                      "selector": "a.PageFooterdesktop__Link-hz1fx1-1.gwrcCS",
+                      "href": "/jobs",
+                      "text": "Jobs"
+                    },
+                    {
+                      "type": "ELEMENT_NODE",
+                      "selector": "a.PageFooterdesktop__Link-hz1fx1-1.gwrcCS",
+                      "href": "/developers",
+                      "text": "Developers"
+                    },
+                    {
+                      "type": "ELEMENT_NODE",
+                      "selector": "a.PageFooterdesktop__Link-hz1fx1-1.gwrcCS",
+                      "href": "/static/copyright",
+                      "text": "Copyright Policy"
+                    },
+                    {
+                      "type": "ELEMENT_NODE",
+                      "selector": "a.PageFooterdesktop__Link-hz1fx1-1.gwrcCS",
+                      "href": "/feedback/new",
+                      "text": "Contact Us"
+                    },
+                    {
+                      "type": "ELEMENT_NODE",
+                      "selector": "a.PageFooterdesktop__Link-hz1fx1-1.gwrcCS",
+                      "href": "/login",
+                      "text": "Sign In"
+                    },
+                    {
+                      "type": "ELEMENT_NODE",
+                      "selector": "a.PageFooterdesktop__Link-hz1fx1-1.gwrcCS",
+                      "href": "/static/ccpa",
+                      "text": "Do Not Sell My Personal Information"
+                    }
+                  ]
+                },
+                {
+                  "type": "ELEMENT_NODE",
+                  "selector": "div.PageFooterdesktop__Quarter-hz1fx1-4.PageFooterdesktop__OffsetQuarter-hz1fx1-5.diwZPD",
+                  "child": {
+                    "type": "ELEMENT_NODE",
+                    "selector": "div.PageFooterdesktop__FinePrint-hz1fx1-6.iDkyVM",
+                    "text": "© 2022 ML Genius Holdings, LLC"
+                  }
+                },
+                {
+                  "type": "ELEMENT_NODE",
+                  "selector": "div.PageFooterdesktop__Quarter-hz1fx1-4.hMUvCn",
+                  "child": {
+                    "type": "ELEMENT_NODE",
+                    "selector": "a.PageFooterdesktop__FinePrint-hz1fx1-6.iDkyVM",
+                    "href": "/static/terms",
+                    "text": "Terms of Use"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "ELEMENT_NODE",
+              "selector": "div.PageGriddesktop-a6v82w-0.PageFooterdesktop__Section-hz1fx1-2.PageFooterdesktop__Bottom-hz1fx1-7.kNXBDG",
+              "childs": [
+                {
+                  "type": "ELEMENT_NODE",
+                  "selector": "div.PageFooterdesktop__Row-hz1fx1-8.eIiYRJ",
+                  "childs": [
+                    {
+                      "type": "ELEMENT_NODE",
+                      "selector": "a.PageFooterdesktop__VerifiedArtists-hz1fx1-10.bMBKQI",
+                      "href": "/verified-artists",
+                      "child": {
+                        "type": "ELEMENT_NODE",
+                        "selector": "span.TextLabel-sc-8kw9oj-0.kokouQ",
+                        "[font-weight]": "normal",
+                        "text": "Verified Artists"
+                      }
+                    },
+                    {
+                      "type": "ELEMENT_NODE",
+                      "selector": "div.PageFooterdesktop__FlexWrap-hz1fx1-9.hNrwqx",
+                      "childs": [
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "div.PageFooterdesktop__Label-hz1fx1-11.dcpJwP",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "span.TextLabel-sc-8kw9oj-0.kokouQ",
+                            "[font-weight]": "normal",
+                            "text": "All Artists:"
+                          }
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "a.PageFooterArtistLinks__Link-sc-1ng9ih0-0.kTXFZQ",
+                          "href": "/artists-index/a",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "span.TextLabel-sc-8kw9oj-0.kokouQ",
+                            "[font-weight]": "normal",
+                            "text": "a"
+                          }
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "a.PageFooterArtistLinks__Link-sc-1ng9ih0-0.kTXFZQ",
+                          "href": "/artists-index/b",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "span.TextLabel-sc-8kw9oj-0.kokouQ",
+                            "[font-weight]": "normal",
+                            "text": "b"
+                          }
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "a.PageFooterArtistLinks__Link-sc-1ng9ih0-0.kTXFZQ",
+                          "href": "/artists-index/c",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "span.TextLabel-sc-8kw9oj-0.kokouQ",
+                            "[font-weight]": "normal",
+                            "text": "c"
+                          }
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "a.PageFooterArtistLinks__Link-sc-1ng9ih0-0.kTXFZQ",
+                          "href": "/artists-index/d",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "span.TextLabel-sc-8kw9oj-0.kokouQ",
+                            "[font-weight]": "normal",
+                            "text": "d"
+                          }
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "a.PageFooterArtistLinks__Link-sc-1ng9ih0-0.kTXFZQ",
+                          "href": "/artists-index/e",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "span.TextLabel-sc-8kw9oj-0.kokouQ",
+                            "[font-weight]": "normal",
+                            "text": "e"
+                          }
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "a.PageFooterArtistLinks__Link-sc-1ng9ih0-0.kTXFZQ",
+                          "href": "/artists-index/f",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "span.TextLabel-sc-8kw9oj-0.kokouQ",
+                            "[font-weight]": "normal",
+                            "text": "f"
+                          }
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "a.PageFooterArtistLinks__Link-sc-1ng9ih0-0.kTXFZQ",
+                          "href": "/artists-index/g",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "span.TextLabel-sc-8kw9oj-0.kokouQ",
+                            "[font-weight]": "normal",
+                            "text": "g"
+                          }
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "a.PageFooterArtistLinks__Link-sc-1ng9ih0-0.kTXFZQ",
+                          "href": "/artists-index/h",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "span.TextLabel-sc-8kw9oj-0.kokouQ",
+                            "[font-weight]": "normal",
+                            "text": "h"
+                          }
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "a.PageFooterArtistLinks__Link-sc-1ng9ih0-0.kTXFZQ",
+                          "href": "/artists-index/i",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "span.TextLabel-sc-8kw9oj-0.kokouQ",
+                            "[font-weight]": "normal",
+                            "text": "i"
+                          }
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "a.PageFooterArtistLinks__Link-sc-1ng9ih0-0.kTXFZQ",
+                          "href": "/artists-index/j",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "span.TextLabel-sc-8kw9oj-0.kokouQ",
+                            "[font-weight]": "normal",
+                            "text": "j"
+                          }
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "a.PageFooterArtistLinks__Link-sc-1ng9ih0-0.kTXFZQ",
+                          "href": "/artists-index/k",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "span.TextLabel-sc-8kw9oj-0.kokouQ",
+                            "[font-weight]": "normal",
+                            "text": "k"
+                          }
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "a.PageFooterArtistLinks__Link-sc-1ng9ih0-0.kTXFZQ",
+                          "href": "/artists-index/l",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "span.TextLabel-sc-8kw9oj-0.kokouQ",
+                            "[font-weight]": "normal",
+                            "text": "l"
+                          }
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "a.PageFooterArtistLinks__Link-sc-1ng9ih0-0.kTXFZQ",
+                          "href": "/artists-index/m",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "span.TextLabel-sc-8kw9oj-0.kokouQ",
+                            "[font-weight]": "normal",
+                            "text": "m"
+                          }
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "a.PageFooterArtistLinks__Link-sc-1ng9ih0-0.kTXFZQ",
+                          "href": "/artists-index/n",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "span.TextLabel-sc-8kw9oj-0.kokouQ",
+                            "[font-weight]": "normal",
+                            "text": "n"
+                          }
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "a.PageFooterArtistLinks__Link-sc-1ng9ih0-0.kTXFZQ",
+                          "href": "/artists-index/o",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "span.TextLabel-sc-8kw9oj-0.kokouQ",
+                            "[font-weight]": "normal",
+                            "text": "o"
+                          }
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "a.PageFooterArtistLinks__Link-sc-1ng9ih0-0.kTXFZQ",
+                          "href": "/artists-index/p",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "span.TextLabel-sc-8kw9oj-0.kokouQ",
+                            "[font-weight]": "normal",
+                            "text": "p"
+                          }
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "a.PageFooterArtistLinks__Link-sc-1ng9ih0-0.kTXFZQ",
+                          "href": "/artists-index/q",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "span.TextLabel-sc-8kw9oj-0.kokouQ",
+                            "[font-weight]": "normal",
+                            "text": "q"
+                          }
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "a.PageFooterArtistLinks__Link-sc-1ng9ih0-0.kTXFZQ",
+                          "href": "/artists-index/r",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "span.TextLabel-sc-8kw9oj-0.kokouQ",
+                            "[font-weight]": "normal",
+                            "text": "r"
+                          }
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "a.PageFooterArtistLinks__Link-sc-1ng9ih0-0.kTXFZQ",
+                          "href": "/artists-index/s",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "span.TextLabel-sc-8kw9oj-0.kokouQ",
+                            "[font-weight]": "normal",
+                            "text": "s"
+                          }
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "a.PageFooterArtistLinks__Link-sc-1ng9ih0-0.kTXFZQ",
+                          "href": "/artists-index/t",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "span.TextLabel-sc-8kw9oj-0.kokouQ",
+                            "[font-weight]": "normal",
+                            "text": "t"
+                          }
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "a.PageFooterArtistLinks__Link-sc-1ng9ih0-0.kTXFZQ",
+                          "href": "/artists-index/u",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "span.TextLabel-sc-8kw9oj-0.kokouQ",
+                            "[font-weight]": "normal",
+                            "text": "u"
+                          }
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "a.PageFooterArtistLinks__Link-sc-1ng9ih0-0.kTXFZQ",
+                          "href": "/artists-index/v",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "span.TextLabel-sc-8kw9oj-0.kokouQ",
+                            "[font-weight]": "normal",
+                            "text": "v"
+                          }
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "a.PageFooterArtistLinks__Link-sc-1ng9ih0-0.kTXFZQ",
+                          "href": "/artists-index/w",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "span.TextLabel-sc-8kw9oj-0.kokouQ",
+                            "[font-weight]": "normal",
+                            "text": "w"
+                          }
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "a.PageFooterArtistLinks__Link-sc-1ng9ih0-0.kTXFZQ",
+                          "href": "/artists-index/x",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "span.TextLabel-sc-8kw9oj-0.kokouQ",
+                            "[font-weight]": "normal",
+                            "text": "x"
+                          }
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "a.PageFooterArtistLinks__Link-sc-1ng9ih0-0.kTXFZQ",
+                          "href": "/artists-index/y",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "span.TextLabel-sc-8kw9oj-0.kokouQ",
+                            "[font-weight]": "normal",
+                            "text": "y"
+                          }
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "a.PageFooterArtistLinks__Link-sc-1ng9ih0-0.kTXFZQ",
+                          "href": "/artists-index/z",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "span.TextLabel-sc-8kw9oj-0.kokouQ",
+                            "[font-weight]": "normal",
+                            "text": "z"
+                          }
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "a.PageFooterArtistLinks__Link-sc-1ng9ih0-0.kTXFZQ",
+                          "href": "/artists-index/0",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "span.TextLabel-sc-8kw9oj-0.kokouQ",
+                            "[font-weight]": "normal",
+                            "text": "#"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "ELEMENT_NODE",
+                  "selector": "div.PageFooterdesktop__Row-hz1fx1-8.eIiYRJ",
+                  "childs": [
+                    {
+                      "type": "ELEMENT_NODE",
+                      "selector": "div.PageFooterdesktop__Label-hz1fx1-11.dcpJwP",
+                      "child": {
+                        "type": "ELEMENT_NODE",
+                        "selector": "span.TextLabel-sc-8kw9oj-0.kokouQ",
+                        "[font-weight]": "normal",
+                        "text": "Hot Songs:"
+                      }
+                    },
+                    {
+                      "type": "ELEMENT_NODE",
+                      "selector": "div.PageFooterdesktop__FlexWrap-hz1fx1-9.hNrwqx",
+                      "childs": [
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "a.PageFooterHotSongLinks__Link-sc-1adazwo-0.hAxKUd",
+                          "href": "https://genius.com/Newjeans-ditto-lyrics",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "span.TextLabel-sc-8kw9oj-0.kokouQ",
+                            "[font-weight]": "normal",
+                            "text": "Ditto"
+                          }
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "a.PageFooterHotSongLinks__Link-sc-1adazwo-0.hAxKUd",
+                          "href": "https://genius.com/Sza-kill-bill-lyrics",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "span.TextLabel-sc-8kw9oj-0.kokouQ",
+                            "[font-weight]": "normal",
+                            "text": "Kill Bill"
+                          }
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "a.PageFooterHotSongLinks__Link-sc-1adazwo-0.hAxKUd",
+                          "href": "https://genius.com/Oxxxymiron-the-story-of-alisher-lyrics",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "span.TextLabel-sc-8kw9oj-0.kokouQ",
+                            "[font-weight]": "normal",
+                            "text": "THE STORY OF ALISHER"
+                          }
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "a.PageFooterHotSongLinks__Link-sc-1adazwo-0.hAxKUd",
+                          "href": "https://genius.com/Genius-romanizations-fujii-kaze-shinunoga-e-wa-romanized-lyrics",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "span.TextLabel-sc-8kw9oj-0.kokouQ",
+                            "[font-weight]": "normal",
+                            "text": "藤井風 (Fujii Kaze) - 死ぬのがいいわ (Shinunoga E-Wa) (Romanized)"
+                          }
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "a.PageFooterHotSongLinks__Link-sc-1adazwo-0.hAxKUd",
+                          "href": "https://genius.com/Genius-romanizations-john-cena-bing-chilling-romanized-annotated",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "span.TextLabel-sc-8kw9oj-0.kokouQ",
+                            "[font-weight]": "normal",
+                            "text": "John Cena - Bing Chilling (Romanized)"
+                          }
+                        },
+                        {
+                          "type": "ELEMENT_NODE",
+                          "selector": "a.PageFooterHotSongLinks__Link-sc-1adazwo-0.hAxKUd",
+                          "href": "/hot-songs",
+                          "child": {
+                            "type": "ELEMENT_NODE",
+                            "selector": "span.TextLabel-sc-8kw9oj-0.kokouQ",
+                            "[font-weight]": "normal",
+                            "text": "View All"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "TEXT_NODE",
+      "text": "  "
+    }
+  ]
+}
