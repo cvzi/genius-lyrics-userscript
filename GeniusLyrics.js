@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.6.3
+// @version      5.6.4
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2020, cuzi (https://github.com/cvzi)
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -150,6 +150,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       noRelatedLinks: false,
       onlyCompleteLyrics: false
     },
+    onThemeChanged: [],
     debug: false
   }
 
@@ -1218,8 +1219,16 @@ Genius:     ${originalUrl}
   const iframeCSSCommon =
   `
   html {
-    --ygl-btn-half-border-size: 7px;
-    --ygl-btn-color: #222;
+    --egl-btn-half-border-size: 7px;
+    --egl-btn-color: #222;
+    /* this is intended to give some space to see the first line at the vertical center */
+    --egl-page-pt: 50vh;
+    /* this is intended to give some space to see the last line at the vertical center */
+    --egl-page-pb: 50vh;
+    visibility: collapse;
+  }
+  html.v {
+    visibility: visible;
   }
   #resumeAutoScrollButtonContainer{
     position: fixed; 
@@ -1241,7 +1250,7 @@ Genius:     ${originalUrl}
     align-content: center;
     justify-items: center;
     align-items: center;
-    padding: calc(1.732*var(--ygl-btn-half-border-size) + 3px);
+    padding: calc(1.732*var(--egl-btn-half-border-size) + 3px);
     contain: strict;
   }
   #resumeAutoScrollButtonContainer {
@@ -1258,24 +1267,24 @@ Genius:     ${originalUrl}
     contain: strict;
   }
   #resumeAutoScrollButton[arrow-icon="up"] > div:only-child {
-    border-top: calc(1.732*var(--ygl-btn-half-border-size)) solid var(--ygl-btn-color);
-    border-right: var(--ygl-btn-half-border-size) inset transparent;
+    border-top: calc(1.732*var(--egl-btn-half-border-size)) solid var(--egl-btn-color);
+    border-right: var(--egl-btn-half-border-size) inset transparent;
     border-bottom: 0;
-    border-left: var(--ygl-btn-half-border-size) inset transparent;
+    border-left: var(--egl-btn-half-border-size) inset transparent;
   }
   #resumeAutoScrollButton[arrow-icon="down"] > div:only-child {
     border-top: 0;
-    border-right: var(--ygl-btn-half-border-size) inset transparent;
-    border-bottom: calc(1.732*var(--ygl-btn-half-border-size)) solid var(--ygl-btn-color);
-    border-left: var(--ygl-btn-half-border-size) inset transparent;
+    border-right: var(--egl-btn-half-border-size) inset transparent;
+    border-bottom: calc(1.732*var(--egl-btn-half-border-size)) solid var(--egl-btn-color);
+    border-left: var(--egl-btn-half-border-size) inset transparent;
   }
   #resumeAutoScrollFromHereButton > div:only-child {
     position: absolute;
     contain: strict;
-    border-top: var(--ygl-btn-half-border-size) inset transparent;
+    border-top: var(--egl-btn-half-border-size) inset transparent;
     border-right: 0;
-    border-bottom: var(--ygl-btn-half-border-size) inset transparent;
-    border-left: calc(1.732*var(--ygl-btn-half-border-size)) solid var(--ygl-btn-color);
+    border-bottom: var(--egl-btn-half-border-size) inset transparent;
+    border-left: calc(1.732*var(--egl-btn-half-border-size)) solid var(--egl-btn-color);
   }
   
   body div[class*="__Container"] iframe,
@@ -1332,8 +1341,16 @@ Genius:     ${originalUrl}
   #application.app11 {
     animation: appDomAppended2 1ms linear 0s 1 normal forwards;
   }
-  #application.app11 div.LSongHeader__Container:not(.genius-lyrics-header-container) div.LSongHeader__CenterInfo {
+  #application.app11 div.LSongHeader__Container:not(.genius-lyrics-header-container) div.LSongHeader__CenterInfo,
+  #application.app11 span#lyrics_rendered {
     animation: songHeaderDomAppended 1ms linear 0s 1 normal forwards;
+  }
+  span#lyrics_rendered {
+    position:fixed;
+    top:-10px;
+    left:-10px;
+    height:1px;
+    width:1px;
   }
 
   #application.app11 div.LUNDETERMINED__Container .LHeaderArtistAndTracklist__Artist {
@@ -1428,6 +1445,9 @@ Genius:     ${originalUrl}
     transform: translateY(-100%);
     top: calc(var(--annotation-container-syrt) - 3px - 18px);  window.scrollY + rect.top - 3 - 18);
   }
+  [data-lyrics-container="true"] + [data-exclude-from-selection="true"] {
+    display: none;
+  }
   `
 
   function setAnnotationsContainerTop (c, a, isContentChanged) {
@@ -1463,10 +1483,21 @@ Genius:     ${originalUrl}
     })
   }
 
+  function scrollToBegining () {
+    let selector = theme.scrollableContainer
+    if (document.querySelector('style#egl-contentstyles')) {
+      selector = 'body'
+      theme.scrollableContainer = selector
+      theme.scrollLyrics = scrollLyricsFunction('body', 0)
+    }
+    document.querySelector(selector).scrollIntoView()
+  }
+
   const themes = {
     genius: {
       name: 'Genius (Default)',
       themeKey: 'genius',
+      scrollableContainer: 'div[class*="SongPage__LyricsWrapper"]',
       scripts: function themeGeniusScripts () {
         const onload = []
 
@@ -1536,9 +1567,7 @@ Genius:     ${originalUrl}
         onload.push(hideStuff)
 
         // Goto lyrics
-        onload.push(function () {
-          document.getElementById('lyrics').scrollIntoView()
-        })
+        onload.push(scrollToBegining)
 
         // Make expandable content buttons work
         function expandContent () {
@@ -1578,6 +1607,11 @@ Genius:     ${originalUrl}
           document.querySelector('div[class^="Lyrics__Container"]').style.maxWidth = `calc(${bodyWidth}px - 1.5em)`
           document.querySelector('#lyrics-root').style.gridTemplateColumns = 'auto' // class="SongPageGriddesktop__TwoColumn-
         })
+        onload.push(() => {
+          Promise.resolve(0).then(() => {
+            document.documentElement.classList.add('v')
+          })
+        })
         return onload
       },
       combine: function themeGeniusCombineGeniusResources (song, html, annotations, cb) {
@@ -1614,6 +1648,10 @@ Genius:     ${originalUrl}
           a[href].annotated {
             display: inline-block; /* make the whole <a> clickable; including gap between lines*/
           }
+          html div[class*="SongPage__LyricsWrapper"] {
+            padding-top: var(--egl-page-pt);
+            padding-bottom: var(--egl-page-pb);
+          }
           ${iframeCSSCommon}
         </style>`
 
@@ -1623,12 +1661,13 @@ Genius:     ${originalUrl}
         return cb(html)
       },
       // scrollLyrics: scrollLyricsFunction('div[class^="Lyrics__Container"]', -200)
-      scrollLyrics: scrollLyricsFunction('div[class*="SongPage__LyricsWrapper"]', -120)
+      scrollLyrics: scrollLyricsFunction('div[class*="SongPage__LyricsWrapper"]', 0)
     },
 
     cleanwhite: {
       name: 'Clean white', // secondary theme
       themeKey: 'cleanwhite',
+      scrollableContainer: '.lyrics_body_pad',
       scripts: function themeCleanWhiteScripts () {
         const onload = []
 
@@ -1642,6 +1681,16 @@ Genius:     ${originalUrl}
         } else {
           onload.push(themeCommon.addAnnotationHandling)
         }
+
+        // Goto lyrics
+        onload.push(scrollToBegining)
+
+        onload.push(() => {
+          Promise.resolve(0).then(() => {
+            document.documentElement.classList.add('v')
+          })
+        })
+
         return onload
       },
 
@@ -1696,6 +1745,13 @@ Genius:     ${originalUrl}
             div.LHeaderMetaCredits__Container {
               display:none;
             }
+            html .lyrics_body_pad{
+              padding-top: var(--egl-page-pt);
+              padding-bottom: var(--egl-page-pb);
+            }
+            h1,h2,h3,h4,h5,h6 {
+              margin:0;
+            }
             ${iframeCSSCommon}
           </style>`
 
@@ -1708,21 +1764,29 @@ Genius:     ${originalUrl}
            ${headhtml}
           </head>
           <body>
-            ${titlehtml}
-            <div class="mylyrics song_body-lyrics">
-            ${lyricshtml}
+            <div id="application">
+            <main>
+              <div class="lyrics_body_pad">
+                ${titlehtml}
+                <div class="mylyrics song_body-lyrics">
+                ${lyricshtml}
+                </div>
+              </div>
+              <div class="annotationbox" id="annotationbox"></div>
+              <span id="lyrics_rendered"></span>
+            </main>
             </div>
-            <div class="annotationbox" id="annotationbox"></div>
           </body>
           </html>
           `)
       },
-      scrollLyrics: scrollLyricsFunction('.mylyrics', -200)
+      scrollLyrics: scrollLyricsFunction('.lyrics_body_pad', 0)
     },
 
     spotify: {
       name: 'Spotify', // secondary theme
       themeKey: 'spotify',
+      scrollableContainer: '.lyrics_body_pad',
       scripts: function themeSpotifyScripts () {
         const onload = []
 
@@ -1759,6 +1823,10 @@ Genius:     ${originalUrl}
           // Remove other meta like Producer
           removeElements(document.querySelectorAll('h3'))
         }
+
+        // Goto lyrics
+        onload.push(scrollToBegining)
+
         onload.push(clickableTitle)
 
         onload.push(themeCommon.targetBlankLinks)
@@ -1771,6 +1839,13 @@ Genius:     ${originalUrl}
         } else {
           onload.push(themeCommon.addAnnotationHandling)
         }
+
+        onload.push(() => {
+          Promise.resolve(0).then(() => {
+            document.documentElement.classList.add('v')
+          })
+        })
+
         return onload
       },
       combine: function themeSpotifyCombineGeniusResources (song, html, annotations, onCombine) {
@@ -1836,6 +1911,13 @@ Genius:     ${originalUrl}
             .emptyspacer {
               padding-top:50px;
             }
+            h1,h2,h3,h4,h5,h6 {
+              margin:0;
+            }
+            html .lyrics_body_pad{
+              padding-top: var(--egl-page-pt);
+              padding-bottom: var(--egl-page-pb);
+            }
             ${iframeCSSCommon}
           </style>`
 
@@ -1848,17 +1930,24 @@ Genius:     ${originalUrl}
            ${headhtml}
           </head>
           <body>
-            ${titlehtml}
-            <div class="mylyrics song_body-lyrics">
-            ${lyricshtml}
+            <div id="application">
+            <main>
+              <div class="lyrics_body_pad">
+                ${titlehtml}
+                <div class="mylyrics song_body-lyrics">
+                ${lyricshtml}
+                </div>
+              </div>
+              <div class="emptyspacer"></div>
+              <div class="annotationbox" id="annotationbox"></div>
+              <span id="lyrics_rendered"></span>
+            </main>
             </div>
-            <div class="emptyspacer"></div>
-            <div class="annotationbox" id="annotationbox"></div>
           </body>
           </html>
           `)
       },
-      scrollLyrics: scrollLyricsFunction('.mylyrics', -200)
+      scrollLyrics: scrollLyricsFunction('.lyrics_body_pad', 0)
     }
   }
 
@@ -2443,12 +2532,25 @@ pre{white-space:pre-wrap}
       ${contentStyle.includes('--egl-font-size') ? 'font-size: var(--egl-font-size);' : ''}
       margin: 0;
       padding: 0;
-      padding-top: 80vh;
-      /* this is intended to give some space to see the first line at the vertical center */
-      padding-bottom: 50vh;
-      /* this is intended to give some space to see the last line at the vertical center */
     }
 
+    html body div[class*="SongPage__LyricsWrapper"]{
+      padding: 0;
+    }
+
+    html {
+      --egl-page-pt: 80vh;
+      --egl-page-pb: 50vh;
+    }
+
+    html body {
+      padding-top: var(--egl-page-pt);
+      padding-bottom: var(--egl-page-pb);
+    }
+
+    h1[class].LSongHeader__Title{
+      font-size: 140%;
+    }
 
     [class*="LabelWithIcon__Container"],
     [class*="MetadataStats__LabelWithIcon"]
@@ -2734,9 +2836,9 @@ pre{white-space:pre-wrap}
       white-space: break-spaces;
     }
 
-    /* the following shall apply with padding-top: 80vh */
-    /* the content might be hidden if height > 80vh */
-    /* the max-height allow the header box to be scrolled if height > 80vh */
+    /* the following shall apply with padding-top: XXX */
+    /* the content might be hidden if height > XXX */
+    /* the max-height allow the header box to be scrolled if height > XXX */
     .genius-lyrics-header-container {
       position: relative;
       /* set 100% width for inner absolute box */
@@ -2763,7 +2865,7 @@ pre{white-space:pre-wrap}
       /* related to .genius-lyrics-header-container which is padded */
       transform: translateY(-100%);
       /* 100% height refer to the element itself dim */
-      max-height: 80vh;
+      max-height: var(--egl-page-pt);
       display: flex;
       flex-direction: column;
 
@@ -2977,7 +3079,7 @@ pre{white-space:pre-wrap}
     `
 
     const headhtml = `
-    <style>
+    <style id="egl-contentstyles">
     ${contentStyleByDefault}
     ${contentStyle}
     ${css}
@@ -3653,7 +3755,14 @@ Link__StyledLink
       if (hasChanged) {
         genius.option.themeKey = selectTheme.selectedOptions[0].value
         theme = themes[genius.option.themeKey]
-        custom.GM.setValue('theme', genius.option.themeKey).then(() => custom.addLyrics(true))
+        custom.GM.setValue('theme', genius.option.themeKey).then(() => {
+          if (genius.onThemeChanged) {
+            for (const f of genius.onThemeChanged) {
+              f()
+            }
+          }
+          custom.addLyrics(true)
+        })
       }
     }
     selectTheme.addEventListener('change', onSelectTheme)
