@@ -1788,10 +1788,7 @@ Genius:     ${originalUrl}
         const titlehtml = '<div class="myheader">' + h1.parentNode.outerHTML + '</div>'
 
         const spotifyOriginalCSS = document.head.querySelector('link[rel="stylesheet"][href*="spotifycdn.com"][href*="web-player"]')
-        console.log(document.head)
-        console.log(spotifyOriginalCSS)
         if (spotifyOriginalCSS) {
-          console.log(spotifyOriginalCSS.outerHTML)
           headhtml += spotifyOriginalCSS.outerHTML
         }
         headhtml += `<style>
