@@ -2438,9 +2438,9 @@ pre{white-space:pre-wrap}
     if (!contentStyle) return html
     const css = `
     body {
-      ${contentStyle.includes("--egl-background")?"background-color: var(--egl-background);":''}
-      ${contentStyle.includes("--egl-color")?"color: var(--egl-color);":''}
-      ${contentStyle.includes("--egl-font-size")?"font-size: var(--egl-font-size);":''}
+      ${contentStyle.includes("--egl-background") ? "background-color: var(--egl-background);" : ''}
+      ${contentStyle.includes("--egl-color") ? "color: var(--egl-color);" : ''}
+      ${contentStyle.includes("--egl-font-size") ? "font-size: var(--egl-font-size);" : ''}
       margin: 0;
       padding: 0;
       padding-top: 80vh;
@@ -2486,7 +2486,7 @@ pre{white-space:pre-wrap}
     }
 
     body #annotationcontainer958 {
-      ${contentStyle.includes("--egl-font-size")?"font-size: var(--egl-font-size);":''}
+      ${contentStyle.includes("--egl-font-size") ? "font-size: var(--egl-font-size);" : ''}
     }
 
     .annotationcontent {
@@ -2751,7 +2751,7 @@ pre{white-space:pre-wrap}
 
     .genius-lyrics-header-container > .genius-lyrics-header-content {
 
-      ${contentStyle.includes("--egl-infobox-background")?"background-color: var(--egl-infobox-background);":''}
+      ${contentStyle.includes("--egl-infobox-background") ? "background-color: var(--egl-infobox-background);" : ''}
       /* give some color to info container background */
       padding: 18px 26px;
       /* looks better */
@@ -3076,7 +3076,7 @@ pre{white-space:pre-wrap}
       case 'HeaderCreditsPrimis__List':
         return 'LHeaderMetaCredits__List'
 
-      /*
+        /*
 
       desktop_react_atf
 
@@ -3106,11 +3106,11 @@ Link__StyledLink
   }
 
   function normalizeClassNames (htmlText) {
-    htmlText = htmlText.replace(/\s+class=\"([a-zA-Z0-9\-_\s]+)\"/g, (m, a) => {
-      if (!a.includes("__")) return m // ignore without __
+    htmlText = htmlText.replace(/\s+class="([a-zA-Z0-9\-_\s]+)"/g, (m, a) => {
+      if (!a.includes('__')) return m // ignore without __
       const arr = []
       a.replace(/([A-Za-z]+)__([A-Za-z]+)/g, (d, k1, k2) => {
-        let newClassName = normalizeClassNameInner(d, k1, k2)
+        const newClassName = normalizeClassNameInner(d, k1, k2)
         if (newClassName) {
           arr.push(newClassName)
         }
@@ -4026,10 +4026,10 @@ Link__StyledLink
       /** @type {HTMLElement | null} */
       const elm = (evTarget || 0)
       if (elm && elm.matches('div.LSongHeader__CenterInfo')) {
-        let elmSongHeaderContainer = elm.closest('div.LSongHeader__Container:not(.genius-lyrics-header-container)')
+        const elmSongHeaderContainer = elm.closest('div.LSongHeader__Container:not(.genius-lyrics-header-container)')
         let p = elm
         while (p) {
-          let t = p.parentNode
+          const t = p.parentNode
           if (t === elmSongHeaderContainer) break
           p = t
         }
@@ -4039,6 +4039,8 @@ Link__StyledLink
           appendElements(wrapper, children)
           elmSongHeaderContainer.classList.add('genius-lyrics-header-container')
           wrapper.classList.add('genius-lyrics-header-content') // for flexbox
+          children = null
+          wrapper = null
         }
       }
     }
@@ -4047,7 +4049,7 @@ Link__StyledLink
       /** @type {HTMLElement | null} */
       const elm = (evTarget || 0)
       if (elm && elm.matches('.LHeaderArtistAndTracklist__Artist')) {
-        let container = elm.closest('div.LUNDETERMINED__Container')
+        const container = elm.closest('div.LUNDETERMINED__Container')
         if (container) {
           container.classList.remove('LUNDETERMINED__Container')
           container.classList.add('LHeaderArtistAndTracklist__Container')
