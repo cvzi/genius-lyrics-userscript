@@ -1646,7 +1646,7 @@ Genius:     ${originalUrl}
             background-color: #ddd;
           }
           a[href].annotated {
-            display: inline-block; /* make the whole <a> clickable; including gap between lines*/
+            padding: 5px 0px; /* make the whole <a> clickable; including gap between lines*/
           }
           html div[class*="SongPage__LyricsWrapper"] {
             padding-top: var(--egl-page-pt);
