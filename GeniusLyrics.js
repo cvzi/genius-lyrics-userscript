@@ -1317,14 +1317,28 @@ Genius:     ${originalUrl}
       background-position-x: 2px;
     }
   }
+  @keyframes headerArtistAndTracklistDOMAppended {
+    0% {
+      background-position-x: 1px;
+    }
+  
+    100% {
+      background-position-x: 2px;
+    }
+  }
   #application {
     animation: appDomAppended 1ms linear 0s 1 normal forwards;
   }
   #application.app11 {
     animation: appDomAppended2 1ms linear 0s 1 normal forwards;
   }
-  #application.app11 div[class*="SongHeaderWithPrimis__Container"] > div[class*="SongHeaderWithPrimis__Right"] {
+  #application.app11 div.LSongHeader__Container:not(.genius-lyrics-header-container) div.LSongHeader__CenterInfo {
     animation: songHeaderDomAppended 1ms linear 0s 1 normal forwards;
+  }
+
+  #application.app11 div.LUNDETERMINED__Container .LHeaderArtistAndTracklist__Artist {
+    animation: headerArtistAndTracklistDOMAppended 1ms linear 0s 1 normal forwards;
+    /* animation removed once the class is determined */
   }
 
   /* CSS for annotation container */
@@ -1676,10 +1690,10 @@ Genius:     ${originalUrl}
             .annotationbox .annotation_rich_text_formatting {color: black}
             .annotationbox .annotation_rich_text_formatting a {color: rgb(6, 95, 212)}
 
-            div[class*="HeaderArtistAndTracklistPrimis"] {
+            div[class*="HeaderArtistAndTracklistPrimis"] /* desktop_react_atf */ {
               display:none;
             }
-            div[class*="HeaderCreditsPrimis__Container"] {
+            div.LHeaderMetaCredits__Container {
               display:none;
             }
             ${iframeCSSCommon}
@@ -1816,7 +1830,7 @@ Genius:     ${originalUrl}
             div[class*="HeaderArtistAndTracklistPrimis"] {
               display:none;
             }
-            div[class*="HeaderCreditsPrimis__Container"] {
+            div.LHeaderMetaCredits__Container {
               display:none;
             }
             .emptyspacer {
@@ -2166,9 +2180,9 @@ Genius:     ${originalUrl}
 .leLkHK{display:-webkit-box;margin-left:2.25rem}
 .cRrFdP{display:block;position:relative}
 .dvOJud{cursor:pointer}
-.fqAixv{display:-webkit-box;width:100%;margin-bottom:1rem}
-.cVGQZE{line-height:1.33;white-space:nowrap}
-.eRbhLo{position:relative;display:-webkit-box;column-gap:1.5rem}
+/*.fqAixv{display:-webkit-box;width:100%;margin-bottom:1rem}*/
+/*.cVGQZE{line-height:1.33;white-space:nowrap}*/
+/*.eRbhLo{position:relative;display:-webkit-box;column-gap:1.5rem}*/
 /*.hxSUxL{font-weight:100;font-size:.75rem;line-height:1.33;color:#fff;max-width:50%}*/
 /*.repVv{display:block;line-height:1.2;font-size:.75rem;color:#fff}*/
 /*.eOxYeV{font-size:1rem}*/
@@ -2211,26 +2225,27 @@ Genius:     ${originalUrl}
 .csMTdh{width:100%}
 .jecoie{display:grid}
 /*.hshFQG{z-index:1;background-image:linear-gradient(#d62d36,#64321d);padding-top:.75rem;padding-bottom:1.5rem;position:relative;color:#fff}*/
-.jiZgac{width:100%;height:100%;position:relative;z-index:1;display:-webkit-box}
-.brVVKA{display:-webkit-box}
-.iMmhUH{display:-webkit-box}
-.iFxQsP{display:-webkit-box;max-width:32rem}
-.hudniQ{margin-top:.75rem;margin-right:.75rem;width:100%}
-@media screen and (min-width:1164px) {
+/*.jiZgac{width:100%;height:100%;position:relative;z-index:1;display:-webkit-box}*/
+/*.brVVKA{display:-webkit-box}*/
+/*.iMmhUH{display:-webkit-box}*/
+/*.iFxQsP{display:-webkit-box;max-width:32rem}*/
+/*.hudniQ{margin-top:.75rem;margin-right:.75rem;width:100%}*/
+/*@media screen and (min-width:1164px) {
 .hudniQ{max-height:calc(100% + 1.5rem)}
-}
+}*/
+/*
 .dnpvgJ img{display:inline-block;box-shadow:0 0 .75rem 0 rgba(0,0,0,0.05)}
 @media screen and (min-width:1164px) {
 .dnpvgJ{height:100%;text-align:right}
 .dnpvgJ img{max-height:100%}
-}
+}*/
 /*.fpQGbx{display:-webkit-box;font-size:1.5rem;font-weight:400;color:#fff;line-height:1.125;word-wrap:break-word}*/
-.jSgIpQ{opacity:1}
-.fmRrc{position:absolute;width:100%;bottom:calc(0 + 3rem);z-index:-2}
-.iEXgTT{width:100%}
-.heddkF{margin-left:1.5rem;width:400px;min-width:400px;max-width:400px}
+/*.jSgIpQ{opacity:1}*/
+/*.fmRrc{position:absolute;width:100%;bottom:calc(0 + 3rem);z-index:-2}*/
+/*.iEXgTT{width:100%}*/
+/*.heddkF{margin-left:1.5rem;width:400px;min-width:400px;max-width:400px}*/
 .ENCiS{position:absolute;top:calc(100vh - (0 + 3rem));bottom:0;width:100%;z-index:-2}
-.iwZJzz{display:-webkit-box;column-gap:1rem}
+/*.iwZJzz{display:-webkit-box;column-gap:1rem}*/
 /*.kEyJXB{z-index:3;background-color:#fff;margin-top:1rem;padding:.375rem 0;font-size:.75rem;position:absolute;border:1px solid #000;min-width:100%;cursor:pointer;white-space:nowrap;left:0}
 .kEyJXB:before{content:'';position:absolute;width:8px;height:8px;background-color:#fff;border-top:1px solid #000;border-right:1px solid #000;top:0;left:50%;transform:translateX(-50%) translateY(calc(-50% - 1px)) rotate(-45deg)}*/
 /*.enfGY{color:#000}
@@ -2423,15 +2438,60 @@ pre{white-space:pre-wrap}
     if (!contentStyle) return html
     const css = `
     body {
-      background-color: var(--egl-background);
-      color: var(--egl-color);
-      font-size: var(--egl-font-size);
+      ${contentStyle.includes('--egl-background') ? 'background-color: var(--egl-background);' : ''}
+      ${contentStyle.includes('--egl-color') ? 'color: var(--egl-color);' : ''}
+      ${contentStyle.includes('--egl-font-size') ? 'font-size: var(--egl-font-size);' : ''}
       margin: 0;
       padding: 0;
       padding-top: 80vh;
       /* this is intended to give some space to see the first line at the vertical center */
       padding-bottom: 50vh;
       /* this is intended to give some space to see the last line at the vertical center */
+    }
+
+
+    [class*="LabelWithIcon__Container"],
+    [class*="MetadataStats__LabelWithIcon"]
+    {
+      font-size: inherit;
+    }
+    [class*="LabelWithIcon__Container"] svg,
+    [class*="MetadataStats__LabelWithIcon"] svg,
+    svg[class*="MetadataTooltip__InfoIcon"] {
+      height: 1.2em;
+      width: 1.2em;
+      font-size: inherit;
+    }
+
+    .LHeaderMetaCredits__Selection {
+      white-space: nowrap;
+      word-break: normal;
+      /* .grjXi, .glevmK */
+      font-weight: 100;
+      font-size: .75rem;
+      line-height: 1.33;
+    }
+    .LDESKTOPONLY__Grid{
+      display: grid;
+      grid-template-columns: repeat(2,1fr);
+      -webkit-column-gap: 0.75rem;
+    }
+    [class].LDESKTOPONLY__Grid{
+      column-gap: 28px;
+    }
+
+    a[href^="#"][class="HeaderBio__Wrapper"]{
+      /* .eFqCnd */
+      line-height: 1.33;
+    }
+
+    body #annotationcontainer958 {
+      ${contentStyle.includes('--egl-font-size') ? 'font-size: var(--egl-font-size);' : ''}
+    }
+
+    .annotationcontent {
+      max-height: 30vh;
+      overflow: auto;
     }
 
     main,
@@ -2445,9 +2505,23 @@ pre{white-space:pre-wrap}
       /* looks better to give some space away from the iframe */
     }
 
-    div[data-lyrics-container] {
-      font-size: var(--egl-font-size);
-      /* adjust font to smaller size */
+    [class*="LabelWithIcon__Container"] [class*="LabelWithIcon__Label"] {
+      font-size:inherit; /* general */
+    }
+
+    div[class].LSongHeader__CenterInfo {
+      color: inherit; /* for dekstop_react */
+    }
+
+    div#lyrics-root[class*="Lyrics__Root"] {
+        font-size: inherit; /* for lyrics text */
+    }
+
+    body .LHeaderMetaCredits__List, body .HeaderTracklist__Container {
+      font-size: inherit; /* revert 1rem */
+    }
+    body .LHeaderMetaCredits__Selection{
+      margin-bottom:0; /* revert mb */
     }
 
     #application:not(:hover) [data-lyrics-container="true"]::selection {
@@ -2460,25 +2534,16 @@ pre{white-space:pre-wrap}
     div[class*="SongHeader"] {
       background-color: transparent;
       padding: 0;
-      color: var(--egl-color);
     }
 
     div[class*="SongPageGrid"],
-    div[class*="SongHeaderWithPrimis__Container"] {
+    div[class].LSongHeader__Container {
       background-image: none;
       /* no header background image */
     }
 
     div[data-exclude-from-selection] {
       display: none;
-    }
-
-    main[class*="Container"] a[href] {
-      color: var(--egl-color) !important;
-    }
-
-    main[class*="Container"] h1[font-size][class] {
-      color: var(--egl-color);
     }
 
     main[class*="Container"] h1[font-size][class*="SongHeaderWithPrimis__Title"] {
@@ -2491,7 +2556,7 @@ pre{white-space:pre-wrap}
       width: 100%;
     }
 
-    div[class*="SongHeaderWithPrimis__Left"] {
+    div[class].LSongHeader__Left {
       display: none;
       /* just empty space */
     }
@@ -2523,18 +2588,11 @@ pre{white-space:pre-wrap}
       cursor: default;
       /* no pointer */
     }
-
-    div[class*="SongHeaderWithPrimis__Information"] div[class*="HeaderCreditsPrimis__Container"] {
-      /* using flexbox with wrapping */
-      display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-      gap: 0px;
-      align-items: center;
-      justify-items: center;
+    div[class*="MetadataStats"] [class] {
+      cursor: inherit;
     }
 
-    div[class*="SongHeaderWithPrimis__Information"] {
+    div[class].LSongHeader__CenterInfo {
       margin: 0;
       padding: 0;
       max-width: 100%;
@@ -2543,16 +2601,14 @@ pre{white-space:pre-wrap}
       flex-direction: column;
     }
 
-    div[class*="SongHeaderWithPrimis__Bottom"] a[href] {
-      padding: 0;
-      margin: 0;
-    }
-
-    div[class*="SongHeaderWithPrimis__Right"] {
-      background-color: var(--egl-infobox-background);
-      /* give some color to info container background */
-      padding: 18px 26px;
-      /* looks better */
+    div[class].LSongHeader__CenterInfo .LHeaderMetaCredits__Container{
+      /* using flexbox with wrapping */
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 0px;
+      align-items: center;
+      justify-items: center;
     }
 
     div[data-lyrics-container][class*="Lyrics__Container"] {
@@ -2583,53 +2639,56 @@ pre{white-space:pre-wrap}
 
     a[href][class],
     span[class*="PortalTooltip"],
-    div[class*="HeaderCreditsPrimis"],
-    div[class*="HeaderArtistAndTracklistPrimis"] {
+    div[class*="HeaderCreditsPrimis"]  /* desktop_react_atf */,
+    div[class*="HeaderArtistAndTracklistPrimis"] /* desktop_react_atf */,
+    div[class*="HeaderTracklist__Container"]  /* desktop_react */
+     {
       font-size: inherit;
     }
 
-    div[class*="SongHeaderWithPrimis__Information"] h1+div[class*="HeaderArtistAndTracklistPrimis"] {
+    div[class].LSongHeader__CenterInfo h1+div[class*="HeaderArtistAndTracklistPrimis"]   /* desktop_react_atf */
+    {
       font-size: 80%;
       margin-top: 10px;
       margin-bottom: 3px;
     }
 
-    div[class*="MetadataStats__Stats"] {
-      /* using flexbox with wrapping */
-      display: flex;
-      flex-wrap: wrap;
-      /* element blocks with wrapping */
-      white-space: nowrap;
-      /* text itself no wrapping */
-      row-gap: 4px;
-      column-gap: 16px;
-      margin-top: 6px;
-      width: 100%;
-      /* force the div to be full width */
+    .LSongHeader__CenterInfo .LSongHeader__Title + span[class*="PortalTooltip__Container"]   /* desktop_react */
+    {
+      font-size: 80%;
+      display:inline-flex;
+      margin-top: 10px;
+      margin-bottom: 3px;
+    }
+    .LSongHeader__CenterInfo .LSongHeader__Title + span[class*="PortalTooltip__Container"] + div[class*="HeaderTracklist__Container"]   /* desktop_react */
+    {
+      font-size: 80%;
+      display:inline-flex;
+      margin-top: 10px;
+      margin-bottom: 3px;
     }
 
-    h1,
-    div[class*="SongPage__LyricsWrapper"] {
-      white-space: normal;
+    .LSongHeader__CenterInfo .LSongHeader__Title + span[class*="PortalTooltip__Container"] + div[class*="HeaderTracklist__Container"]::before   /* desktop_react */
+    {
+      content: "•";
+      margin: 0 .5em;
+      display: inline-block;
+      float: left;
     }
 
-    div[class*="MetadataStats__Stats"]>[class] {
-      margin-right: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      column-gap: 2px;
+    .LSongHeader__CenterInfo .LSongHeader__Title + span[class*="PortalTooltip__Container"] + div[class*="HeaderTracklist__Container"] [class*="HeaderTracklist__AlbumWrapper"]   /* desktop_react */
+    {
+      display: inline-flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
     }
 
-    div[class*="SongHeaderWithPrimis__Information"] div[class*="HeaderCreditsPrimis__List"] {
-      font-size: 85%;
+
+    .LSongHeader__CenterInfo [class], div[class].LSongHeader__Container {
+      color: inherit;
     }
 
-    div[class*="SongHeaderWithPrimis__Information"]~div[class*="SongHeaderWithPrimis__PrimisContainer"] {
-      display: none;
-    }
-
-    div[class*="SongHeaderWithPrimis__Information"] {
+    .LSongHeader__CenterInfo {
       --egl-container-display: '-NULL-';
       /* all under info would not hide */
     }
@@ -2658,6 +2717,11 @@ pre{white-space:pre-wrap}
       /* default just 50%; want full width */
     }
 
+    div[class*="SongHeader"] h1 {
+      font-size: 200%; /* by default */
+      white-space: break-spaces;
+    }
+
     div[class*="SongHeader"] h1[font-size="medium"] {
       font-size: 140%;
       /* make song header title smaller */
@@ -2678,14 +2742,20 @@ pre{white-space:pre-wrap}
       /* set 100% width for inner absolute box */
     }
 
-    .genius-lyrics-header-container>* {
+    .genius-lyrics-header-container > * {
       /* main purpose for adding class using CSS event triggering; avoid :has() */
       --genius-lyrics-header-content-display: none;
       display: var(--genius-lyrics-header-content-display);
       /* none by default */
     }
 
-    .genius-lyrics-header-container>.genius-lyrics-header-content {
+    .genius-lyrics-header-container > .genius-lyrics-header-content {
+
+      ${contentStyle.includes('--egl-infobox-background') ? 'background-color: var(--egl-infobox-background);' : ''}
+      /* give some color to info container background */
+      padding: 18px 26px;
+      /* looks better */
+    
       --genius-lyrics-header-content-display: '--NULL--';
       /* override none */
       position: absolute;
@@ -2694,15 +2764,12 @@ pre{white-space:pre-wrap}
       transform: translateY(-100%);
       /* 100% height refer to the element itself dim */
       max-height: 80vh;
-    }
-
-    div[class*="SongHeaderWithPrimis__Container"]>div[class*="SongHeaderWithPrimis__Right"].genius-lyrics-header-content {
       display: flex;
       flex-direction: column;
-    }
 
-    div[class*="SongHeaderWithPrimis__Container"]>div[class*="SongHeaderWithPrimis__Right"].genius-lyrics-header-content>div {
       overflow: auto;
+      height: auto;
+      word-break: break-word;
     }
 
     div[class*="Lyrics__Container"][data-lyrics-container="true"] {
@@ -2710,7 +2777,7 @@ pre{white-space:pre-wrap}
       /* not only a single lyrics character get wrapped. the whole lyrics word will be wrapped */
     }
 
-    div[class*="HeaderCreditsPrimis__Section"] {
+    .LHeaderMetaCredits__Selection {
       /* flexbox for header info */
       display: flex;
       flex-direction: row;
@@ -2726,14 +2793,9 @@ pre{white-space:pre-wrap}
       display: none;
     }
 
-    div[class*="HeaderArtistAndTracklistPrimis__Container"] {
-      flex-wrap: wrap;
-      column-gap: 6px;
-      row-gap: 2p;
-      x
-    }
-
-    div[class*="HeaderArtistAndTracklistPrimis__Container"] div[class*="HeaderArtistAndTracklistPrimis__Tracklist"]>a[href] {
+    div[class*="HeaderArtistAndTracklistPrimis__Container"] div[class*="HeaderArtistAndTracklistPrimis__Tracklist"]>a[href], /* desktop_react_atf */
+    div[class*="HeaderTracklist__Container"] div[class*="HeaderTracklist__Album"] a[href] /* desktop_react */
+     {
       margin: 6px;
     }
 
@@ -2741,38 +2803,165 @@ pre{white-space:pre-wrap}
       color: inherit;
     }
 
-    div[class*="SongHeaderWithPrimis__Information"] div[class*="SongHeaderWithPrimis__Bottom"] {
-      display: flex;
-      flex-direction: column;
+    .LSongHeader__CenterInfo a[href][class]{
+      padding: 0;
+      margin: 0;
     }
-
-    div[class*="SongHeaderWithPrimis__Information"] div[class*="SongHeaderWithPrimis__Bottom"] a[href="#about"] {
+    
+    .LSongHeader__CenterInfo a[href="#about"]
+    {
       font-weight: 300;
       font-size: 85%;
       opacity: 0.65;
       /* coloring only */
     }
+    
 
-    button[class*="LabelWithIcon__Container"] {
+    h1,
+    div[class*="SongPage__LyricsWrapper"] {
+      white-space: normal;
+    }
+
+    .genius-lyrics-header-content div[class*="MetadataStats__Stats"] {
+      /* using flexbox with wrapping */
+      display: flex;
+      flex-wrap: wrap;
+      /* element blocks with wrapping */
+      white-space: nowrap;
+      /* text itself no wrapping */
+      row-gap: 4px;
+      column-gap: 16px;
+      margin-top: 6px;
+      width: 100%;
+      /* force the div to be full width */
+      font-size: 85%;
+    }
+    [class*="Tooltip__Children"], [class*="Tooltip__Container"] {
+      display: inline-flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      justify-items: center;
+      align-content: center;
+      align-self: center;
+      justify-self: center;
+    }
+
+    .genius-lyrics-header-content div[class*="MetadataStats__Stats"] > [class] {
+      margin-right: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      column-gap: 2px;
+    }
+
+    .genius-lyrics-header-content div[class*="MetadataStats__Stats"] button[class*="LabelWithIcon__Container"] {
       display: flex;
       justify-content: center;
       cursor: default;
     }
 
-    body #annotationcontainer958 {
-      font-size: var(--egl-font-size);
+    .genius-lyrics-header-content div[class*="MetadataStats__Stats"] span[class*="LabelWithIcon__Container"] {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      justify-content: center;
+      align-items: center;
     }
 
-    .annotationcontent {
-      max-height: 30vh;
-      overflow: auto;
+    .LHeaderMetaCredits__Label[class] {
+      font-size: 0.92em; /* instead of 0.75rem */
+      align-self: center;
     }
 
-    [class*="SongHeaderWithPrimis"] a[href][class*="Link__"] {
-      --egl-color: var(--egl-link-color);
+    #lyrics-root [class*="Lyrics__Title"]{
+      font-size: 0.7rem; /* looks better */
+      margin: 12px 4px; /* looks better */
+      color: inherit;
+      opacity: 0.89; /* lighter in color */
     }
 
-    [class*="HeaderCreditsPrimis__List"] {
+    .LSongHeader__Title a[href][style*="color"] {
+      color: inherit !important; /* important color set by inherit instead */
+    }
+    .LSongHeader__Title a[href][class] {
+      color: inherit; /* if not forced color, inherit color */
+    }
+
+
+    .genius-lyrics-header-content div[class].LHeaderMetaCredits__List{
+      font-size: 92%;
+    }
+    .genius-lyrics-header-content div[class].LHeaderMetaCredits__List span,
+    .genius-lyrics-header-content div[class].LHeaderMetaCredits__List button{
+      font-size: inherit;
+    }
+    button[class*="List__More"] {
+      cursor: inherit;
+      color: inherit;
+      text-decoration: inherit;
+      font-size: inherit;
+    }
+
+    /* desktop_react_atf */
+
+
+
+    .LSongHeader__CenterInfo ~ div[class*="SongHeaderWithPrimis__PrimisContainer"] /* desktop_react_atf */ {
+      display: none;
+    }
+
+
+    div[class*="HeaderArtistAndTracklistPrimis__Container"]  /* desktop_react_atf */
+    {
+      flex-wrap: wrap;
+      column-gap: 6px;
+      row-gap: 2px;
+    }
+
+    .LSongHeader__CenterInfo div[class*="SongHeaderWithPrimis__Bottom"] /* desktop_react_atf */ {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .genius-lyrics-header-content a[href][class*="Link__"] {
+      color: var(--egl-link-color);
+      font-weight: 100;
+      text-decoration: none;
+    }
+
+    div[class*="HeaderMetadata__ReleaseDate"] {
+      font-size: inherit;
+    }
+
+    /* anchor links like #about, #primary-album */
+    .genius-lyrics-header-content a[href^="#"][class*="Link_"]
+    {
+      --egl-link-color: '--NULL--';
+      pointer-events: none;
+      text-decoration: inherit;
+    }
+
+    .genius-lyrics-header-content a[href^="#"][class*="Link_"] *
+    {
+      pointer-events: all; /* text can be selected */
+      text-decoration: inherit;
+    }
+
+    .genius-lyrics-header-content a[href^="#"][class*="Link_"] > span[class*="InlineSvg"]:last-child,
+    .genius-lyrics-header-content a[href^="#"][class*="Link_"] > span[class*="InlineSvg"]:last-child > svg
+    {
+      display: none;
+    }
+    
+    /* only for #about Read More */
+    .genius-lyrics-header-content a[href^="#"][class*="Link_"] > span[class*="HeaderBio__ViewBio"]:last-child,
+    .genius-lyrics-header-content a[href^="#"][class*="Link_"] > span[class*="HeaderBio__ViewBio"]:last-child svg
+    {
+      display: none;
+    }
+
+    [class].LHeaderMetaCredits__List /* desktop_react_atf */ {
       justify-content: center;
       align-items: center;
       display: inline-flex;
@@ -2781,7 +2970,19 @@ pre{white-space:pre-wrap}
     }
     `
 
-    const headhtml = `<style>${contentStyle}\n${css}</style>`
+    const contentStyleByDefault = `
+    html{
+      --egl-link-color: hsl(206,100%,40%);
+    }
+    `
+
+    const headhtml = `
+    <style>
+    ${contentStyleByDefault}
+    ${contentStyle}
+    ${css}
+    </style>
+    `
 
     // Add to <head>
     html = appendHeadText(html, headhtml)
@@ -2798,7 +2999,7 @@ pre{white-space:pre-wrap}
 
   /* eslint-disable quotes, comma-dangle, indent */
   // to check validity of the content style being used in defaultCSS
-  const defaultStyleCheckerArr = [".dTXQYT", ".ilfajN", ".bIwkeM", ".dIgauN", ".jOhzET", ".kokouQ", ".xQwqG", ".jDxAhO", ".dawSPu", ".cmIqeW", ".hTPksM", ".hVAZmF", ".cLBJdA", ".cpvLYi", ".kMDkxm", ".leLkHK", ".cRrFdP", ".dvOJud", ".fqAixv", ".cVGQZE", ".eRbhLo", ".huhsMa", ".dCKKNS", ".kMItKF", ".gjSNHg", ".itbKya", ".eMjKRh", ".eQViPi", ".ctylSH", ".gAieh", ".csMTdh", ".jecoie", ".jiZgac", ".brVVKA", ".iMmhUH", ".iFxQsP", ".hudniQ", ".dnpvgJ", ".jSgIpQ", ".fmRrc", ".iEXgTT", ".heddkF", ".ENCiS", ".iwZJzz", ".bBMTMQ", ".dyewdM", ".ePvBqA", ".kJxpEi", ".ueUKD", ".fraZOY", ".kMKmmz", ".hQgDBO", ".fUyrrM", ".fVWWod", ".lfAvEQ", ".fdEmdh", ".fHdUT", ".jrjShc", ".YYrds", ".fMoZxb", ".hXQMRu", ".eDBQeK", ".rncXA", ".kkpCaw", ".eqRvkr", ".bcLwQh", ".hFPGxa", ".lbdVJq", ".hGLtDM", ".bXbziL", ".ldjaSd", ".cSKAwQ", ".fPpEQG", ".vrxkS", ".cabqMy", ".fyUjsz", ".esoPOn", ".uEMeZ", ".ceKRFE", ".bZsZHM", ".iRKrFW", ".dWcYSx", ".fognin", ".lopKUj", ".eSiFpi", ".cVjBCj", ".frgRKG", ".bIlJhm", ".lgbAKX", ".kojbqH", ".jZrfsi", ".euQZer", ".gRiFtA", ".fOsBvT", ".gTBWpu", ".fHiIPi", ".iXrcWP", ".cziiuX", ".fRTMWj", ".iuNSEV", ".uGviF", ".kTXFZQ", ".hAxKUd", ".boDKcJ", ".gwrcCS", ".gUdeqB", ".iDkyVM", ".kNXBDG", ".eIiYRJ", ".hNrwqx", ".bMBKQI", ".dcpJwP", ".cXvCRB", ".bcJzkW", ".UKjRP", ".noscroll"]
+  const defaultStyleCheckerArr = [".dTXQYT", ".ilfajN", ".bIwkeM", ".dIgauN", ".jOhzET", ".kokouQ", ".xQwqG", ".jDxAhO", ".dawSPu", ".cmIqeW", ".hTPksM", ".hVAZmF", ".cLBJdA", ".cpvLYi", ".kMDkxm", ".leLkHK", ".cRrFdP", ".dvOJud", ".huhsMa", ".dCKKNS", ".kMItKF", ".gjSNHg", ".itbKya", ".eMjKRh", ".eQViPi", ".ctylSH", ".gAieh", ".csMTdh", ".jecoie", ".ENCiS", ".bBMTMQ", ".dyewdM", ".ePvBqA", ".kJxpEi", ".ueUKD", ".fraZOY", ".kMKmmz", ".hQgDBO", ".fUyrrM", ".fVWWod", ".lfAvEQ", ".fdEmdh", ".fHdUT", ".jrjShc", ".YYrds", ".fMoZxb", ".hXQMRu", ".eDBQeK", ".rncXA", ".kkpCaw", ".eqRvkr", ".bcLwQh", ".hFPGxa", ".lbdVJq", ".hGLtDM", ".bXbziL", ".ldjaSd", ".cSKAwQ", ".fPpEQG", ".vrxkS", ".cabqMy", ".fyUjsz", ".esoPOn", ".uEMeZ", ".ceKRFE", ".bZsZHM", ".iRKrFW", ".dWcYSx", ".fognin", ".lopKUj", ".eSiFpi", ".cVjBCj", ".frgRKG", ".bIlJhm", ".lgbAKX", ".kojbqH", ".jZrfsi", ".euQZer", ".gRiFtA", ".fOsBvT", ".gTBWpu", ".fHiIPi", ".iXrcWP", ".cziiuX", ".fRTMWj", ".iuNSEV", ".uGviF", ".kTXFZQ", ".hAxKUd", ".boDKcJ", ".gwrcCS", ".gUdeqB", ".iDkyVM", ".kNXBDG", ".eIiYRJ", ".hNrwqx", ".bMBKQI", ".dcpJwP", ".cXvCRB", ".bcJzkW", ".UKjRP", ".noscroll"]
   // store all the svgs displayed in the lyrics panel; reduce cache size
   const defaultSVGBoxs =
     [
@@ -2831,6 +3032,94 @@ pre{white-space:pre-wrap}
       "<svg><path d=\"M24 10h-10v-10h-4v10h-10v4h10v10h4v-10h10z\"></path></svg>",
   ]
   /* eslint-enable quotes, comma-dangle, indent */
+
+  function normalizeClassNameInner (d, k1, k2) {
+    switch (d) {
+      case 'SongHeaderdesktop__Column':
+        return 'LDESKTOPONLY__Column'
+      case 'SongHeaderdesktop__Container':
+      case 'SongHeaderWithPrimis__Container':
+        return 'LSongHeader__Container'
+      case 'SongHeaderdesktop__Sentinel':
+      case 'SongHeaderWithPrimis__Sentinel':
+        return 'LSongHeader__Sentinel'
+      case 'SongHeaderdesktop__Left':
+      case 'SongHeaderWithPrimis__Left':
+        return 'LSongHeader__Left'
+      case 'SongHeaderdesktop__Center':
+      case 'SongHeaderWithPrimis__Information':
+        return 'LSongHeader__CenterInfo'
+      case 'SongHeaderdesktop__Title':
+      case 'SongHeaderWithPrimis__Title':
+        return 'LSongHeader__Title'
+      case 'SongHeaderdesktop__HiddenMask':
+      case 'SongHeaderWithPrimis__HiddenMask':
+        return 'LSongHeader__Title'
+      case 'HeaderArtistAndTracklistPrimis__Container':
+      case 'PortalTooltip__Container':
+        return 'LUNDETERMINED__Container' // set to LHeaderArtistAndTracklist__Container after DOM loaded
+      case 'SongHeaderdesktop__Artist':
+      case 'HeaderArtistAndTracklistPrimis__Artist':
+        return 'LHeaderArtistAndTracklist__Artist'
+      case 'HeaderMetadata__Container':
+      case 'HeaderCreditsPrimis__Container':
+        return 'LHeaderMetaCredits__Container'
+      case 'HeaderMetadata__Grid':
+        return 'LDESKTOPONLY__Grid'
+      case 'HeaderMetadata__Section':
+      case 'HeaderCreditsPrimis__Section':
+        return 'LHeaderMetaCredits__Selection'
+      case 'HeaderMetadata__Label':
+      case 'HeaderCreditsPrimis__Label':
+        return 'LHeaderMetaCredits__Label'
+      case 'HeaderMetadata__List':
+      case 'HeaderCreditsPrimis__List':
+        return 'LHeaderMetaCredits__List'
+
+        /*
+
+      desktop_react_atf
+
+SongHeaderWithPrimis__Bottom
+HeaderBio__Wrapper
+SongHeaderWithPrimis__HeaderBio
+HeaderBio__ViewBio
+
+desktop_react
+
+HeaderMetadata__Section
+HeaderMetadata__Label
+HeaderMetadata__ReleaseDate
+HeaderMetadata__Section
+HeaderMetadata__ViewCredits
+Link__StyledLink
+
+      */
+
+      default:
+      // if (k1 === 'SongHeaderdesktop' || k1 === 'SongHeaderWithPrimis') {
+      //   return `LSongHeader__${k2}`
+      // }
+      // return null // ignore all not recognized
+    }
+    return null
+  }
+
+  function normalizeClassNames (htmlText) {
+    htmlText = htmlText.replace(/\s+class="([a-zA-Z0-9\-_\s]+)"/g, (m, a) => {
+      if (!a.includes('__')) return m // ignore without __
+      const arr = []
+      a.replace(/([A-Za-z]+)__([A-Za-z]+)/g, (d, k1, k2) => {
+        const newClassName = normalizeClassNameInner(d, k1, k2)
+        if (newClassName) {
+          arr.push(newClassName)
+        }
+      })
+      if (arr.length === 0) return m
+      return ` class="${a} ${arr.join(' ')}"`
+    })
+    return htmlText
+  }
 
   async function trimHTMLReponseTextFn (htmlText) {
     /*
@@ -2870,7 +3159,7 @@ pre{white-space:pre-wrap}
           // font-face
           console.log('Genius Lyrics - REPX1')
           return '<style id="REPX1"></style>'
-        } else if (m.indexOf('<style data-styled="true" data-styled-version="5.1.0">') >= 0) {
+        } else if (genius.style.enabled === true && m.indexOf('<style data-styled="true" data-styled-version="5.1.0">') >= 0) {
           const arr = defaultStyleCheckerArr
           let match = true
           const p = []
@@ -2933,9 +3222,13 @@ pre{white-space:pre-wrap}
       return m
     })
 
+    // add normalized classname to adapt both desktop_react and desktop_react_atf
+    htmlText = normalizeClassNames(htmlText)
+
     console.log(`Genius Lyrics - HTML text size reduced from ${metricPrefix(originalHtmlText.length, 2, 1024)} to ${metricPrefix(htmlText.length, 2, 1024)}`)
     // console.log([htmlText])
     // htmlText = response.responseText
+    // structurize(htmlText)
 
     return htmlText
   }
@@ -3730,13 +4023,37 @@ pre{white-space:pre-wrap}
     e = null
 
     function addClassNameToInfoHeader (evTarget) {
+      /** @type {HTMLElement | null} */
       const elm = (evTarget || 0)
-      const pElm = (elm.parentNode || 0)
-      if (elm && pElm && pElm.matches('div[class*="SongHeaderWithPrimis__Container"]') && elm.matches('div[class*="SongHeaderWithPrimis__Right"]')) {
-        // let elms = [...pElm.childNodes].filter(entry => entry !== elm)
-        // removeElements(elms)
-        pElm.classList.add('genius-lyrics-header-container')
-        elm.classList.add('genius-lyrics-header-content')
+      if (elm && elm.matches('div.LSongHeader__CenterInfo')) {
+        const elmSongHeaderContainer = elm.closest('div.LSongHeader__Container:not(.genius-lyrics-header-container)')
+        let p = elm
+        while (p) {
+          const t = p.parentNode
+          if (t === elmSongHeaderContainer) break
+          p = t
+        }
+        if (p !== null) {
+          let children = [...elmSongHeaderContainer.children]
+          let wrapper = elmSongHeaderContainer.appendChild(document.createElement('div'))
+          appendElements(wrapper, children)
+          elmSongHeaderContainer.classList.add('genius-lyrics-header-container')
+          wrapper.classList.add('genius-lyrics-header-content') // for flexbox
+          children = null
+          wrapper = null
+        }
+      }
+    }
+
+    function addClassNameToHeaderArtistAndTracklist (evTarget) {
+      /** @type {HTMLElement | null} */
+      const elm = (evTarget || 0)
+      if (elm && elm.matches('.LHeaderArtistAndTracklist__Artist')) {
+        const container = elm.closest('div.LUNDETERMINED__Container')
+        if (container) {
+          container.classList.remove('LUNDETERMINED__Container')
+          container.classList.add('LHeaderArtistAndTracklist__Container')
+        }
       }
     }
 
@@ -3757,6 +4074,9 @@ pre{white-space:pre-wrap}
             communicationWindow.postMessage({ iAm: custom.scriptName, type: 'iframeContentRendered' }, '*') // iframeWin -> mainWin
           })
           Promise.resolve(evTarget).then(addClassNameToInfoHeader)
+        }
+        if (ev.animationName === 'headerArtistAndTracklistDOMAppended') {
+          Promise.resolve(evTarget).then(addClassNameToHeaderArtistAndTracklist)
         }
       }, true)
     }
