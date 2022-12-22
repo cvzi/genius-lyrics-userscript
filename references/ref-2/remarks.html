@@ -1,0 +1,261 @@
+<html>
+  <body>
+<a href="https://open.spotify.com/album/6rUA6B33RkZkjRJu2pEnAn">https://open.spotify.com/album/6rUA6B33RkZkjRJu2pEnAn</a>
+
+  
+ 
+  
+  <pre id="pre1"></pre>
+  
+  <pre id="pre2"></pre>
+    
+    <script>
+    
+      document.querySelector('#pre1').textContent = `
+      
+  function structurize(htmlText){
+    // FOR DEBUG ONLY
+
+
+    const NODE_TYPES = new Map()
+
+    
+    for(const [key, desc] of Object.entries(Object.getOwnPropertyDescriptors(Node))){
+
+      if(typeof desc.value === 'number' && desc.writable===false && desc.enumerable ===true && desc.configurable===false){
+
+        if(key.endsWith('_NODE')){
+
+          NODE_TYPES.set(desc.value, key)
+        }
+
+
+      }
+      
+
+
+    }
+    
+  function prettyElm(/** @type {Element} */ elm) {
+    if (!elm || !elm.nodeName) return null;
+    const eId = elm.id || null;
+    const eClassList = elm.classList || null;
+    return [elm.nodeName.toLowerCase(), typeof eId == 'string' ? "#" + eId : '', eClassList && eClassList.length>0 ? '.' + [...eClassList].join('.'): ''].join('');
+  }
+
+    let template = document.createElement('template')
+    template.innerHTML = htmlText
+    let frag = template.content
+    
+    function looper( /** @type {DocumentFragment | Document | Node | HTMLElement | null} */ elm, parent){
+
+      if (!elm) return
+
+      if(elm.nodeType === 3){
+        return {
+          type: NODE_TYPES.get(elm.nodeType) || elm.nodeType,
+          text: elm.textContent
+        }
+      }else if (elm.nodeType !== 1 && (elm.childNodes || []).length === 0) {
+        return {
+          type: NODE_TYPES.get(elm.nodeType) || elm.nodeType,
+        }
+      }
+
+
+      let res = {
+        type: NODE_TYPES.get(elm.nodeType) || elm.nodeType,
+      }
+      let childs = []
+
+      let noChild = true
+      if(elm.nodeName==='SCRIPT' || elm.nodeName === 'STYLE'){
+        noChild = false
+
+      }else{
+        if('childNodes' in elm) {
+        
+          for(const node of elm.childNodes){
+            childs.push(looper(node, elm))
+            noChild = false
+          }
+          
+        }
+      }
+
+      if(elm.nodeType === 1){
+        res.selector = prettyElm(elm) 
+        /** @type {NamedNodeMap} */
+        let attributes = elm.attributes
+        res.selector += [...attributes].map(attribute=>{
+          if(attribute.name ==='id' || attribute.name==='class') return null
+          if(attribute.name ==='src' || attribute.name==='href') return null
+          if(attribute.name ==='rel' || attribute.name==='content') return null
+          if(attribute.name.length<10) return attribute.name
+          else res[`[${attribute.name}]`] = attribute.value
+          return null
+        }).filter(e=>!!e).map(s=>`[${s}]`).join('')
+        function setResValues(k) {
+          let t = elm.getAttribute(k)
+          const N = 220
+          const M = Math.round(N / 2 - 5)
+          if (t.length > N) {
+            t = `${t.substring(0, M)} ... ${t.substring(t.length - M, t.length)}`
+          }
+          res[k] = t
+        }
+        if(elm.nodeName ==='META' &&  elm.hasAttribute('content')) setResValues('content')
+        if(elm.hasAttribute('href')) setResValues('href')
+        else if(elm.hasAttribute('src')) setResValues('src')
+      }
+
+
+
+      if (noChild === true) {
+        res.noChild = true
+      } else if (childs.length > 0) {
+        if (childs.length === 1 && childs[0].type === 'TEXT_NODE') {
+          res.text = childs[0].text
+        } else if (childs.length === 1) {
+          res.child = childs[0]
+        } else {
+          res.childs = childs
+        }
+      }
+
+      return res
+
+    }
+    
+    console.log(JSON.stringify(looper(frag,null),null,2))
+
+
+  }
+  
+  `
+            
+            document.querySelector('#pre2').textContent =`
+            
+            
+  async function trimHTMLReponseTextFn (htmlText) {
+    /*
+
+    original:                                         200 ~ 400 KB
+    trimHTMLReponseText only:                         130 ~ 200 KB [Spotify Genius Lyrics]
+    trimHTMLReponseText + enableStyleSubstitution:    25 ~ 50 KB [YouTube Genius Lyrics Simplified Iframe Content]
+
+    */
+
+    const originalHtmlText = htmlText
+
+    // unicode fix
+    htmlText = htmlText.replace(/[\t\x20\u0009-\u000D\u0085\u00A0\u1680\u2000-\u200A\u2028-\u2029\u202F\u205F\u3000]+/g, ' ') /* spacing */ // eslint-disable-line no-control-regex
+    htmlText = htmlText.replace(/[\u180E\u200B-\u200D\u2060\uFEFF]/g, '')
+
+    // reduce blank lines
+    htmlText = htmlText.replace(/[\r\n](\x20*[\r\n])+/g, '\n')
+
+    // remove metas
+    htmlText = htmlText.replace(/\s*<meta\b[^<>]*(?:(?!>)<[^<>]*)*>\s*/gi, (m) => {
+      if (m.indexOf('og:url') > 0) return m
+      return ''
+    })
+
+    // minimize style
+    htmlText = htmlText.replace(/\s*<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>\s*/gi, (m) => {
+      m = m.replace(/\/\*[^/*]*\*\//g, '') // comments
+
+      if (0 && genius.option.enableStyleSubstitution) {
+        m = m.replace(/\s[\w\-.[\]="]+\{content:"[^"]*"\}\s*/g, ' ') // content:'xxx'
+        m = m.replace(/\s+!important;/g, ';') // !important
+        // this allows further reduction of html text size, but it shall be used with content styling
+        // since some genius css is removed in the minimized version (default CSS)
+
+        if (m.indexOf('@font-face') > 0 && m.split('@font-face { font-family: \'Programme\'; ').length === 6) {
+          // font-face
+          console.log('Genius Lyrics - REPX1')
+          return '<style id="REPX1"></style>'
+        } else if (m.indexOf('<style data-styled="true" data-styled-version="5.1.0">') >= 0) {
+          const arr = defaultStyleCheckerArr
+          let match = true
+          const p = []
+          for (const t of arr) {
+            if (m.indexOf(t) < 0) {
+              p.push(t)
+              match = false
+              // break
+            }
+          }
+          if (match) {
+            console.log('Genius Lyrics - REPX2 success')
+            return '<style id="REPX2"></style>'
+          } else {
+            console.log('Genius Lyrics - REPX2 failed', p.length, p)
+          }
+        }
+      }
+
+      return m
+    })
+
+    // remove all content scripts
+    htmlText = htmlText.replace(/\s*<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>\s*/gi, (m) => {
+      if (m.indexOf('script src=') > 0) return m
+      return ''
+    })
+
+    // <link ... />
+    htmlText = htmlText.replace(/\s*<link\b[^<>]*(?:(?!>)<[^<>]*)*>\s*/gi, (m) => {
+      return ''
+    })
+    // <noscript>....</noscript>
+    htmlText = htmlText.replace(/\s*<noscript\b[^<]*(?:(?!<\/noscript>)<[^<]*)*<\/noscript>\s*/gi, (m) => {
+      return ''
+    })
+    // comments tag
+    htmlText = htmlText.replace(/\s*<!--[^\->]+-->\s*/gi, (m) => {
+      return ''
+    })
+    const om = new Set()
+    htmlText = htmlText.replace(/\s*<svg\b[^<]*(?:(?!<\/svg>)<[^<]*)*<\/svg>\s*/gi, (m) => {
+      m = m.trim()
+      const mi = m.indexOf('><') // <svg .... ><....  </svg>
+      if (mi < 0) return m
+      const n = `<svg><${m.substring(mi + 2).trim()}`
+      const match = defaultSVGBoxs.indexOf(n) // array search
+      if (match >= 0) {
+        return `${m.substring(0, mi)}><svg-repx${match} v1 /></svg>`
+      } else {
+        om.add(n)
+      }
+    })
+    if (om.size > 0) {
+      console.log('Genius Lyrics - new SVGs are found', om.size, [...om.keys()])
+    }
+    // remove all <div style="display: none;"> ... </div>
+    htmlText = htmlText.replace(/<div\b[^<]*(?:(?!<\/div>)<[^<]*)*<\/div>\s*/gi, (m) => {
+      if (m.startsWith('<div style="display: none;">')) return ''
+      return m
+    })
+
+    console.log(`Genius Lyrics - HTML text size reduced from ${metricPrefix(originalHtmlText.length, 2, 1024)} to ${metricPrefix(htmlText.length, 2, 1024)}`)
+    // console.log([htmlText])
+    // htmlText = response.responseText
+
+    console.log(334)
+    structurize(htmlText)
+
+    return htmlText
+  }
+  
+  `
+            
+      
+      
+    </script>
+  
+  </body>
+</html>
+  
+  
+
