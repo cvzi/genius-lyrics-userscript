@@ -514,6 +514,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     // No lyrics will be provided for instrumental music in Genius
     hits = hits.filter(hit => {
       if (hit.result.instrumental === true) return false
+      if (!hit.result.lyrics_updated_at) return false // probably means no lyrics were ever added https://github.com/cvzi/genius-lyrics-userscript/issues/41
       if (genius.minimizeHit.onlyCompleteLyrics === true && hit.result.lyrics_state !== 'complete') return false
       return true
     })
