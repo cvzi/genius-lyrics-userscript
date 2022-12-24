@@ -719,7 +719,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       // const containerHeight = document.documentElement.clientHeight
 
       const lastPos = window.lastScrollTopPosition
-      const iframeHeight = document.scrollingElement.clientHeight * 1
+      const iframeHeight = document.scrollingElement.clientHeight
       let newScrollTop = staticTop + (div.scrollHeight - iframeHeight) * position + offsetTop
       const maxScrollTop = document.scrollingElement.scrollHeight - iframeHeight
       // console.log(888, `${staticTop} + ${div.scrollHeight} * ${position} + ${offsetTop} = ${staticTop + div.scrollHeight * position + offsetTop} < ${maxScrollTop}`)
