@@ -719,9 +719,10 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       // const containerHeight = document.documentElement.clientHeight
 
       const lastPos = window.lastScrollTopPosition
-      let newScrollTop = staticTop + div.scrollHeight * position + offsetTop
-      const maxScrollTop = document.scrollingElement.scrollHeight - document.scrollingElement.clientHeight
-      console.log(888, `${staticTop} + ${div.scrollHeight} * ${position} + ${offsetTop} = ${staticTop + div.scrollHeight * position + offsetTop} < ${maxScrollTop}`)
+      let newScrollTop = staticTop + (div.scrollHeight - iframeHeight) * position + offsetTop
+      const iframeHeight = document.scrollingElement.clientHeight
+      const maxScrollTop = document.scrollingElement.scrollHeight - iframeHeight
+      // console.log(888, `${staticTop} + ${div.scrollHeight} * ${position} + ${offsetTop} = ${staticTop + div.scrollHeight * position + offsetTop} < ${maxScrollTop}`)
       const btnContainer = document.querySelector('#resumeAutoScrollButtonContainer')
 
       if (newScrollTop > maxScrollTop) {
