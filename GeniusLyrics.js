@@ -1489,7 +1489,7 @@ Genius:     ${originalUrl}
     if (document.querySelector('style#egl-contentstyles')) {
       selector = 'body'
       theme.scrollableContainer = selector
-      theme.scrollLyrics = scrollLyricsFunction('body', 0)
+      theme.scrollLyrics = scrollLyricsFunction('html #application', 0)
     }
     document.querySelector(selector).scrollIntoView()
   }
@@ -2540,11 +2540,15 @@ pre{white-space:pre-wrap}
     }
 
     html {
-      --egl-page-pt: 80vh;
+      --egl-page-pt: 50vh;
       --egl-page-pb: 50vh;
     }
 
     html body {
+      padding-top: 30vh;
+    }
+
+    html #application {
       padding-top: var(--egl-page-pt);
       padding-bottom: var(--egl-page-pb);
     }
