@@ -714,7 +714,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
 
   function onResumeAutoScrollClick () {
     const resumeAutoScrollButtonContainer = document.querySelector('#resumeAutoScrollButtonContainer')
-    if(resumeAutoScrollButtonContainer === null || typeof window.newScrollTopPosition !== 'number') return
+    if (resumeAutoScrollButtonContainer === null || typeof window.newScrollTopPosition !== 'number') return
     window.scrollLyricsBusy = true
     window.lastScrollTopPosition = null
     resumeAutoScrollButtonContainer.classList.remove('btn-show')
@@ -730,7 +730,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
 
   function onResumeAutoScrollFromHereClick () {
     const resumeAutoScrollButtonContainer = document.querySelector('#resumeAutoScrollButtonContainer')
-    if(resumeAutoScrollButtonContainer === null || typeof window.staticOffsetTop !== 'number' || typeof window.newScrollTopPosition !== 'number') return
+    if (resumeAutoScrollButtonContainer === null || typeof window.staticOffsetTop !== 'number' || typeof window.newScrollTopPosition !== 'number') return
     window.scrollLyricsBusy = true
     resumeAutoScrollButtonContainer.classList.remove('btn-show')
     // Resume auto scrolling from current position
