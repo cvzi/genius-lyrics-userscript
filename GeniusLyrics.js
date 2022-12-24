@@ -698,7 +698,9 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     } while (`${p1}` !== `${p2}`)
     // the scrollTop is stable now
     window.scrollLyricsBusy = false
-    scrollLyricsGeneric(window.latestScrollPos, true)
+    if (typeof window.latestScrollPos === 'number') {
+      scrollLyricsGeneric(window.latestScrollPos, true)
+    }
   }
 
   function scrollLyricsFunction (lyricsContainerSelector, defaultStaticOffsetTop) {
@@ -709,7 +711,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       if (window.scrollLyricsBusy) return
       window.scrollLyricsBusy = true
 
-      const staticTop = 'staticOffsetTop' in window ? window.staticOffsetTop : defaultStaticOffsetTop
+      const staticTop = typeof window.staticOffsetTop === 'number' ? window.staticOffsetTop : defaultStaticOffsetTop
 
       const div = document.querySelector(lyricsContainerSelector)
       const offset = genius.debug ? sumOffsets(div) : null
@@ -719,6 +721,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       const lastPos = window.lastScrollTopPosition
       let newScrollTop = staticTop + div.scrollHeight * position + offsetTop
       const maxScrollTop = document.scrollingElement.scrollHeight - document.scrollingElement.clientHeight
+      console.log(888, `${staticTop} + ${div.scrollHeight} * ${position} + ${offsetTop} = ${staticTop + div.scrollHeight * position + offsetTop} < ${maxScrollTop}`)
       const btnContainer = document.querySelector('#resumeAutoScrollButtonContainer')
 
       if (newScrollTop > maxScrollTop) {
