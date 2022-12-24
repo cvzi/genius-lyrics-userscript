@@ -1487,9 +1487,9 @@ Genius:     ${originalUrl}
   function scrollToBegining () {
     let selector = theme.scrollableContainer
     if (document.querySelector('style#egl-contentstyles')) {
-      selector = 'body'
+      selector = 'html #application'
       theme.scrollableContainer = selector
-      theme.scrollLyrics = scrollLyricsFunction('html #application', 0)
+      theme.scrollLyrics = scrollLyricsFunction(selector, 0)
     }
     document.querySelector(selector).scrollIntoView()
   }
@@ -2542,10 +2542,11 @@ pre{white-space:pre-wrap}
     html {
       --egl-page-pt: 50vh;
       --egl-page-pb: 50vh;
+      --egl-page-offset-top: 30vh;
     }
 
     html body {
-      padding-top: 30vh;
+      padding-top: var(--egl-page-offset-top);
     }
 
     html #application {
@@ -2870,7 +2871,7 @@ pre{white-space:pre-wrap}
       /* related to .genius-lyrics-header-container which is padded */
       transform: translateY(-100%);
       /* 100% height refer to the element itself dim */
-      max-height: var(--egl-page-pt);
+      max-height: calc( var(--egl-page-offset-top) + var(--egl-page-pt) );
       display: flex;
       flex-direction: column;
 
