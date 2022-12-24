@@ -703,9 +703,53 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     }
   }
 
+  function setArrowUpDownStyle (resumeButton) {
+    if (!resumeButton) return
+    const oldAttribute = resumeButton.getAttribute('arrow-icon')
+    const newAttribute = (document.scrollingElement.scrollTop - window.newScrollTopPosition < 0) ? 'up' : 'down'
+    if (oldAttribute !== newAttribute) {
+      resumeButton.setAttribute('arrow-icon', newAttribute)
+    }
+  }
+
+  function onResumeAutoScrollClick () {
+    const resumeAutoScrollButtonContainer = document.querySelector('#resumeAutoScrollButtonContainer')
+    if(resumeAutoScrollButtonContainer === null || typeof window.newScrollTopPosition !== 'number') return
+    window.scrollLyricsBusy = true
+    window.lastScrollTopPosition = null
+    resumeAutoScrollButtonContainer.classList.remove('btn-show')
+    // Resume auto scrolling
+    document.scrollingElement.scrollTo({
+      top: window.newScrollTopPosition,
+      behavior: 'smooth'
+    })
+    setTimeout(() => {
+      window.scrollLyricsBusy = false
+    }, 100)
+  }
+
+  function onResumeAutoScrollFromHereClick () {
+    const resumeAutoScrollButtonContainer = document.querySelector('#resumeAutoScrollButtonContainer')
+    if(resumeAutoScrollButtonContainer === null || typeof window.staticOffsetTop !== 'number' || typeof window.newScrollTopPosition !== 'number') return
+    window.scrollLyricsBusy = true
+    resumeAutoScrollButtonContainer.classList.remove('btn-show')
+    // Resume auto scrolling from current position
+    if (genius.debug) {
+      for (const e of document.querySelectorAll('.scrolllabel')) {
+        e.remove()
+      }
+      window.first = false
+    }
+    window.lastScrollTopPosition = null
+    window.staticOffsetTop += document.scrollingElement.scrollTop - window.newScrollTopPosition
+    setTimeout(() => {
+      window.scrollLyricsBusy = false
+    }, 30)
+  }
+
   function scrollLyricsFunction (lyricsContainerSelector, defaultStaticOffsetTop) {
     // Creates a scroll function for a specific theme
-    return function scrollLyricsGeneric (position, force) {
+    return async function scrollLyricsGeneric (position, force) {
       window.latestScrollPos = position
 
       if (window.scrollLyricsBusy) return
@@ -716,14 +760,12 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       const div = document.querySelector(lyricsContainerSelector)
       const offset = genius.debug ? sumOffsets(div) : null
       const offsetTop = (div.getBoundingClientRect().top - document.scrollingElement.getBoundingClientRect().top)
-      // const containerHeight = document.documentElement.clientHeight
 
       const lastPos = window.lastScrollTopPosition
       const iframeHeight = document.scrollingElement.clientHeight
       let newScrollTop = staticTop + (div.scrollHeight - iframeHeight) * position + offsetTop
       const maxScrollTop = document.scrollingElement.scrollHeight - iframeHeight
-      // console.log(888, `${staticTop} + ${div.scrollHeight} * ${position} + ${offsetTop} = ${staticTop + div.scrollHeight * position + offsetTop} < ${maxScrollTop}`)
-      const btnContainer = document.querySelector('#resumeAutoScrollButtonContainer')
+      let btnContainer = document.querySelector('#resumeAutoScrollButtonContainer')
 
       if (newScrollTop > maxScrollTop) {
         newScrollTop = maxScrollTop
@@ -733,55 +775,21 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
 
       if (lastPos > 0 && Math.abs(lastPos - document.scrollingElement.scrollTop) > 5) { // lastPos !== null
         if (!force && document.visibilityState === 'visible') {
-          // the scrolltop is updating by scrollTo({behavior:'smooth'})
+          // it is possible that the scrolltop is updating by scrollTo({behavior:'smooth'})
           delayScrolling(scrollLyricsGeneric)
           return
         }
         window.staticOffsetTop = staticTop
         window.newScrollTopPosition = newScrollTop
-        function setArrowUpDownStyle (resumeButton) {
-          if (!resumeButton) return
-          const oldAttribute = resumeButton.getAttribute('arrow-icon')
-          const newAttribute = (document.scrollingElement.scrollTop - window.newScrollTopPosition < 0) ? 'up' : 'down'
-          if (oldAttribute !== newAttribute) {
-            resumeButton.setAttribute('arrow-icon', newAttribute)
-          }
-        }
+
         // User scrolled -> stop auto scroll
         if (!btnContainer) {
           const resumeButton = document.createElement('div')
           const resumeButtonFromHere = document.createElement('div')
           const resumeAutoScrollButtonContainer = document.createElement('div')
           resumeAutoScrollButtonContainer.id = 'resumeAutoScrollButtonContainer'
-          resumeButton.addEventListener('click', function resumeAutoScroll () {
-            window.scrollLyricsBusy = true
-            resumeAutoScrollButtonContainer.classList.remove('btn-show')
-            window.lastScrollTopPosition = null
-            // Resume auto scrolling
-            document.scrollingElement.scrollTo({
-              top: window.newScrollTopPosition,
-              behavior: 'smooth'
-            })
-            setTimeout(() => {
-              window.scrollLyricsBusy = false
-            }, 100)
-          })
-          resumeButtonFromHere.addEventListener('click', function resumeAutoScrollFromHere () {
-            window.scrollLyricsBusy = true
-            resumeAutoScrollButtonContainer.classList.remove('btn-show')
-            // Resume auto scrolling from current position
-            if (genius.debug) {
-              for (const e of document.querySelectorAll('.scrolllabel')) {
-                e.remove()
-              }
-              window.first = false
-            }
-            window.lastScrollTopPosition = null
-            window.staticOffsetTop += document.scrollingElement.scrollTop - window.newScrollTopPosition
-            setTimeout(() => {
-              window.scrollLyricsBusy = false
-            }, 30)
-          })
+          resumeButton.addEventListener('click', onResumeAutoScrollClick, false)
+          resumeButtonFromHere.addEventListener('click', onResumeAutoScrollFromHereClick, false)
           resumeButton.id = 'resumeAutoScrollButton'
           resumeButton.setAttribute('title', 'Resume auto scrolling')
           resumeButton.appendChild(document.createElement('div'))
@@ -789,31 +797,23 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
           resumeButtonFromHere.id = 'resumeAutoScrollFromHereButton'
           resumeButtonFromHere.setAttribute('title', 'Resume auto scrolling from here')
           resumeButtonFromHere.appendChild(document.createElement('div'))
-          setTimeout(() => {
-            if (newScrollTop > 0 && newScrollTop < maxScrollTop) {
-              resumeAutoScrollButtonContainer.classList.add('btn-show')
-            }
-            window.scrollLyricsBusy = false
-          }, 40)
-
           appendElements(resumeAutoScrollButtonContainer, [resumeButton, resumeButtonFromHere])
           document.body.appendChild(resumeAutoScrollButtonContainer)
+          btnContainer = resumeAutoScrollButtonContainer
         } else {
           const resumeButton = document.querySelector('#resumeAutoScrollButton')
           setArrowUpDownStyle(resumeButton)
-          window.scrollLyricsBusy = false
-          setTimeout(() => {
-            if (newScrollTop > 0 && newScrollTop < maxScrollTop) {
-              btnContainer.classList.add('btn-show')
-            }
-            window.scrollLyricsBusy = false
-          }, 40)
         }
+        await Promise.resolve(0) // wait for DOM
+        if (newScrollTop > 0 && newScrollTop < maxScrollTop) {
+          btnContainer.classList.add('btn-show')
+        }
+        await Promise.resolve(0) // wait for DOM
+        window.scrollLyricsBusy = false
         return
       }
 
       if (btnContainer) {
-        btnContainer.classList.remove('btn-show')
         btnContainer.classList.remove('btn-show')
       }
 
@@ -869,6 +869,8 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         indicator.style.top = `${offset.top + window.staticOffsetTop + div.scrollHeight * position}px`
         indicator.innerHTML = `${parseInt(position * 100)}%  -> ${parseInt(newScrollTop)}px`
       }
+
+      await Promise.resolve(0) // wait for DOM
       window.scrollLyricsBusy = false
     }
   }
