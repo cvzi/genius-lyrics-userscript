@@ -92,7 +92,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     window.postMessage({ iAm: custom.scriptName, type: 'cancelLoading' }, '*')
   }
 
-  const __SELECTION_CACHE_VERSION__ = 1
+  const __SELECTION_CACHE_VERSION__ = 2
   const __REQUEST_CACHE_VERSION__ = 1
 
   const genius = {
@@ -283,7 +283,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       }
     }
 
-    console.warn('Genius Lyrics - old section cache is found: ', selectionCache)
+    console.warn('Genius Lyrics - old section cache V0 is found: ', selectionCache)
     for (const originalKey in selectionCache) {
       if (originalKey === '__VERSION__') continue
       let k = 0
@@ -301,7 +301,22 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     for (const bugKey of bugKeys) {
       delete ret[bugKey]
     }
-    console.warn('Genius Lyrics - old section cache is converted to: ', ret)
+    console.warn('Genius Lyrics - old section cache V0 is converted to V1: ', ret)
+    return ret
+  }
+
+  function convertSelectionCacheV1toV2 (selectionCache) {
+    // ${title}\t${artists} => ${artists}\t${title}
+    const ret = {}
+
+    console.warn('Genius Lyrics - old section cache V1 is found: ', selectionCache)
+    for (const originalKey in selectionCache) {
+      if (originalKey === '__VERSION__') continue
+      const s = originalKey.split('\t')
+      const selectionCacheKey = `${s[1]}\t${s[0]}`
+      ret[selectionCacheKey] = selectionCache[originalKey]
+    }
+    console.warn('Genius Lyrics - old section cache V1 is converted to V2: ', ret)
     return ret
   }
 
@@ -334,6 +349,11 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     if (selectionCache.__VERSION__ !== __SELECTION_CACHE_VERSION__) {
       if (selectionCache.__VERSION__ === 0) {
         selectionCache = convertSelectionCacheV0toV1(selectionCache)
+        selectionCache.__VERSION__ = 1
+        selectionCache = convertSelectionCacheV1toV2(selectionCache)
+        selectionCache.__VERSION__ = __SELECTION_CACHE_VERSION__
+      } else if (selectionCache.__VERSION__ === 1) {
+        selectionCache = convertSelectionCacheV1toV2(selectionCache)
         selectionCache.__VERSION__ = __SELECTION_CACHE_VERSION__
       } else {
         selectionCache = cleanSelectionCache()
@@ -452,47 +472,48 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     })
   }
 
-  function getSelectionCacheKey (title, artists) {
+  function generateCompoundTitle (title, artists) {
     title = title.replace(/\s+/g, ' ') // space, \n, \t, ...
     artists = artists.replace(/\s+/g, ' ')
-    const selectionCacheKey = `${title}\t${artists}`
-    return selectionCacheKey
+    return `${artists}\t${title}`
+  }
+  function displayTextOfCompoundTitle (compoundTitle) {
+    return compoundTitle.replace('\t', ' ')
   }
 
   function rememberLyricsSelection (title, artists, jsonHit) {
-    const selectionCacheKey = getSelectionCacheKey(title, artists)
+    const compoundTitleKey = artists === null ? title : generateCompoundTitle(title, artists)
     if (typeof jsonHit === 'object') {
       jsonHit = JSON.stringify(jsonHit)
     }
     if (typeof jsonHit !== 'string') {
       return
     }
-    selectionCache[selectionCacheKey] = jsonHit
+    selectionCache[compoundTitleKey] = jsonHit
     custom.GM.setValue('selectioncache', JSON.stringify(selectionCache))
   }
 
   function forgetLyricsSelection (title, artists) {
-    const selectionCacheKey = getSelectionCacheKey(title, artists)
-    if (selectionCacheKey in selectionCache) {
-      delete selectionCache[selectionCacheKey]
+    const compoundTitleKey = artists === null ? title : generateCompoundTitle(title, artists)
+    if (compoundTitleKey in selectionCache) {
+      delete selectionCache[compoundTitleKey]
       custom.GM.setValue('selectioncache', JSON.stringify(selectionCache))
     }
   }
 
   function forgetCurrentLyricsSelection () {
-    const title = genius.current.title
-    const artists = genius.current.artists
-    if (typeof title === 'string' && typeof artists === 'string') {
-      forgetLyricsSelection(title, artists)
+    const ctitle = genius.current.compoundTitle
+    if (typeof ctitle === 'string') {
+      forgetLyricsSelection(ctitle, null)
       return true
     }
     return false
   }
 
   function getLyricsSelection (title, artists) {
-    const selectionCacheKey = getSelectionCacheKey(title, artists)
-    if (selectionCacheKey in selectionCache) {
-      return JSON.parse(selectionCache[selectionCacheKey])
+    const compoundTitleKey = artists === null ? title : generateCompoundTitle(title, artists)
+    if (compoundTitleKey in selectionCache) {
+      return JSON.parse(selectionCache[compoundTitleKey])
     } else {
       return false
     }
@@ -1968,10 +1989,9 @@ Genius:     ${originalUrl}
   function reloadCurrentLyrics () {
     // this is for special use - if the iframe is moved to another container, the content will be re-rendered.
     // As the lyrics is lost, it requires reloading
-    const songTitle = genius.current.title
-    const songArtists = genius.current.artists
-    if (songTitle && songArtists) {
-      const hitFromCache = getLyricsSelection(songTitle, songArtists)
+    const compoundTitle = genius.current.compoundTitle
+    if (compoundTitle) {
+      const hitFromCache = getLyricsSelection(compoundTitle, null)
       if (hitFromCache) {
         showLyrics(hitFromCache, 1)
         return true
@@ -1995,18 +2015,28 @@ Genius:     ${originalUrl}
   }
 
   function loadLyrics (force, beLessSpecific, songTitle, songArtistsArr, musicIsPlaying) {
-    let songArtists = songArtistsArr.join(' ')
-    if (force || beLessSpecific || (!document.hidden && musicIsPlaying && (genius.current.title !== songTitle || genius.current.artists !== songArtists))) {
-      const mTitle = genius.current.title = songTitle
-      const mArtists = genius.current.artists = songArtists
-
-      const firstArtist = songArtistsArr[0]
-
-      const simpleTitle = songTitle.replace(/\s*-\s*.+?$/, '') // Remove anything following the last dash
+    let songArtists = null
+    let compoundTitle = null
+    let queryType = 0
+    let simpleTitle = null
+    let firstArtist = null
+    if (typeof songTitle === 'string' && (songArtistsArr || 0).length >= 0) {
+      songArtists = songArtistsArr.join(' ')
+      compoundTitle = generateCompoundTitle(songTitle, songArtists)
+      queryType = 1
+      simpleTitle = songTitle.replace(/\s*-\s*.+?$/, '') // Remove anything following the last dash
+      firstArtist = songArtistsArr[0]
       if (beLessSpecific) {
         songArtists = firstArtist
         songTitle = simpleTitle
       }
+    } else if (typeof songTitle === 'string' && songArtistsArr === null) {
+      compoundTitle = songTitle
+      queryType = 2
+      beLessSpecific = false
+    }
+    if (force || beLessSpecific || (!document.hidden && musicIsPlaying && (genius.current.compoundTitle !== compoundTitle))) {
+      const mCTitle = genius.current.compoundTitle = compoundTitle
 
       if ('onNewSongPlaying' in custom) {
         custom.onNewSongPlaying(songTitle, songArtistsArr)
@@ -2023,15 +2053,15 @@ Genius:     ${originalUrl}
         console.log(hits)
       }
 
-      const hitFromCache = getLyricsSelection(mTitle, mArtists)
+      const hitFromCache = getLyricsSelection(mCTitle, null)
       if (!force && hitFromCache) {
         showLyrics(hitFromCache, 1)
       } else {
-        geniusSearch(songTitle + ' ' + songArtists, function geniusSearchCb (r) {
+        geniusSearch(displayTextOfCompoundTitle(mCTitle), function geniusSearchCb (r) {
           const hits = r.response.sections[0].hits
           if (hits.length === 0) {
             hideLyricsWithMessage()
-            if (!beLessSpecific && (firstArtist !== songArtists || simpleTitle !== songTitle)) {
+            if (queryType === 1 && !beLessSpecific && (firstArtist !== songArtists || simpleTitle !== songTitle)) {
               // Try again with only the first artist or the simple title
               custom.addLyrics(!!force, true)
             } else if (force) {
@@ -2043,34 +2073,36 @@ Genius:     ${originalUrl}
               }
             }
             // invalidate previous cache if any
-            forgetLyricsSelection(mTitle, mArtists)
+            forgetLyricsSelection(mCTitle, null)
           } else if (hits.length === 1) {
-            showLyricsAndRemember(mTitle, mArtists, hits[0], 1)
-          } else if (songArtistsArr.length === 1) {
+            showLyricsAndRemember(mCTitle, null, hits[0], 1)
+          } else if (queryType === 2 || songArtistsArr.length === 1) {
             // Check if one result is an exact match
             const exactMatches = []
-            for (const hit of hits) {
-              // hit sorted by _order
-              if (hit.result.title.toLowerCase() === songTitle.toLowerCase() && hit.result.primary_artist.name.toLowerCase() === songArtistsArr[0].toLowerCase()) {
-                exactMatches.push(hit)
+            if (queryType === 1) {
+              for (const hit of hits) {
+                // hit sorted by _order
+                if (hit.result.title.toLowerCase() === songTitle.toLowerCase() && hit.result.primary_artist.name.toLowerCase() === songArtistsArr[0].toLowerCase()) {
+                  exactMatches.push(hit)
+                }
               }
             }
             if (exactMatches.length === 1) {
               resultMsg(hits, `Genius Lyrics - exact match is found in ${hits.length} results.`)
-              showLyricsAndRemember(mTitle, mArtists, exactMatches[0], hits.length)
+              showLyricsAndRemember(mCTitle, null, exactMatches[0], hits.length)
             } else if (isFuzzyMatched(hits)) {
               resultMsg(hits, `Genius Lyrics - fuzzy match is found in ${hits.length} results.`)
-              showLyricsAndRemember(mTitle, mArtists, hits[0], hits.length)
+              showLyricsAndRemember(mCTitle, null, hits[0], hits.length)
             } else {
-              multipleResultsFound(hits, mTitle, mArtists)
+              multipleResultsFound(hits, mCTitle, null)
             }
           } else {
             if (isFuzzyMatched(hits)) {
               resultMsg(hits, `Genius Lyrics - fuzzy match is found in ${hits.length} results.`)
-              showLyricsAndRemember(mTitle, mArtists, hits[0], hits.length)
+              showLyricsAndRemember(mCTitle, null, hits[0], hits.length)
             } else {
               resultMsg(hits, 'Genius Lyrics - lyrics results with multiple artists are found.', hits.length, songArtistsArr)
-              multipleResultsFound(hits, mTitle, mArtists)
+              multipleResultsFound(hits, mCTitle, null)
             }
           }
         }, function geniusSearchErrorCb () {
@@ -2160,8 +2192,9 @@ Genius:     ${originalUrl}
       wrongLyricsButton.textContent = 'Wrong lyrics'
       wrongLyricsButton.addEventListener('click', function wrongLyricsButtonClick (ev) {
         removeElements(document.querySelectorAll('.loadingspinnerholder'))
-        forgetLyricsSelection(genius.current.title, genius.current.artists)
-        custom.showSearchField(`${genius.current.artists} ${genius.current.title}`)
+        forgetLyricsSelection(genius.current.compoundTitle, null)
+        const searchFieldText = displayTextOfCompoundTitle(genius.current.compoundTitle)
+        custom.showSearchField(searchFieldText)
       })
       elementsToBeAppended.push(separator.cloneNode(true), wrongLyricsButton)
     } else if (searchresultsLengths > 1) {
@@ -2176,7 +2209,8 @@ Genius:     ${originalUrl}
       backbutton.textContent = `Back to search (${searchresultsLengths - 1} other result${searchresultsLengths === 2 ? '' : 's'})`
       // }
       backbutton.addEventListener('click', function backbuttonClick (ev) {
-        custom.showSearchField(genius.current.artists + ' ' + genius.current.title)
+        const searchFieldText = displayTextOfCompoundTitle(genius.current.compoundTitle)
+        custom.showSearchField(searchFieldText)
       })
       elementsToBeAppended.push(separator.cloneNode(true), backbutton)
     }
