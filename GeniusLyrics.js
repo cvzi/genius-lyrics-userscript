@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.7.0
+// @version      5.7.1
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2020, cuzi (https://github.com/cvzi)
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -1511,14 +1511,24 @@ Genius:     ${originalUrl}
     })
   }
 
-  function scrollToBegining () {
+  async function scrollToBegining () {
+    await new Promise(resolve => setTimeout(resolve, 100))
+
     let selector = theme.scrollableContainer
-    if (document.querySelector('style#egl-contentstyles')) {
-      selector = 'html #application'
-      theme.scrollableContainer = selector
-      theme.scrollLyrics = scrollLyricsFunction(selector, 0)
+    let scrollable = document.querySelector(selector)
+    if (isScrollLyricsEnabled()) {
+      if (document.querySelector('style#egl-contentstyles')) {
+        selector = 'html #application'
+        theme.scrollableContainer = selector
+        theme.scrollLyrics = scrollLyricsFunction(selector, 0)
+        scrollable = document.querySelector(selector)
+      }
+      scrollable.scrollIntoView()
+    } else if (scrollable && scrollable.firstElementChild) {
+      window.scrollTo(0, scrollable.firstElementChild.getBoundingClientRect().top)
+    } else if (scrollable) {
+      scrollable.scrollIntoView()
     }
-    document.querySelector(selector).scrollIntoView()
   }
 
   const themes = {
@@ -1594,9 +1604,6 @@ Genius:     ${originalUrl}
         })
         onload.push(hideStuff)
 
-        // Goto lyrics
-        onload.push(scrollToBegining)
-
         // Make expandable content buttons work
         function expandContent () {
           const button = this
@@ -1629,17 +1636,15 @@ Genius:     ${originalUrl}
           onload.push(themeCommon.addAnnotationHandling)
         }
 
-        // Adapt width
-        onload.push(function () {
-          const bodyWidth = document.body.getBoundingClientRect().width
-          document.querySelector('div[class^="Lyrics__Container"]').style.maxWidth = `calc(${bodyWidth}px - 1.5em)`
-          document.querySelector('#lyrics-root').style.gridTemplateColumns = 'auto' // class="SongPageGriddesktop__TwoColumn-
-        })
         onload.push(() => {
           Promise.resolve(0).then(() => {
             document.documentElement.classList.add('v')
           })
         })
+
+        // Goto lyrics
+        onload.push(scrollToBegining)
+
         return onload
       },
       combine: function themeGeniusCombineGeniusResources (song, html, annotations, cb) {
@@ -1710,14 +1715,14 @@ Genius:     ${originalUrl}
           onload.push(themeCommon.addAnnotationHandling)
         }
 
-        // Goto lyrics
-        onload.push(scrollToBegining)
-
         onload.push(() => {
           Promise.resolve(0).then(() => {
             document.documentElement.classList.add('v')
           })
         })
+
+        // Goto lyrics
+        onload.push(scrollToBegining)
 
         return onload
       },
@@ -1852,9 +1857,6 @@ Genius:     ${originalUrl}
           removeElements(document.querySelectorAll('h3'))
         }
 
-        // Goto lyrics
-        onload.push(scrollToBegining)
-
         onload.push(clickableTitle)
 
         onload.push(themeCommon.targetBlankLinks)
@@ -1873,6 +1875,9 @@ Genius:     ${originalUrl}
             document.documentElement.classList.add('v')
           })
         })
+
+        // Goto lyrics
+        onload.push(scrollToBegining)
 
         return onload
       },
@@ -1936,9 +1941,6 @@ Genius:     ${originalUrl}
             div.LHeaderMetaCredits__Container {
               display:none;
             }
-            .emptyspacer {
-              padding-top:50px;
-            }
             h1,h2,h3,h4,h5,h6 {
               margin:0;
             }
@@ -1966,7 +1968,6 @@ Genius:     ${originalUrl}
                 ${lyricshtml}
                 </div>
               </div>
-              <div class="emptyspacer"></div>
               <div class="annotationbox" id="annotationbox"></div>
               <span id="lyrics_rendered"></span>
             </main>
@@ -4106,6 +4107,12 @@ Link__StyledLink
     theme = themes[genius.option.themeKey]
     annotationsEnabled = !!values[2]
     autoScrollEnabled = !!values[3]
+
+    if (genius.onThemeChanged) {
+      for (const f of genius.onThemeChanged) {
+        f()
+      }
+    }
 
     // If debug mode, clear cache
     if (genius.debug) {
