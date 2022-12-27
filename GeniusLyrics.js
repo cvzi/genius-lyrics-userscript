@@ -1513,7 +1513,6 @@ Genius:     ${originalUrl}
 
   async function scrollToBegining () {
     await new Promise(resolve => setTimeout(resolve, 100))
-
     let selector = null
     const isContentStylesIsAdded = !!document.querySelector('style#egl-contentstyles')
     if (isContentStylesIsAdded) {
@@ -3600,11 +3599,15 @@ Link__StyledLink
           clear() // loaded
           spinnerUpdate(null, null, 901, 'complete')
           window.postMessage({ iAm: custom.scriptName, type: 'lyricsDisplayState', visibility: 'loaded', lyricsSuccess: true }, '*')
+          unScroll()
+          setTimeout(() => {
+            // delay required due to scrollToBegining() is changing the scrollTop
+            window.isPageAbleForAutoScroll = true
+          }, 240)
         })
         addOneMessageListener('iframeContentRendered', function (ev) {
           if (window.showLyricsIdentifier !== currentFunctionClosureIdentifier) return
           unScroll()
-          window.isPageAbleForAutoScroll = true
         })
 
         function reloadFrame () {
