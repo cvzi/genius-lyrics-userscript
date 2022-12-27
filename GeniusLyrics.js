@@ -1258,6 +1258,12 @@ Genius:     ${originalUrl}
   html.v {
     visibility: visible;
   }
+  html .genius-scrollable{
+    scroll-behavior: smooth;
+  }
+  html.instant-scroll .genius-scrollable{
+    scroll-behavior: auto;
+  }
   #resumeAutoScrollButtonContainer{
     position: fixed; 
     right: 20px; 
@@ -1512,6 +1518,7 @@ Genius:     ${originalUrl}
   }
 
   async function scrollToBegining () {
+    document.documentElement.classList.add('instant-scroll')
     await new Promise(resolve => setTimeout(resolve, 100))
     let selector = null
     const isContentStylesIsAdded = !!document.querySelector('style#egl-contentstyles')
@@ -1524,14 +1531,21 @@ Genius:     ${originalUrl}
     }
     let scrollable = document.querySelector(selector)
     if (isScrollLyricsEnabled()) {
-      scrollable.scrollIntoView(true) // alignToTop = true
+      // scrollable.scrollIntoView(true)
     } else if (scrollable) {
       const innerTopElement = isContentStylesIsAdded
         ? scrollable.querySelector('.genius-lyrics-header-content')
         : scrollable.firstElementChild
       scrollable = (innerTopElement || scrollable)
-      scrollable.scrollIntoView(true) // alignToTop = true
+      // scrollable.scrollIntoView(true)
+    } else {
+      return
     }
+    scrollable.classList.add('genius-scrollable')
+    await Promise.resolve(0) // allow CSS rule changed
+    scrollable.scrollIntoView(true) // alignToTop = true
+    await Promise.resolve(0) // allow DOM scrollTop changed
+    document.documentElement.classList.remove('instant-scroll')
   }
 
   const themes = {
