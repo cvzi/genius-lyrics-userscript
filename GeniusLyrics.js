@@ -1514,20 +1514,24 @@ Genius:     ${originalUrl}
   async function scrollToBegining () {
     await new Promise(resolve => setTimeout(resolve, 100))
 
-    let selector = theme.scrollableContainer
+    let selector = null
+    const isContentStylesIsAdded = !!document.querySelector('style#egl-contentstyles')
+    if (isContentStylesIsAdded) {
+      selector = 'html #application'
+      theme.scrollableContainer = selector
+      theme.scrollLyrics = scrollLyricsFunction(selector, 0)
+    } else {
+      selector = theme.scrollableContainer
+    }
     let scrollable = document.querySelector(selector)
     if (isScrollLyricsEnabled()) {
-      if (document.querySelector('style#egl-contentstyles')) {
-        selector = 'html #application'
-        theme.scrollableContainer = selector
-        theme.scrollLyrics = scrollLyricsFunction(selector, 0)
-        scrollable = document.querySelector(selector)
-      }
-      scrollable.scrollIntoView()
-    } else if (scrollable && scrollable.firstElementChild) {
-      window.scrollTo(0, scrollable.firstElementChild.getBoundingClientRect().top)
+      scrollable.scrollIntoView(true) // alignToTop = true
     } else if (scrollable) {
-      scrollable.scrollIntoView()
+      const innerTopElement = isContentStylesIsAdded
+        ? scrollable.querySelector('.genius-lyrics-header-content')
+        : scrollable.firstElementChild
+      scrollable = (innerTopElement || scrollable)
+      scrollable.scrollIntoView(true) // alignToTop = true
     }
   }
 
