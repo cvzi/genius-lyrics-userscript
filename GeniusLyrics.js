@@ -3573,7 +3573,7 @@ Link__StyledLink
           // b. clear() when failed (after 30s)
           window.removeEventListener('message', interuptMessageHandler, false)
           if ('onLyricsReady' in custom) {
-            // only on success ???
+            // only on success ???; not reliable
             custom.onLyricsReady(songInfo, container)
           }
           if (iv > 0) {
@@ -3630,6 +3630,7 @@ Link__StyledLink
         function reloadFrame () {
           // no use if the iframe is detached
           tv1 = 0
+          if (window.showLyricsIdentifier !== currentFunctionClosureIdentifier) return
           if (isShowLyricsIsCancelledByUser) return
           console.debug('tv1')
           iframe.src = 'data:text/html,%3Ch1%3ELoading...%21%3C%2Fh1%3E'
@@ -3642,6 +3643,7 @@ Link__StyledLink
 
         function fresh () {
           tv2 = 0
+          if (window.showLyricsIdentifier !== currentFunctionClosureIdentifier) return
           if (isShowLyricsIsCancelledByUser) return
           console.debug('tv2')
           clear() // unable to load
