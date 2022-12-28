@@ -3593,7 +3593,7 @@ Link__StyledLink
 
         // event listeners
         addOneMessageListener('genius-iframe-waiting', function () {
-          if (window.showLyricsIdentifier !== currentFunctionClosureIdentifier) return
+          if (isShowLyricsIsCancelledByUser || window.showLyricsIdentifier !== currentFunctionClosureIdentifier) return
           if (iv === 0) {
             return
           }
@@ -3602,7 +3602,7 @@ Link__StyledLink
           iv = 0
         })
         addOneMessageListener('htmlwritten', function () {
-          if (window.showLyricsIdentifier !== currentFunctionClosureIdentifier) return
+          if (isShowLyricsIsCancelledByUser || window.showLyricsIdentifier !== currentFunctionClosureIdentifier) return
           if (iv > 0) {
             clearInterval(iv)
             iv = 0
@@ -3610,7 +3610,7 @@ Link__StyledLink
           spinnerUpdate('1', 'Calculating...', 302, 'htmlwritten')
         })
         addOneMessageListener('pageready', function (ev) {
-          if (window.showLyricsIdentifier !== currentFunctionClosureIdentifier) return
+          if (isShowLyricsIsCancelledByUser || window.showLyricsIdentifier !== currentFunctionClosureIdentifier) return
           // note: this is not called after the whole page is rendered
           // console.log(ev.data)
           clear() // loaded
@@ -3623,7 +3623,7 @@ Link__StyledLink
           }, 240)
         })
         addOneMessageListener('iframeContentRendered', function (ev) {
-          if (window.showLyricsIdentifier !== currentFunctionClosureIdentifier) return
+          if (isShowLyricsIsCancelledByUser || window.showLyricsIdentifier !== currentFunctionClosureIdentifier) return
           unScroll()
         })
 
