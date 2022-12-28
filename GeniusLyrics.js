@@ -3156,6 +3156,7 @@ pre{white-space:pre-wrap}
   }
 
   let isShowLyricsInterrupted = false
+  let isShowLyricsIsCancelledByUser = false
   function interuptMessageHandler (ev) {
     const data = (ev || 0).data || 0
     if (data.iAm === custom.scriptName && data.type === 'lyricsDisplayState' && typeof data.visibility === 'string') {
@@ -3495,6 +3496,7 @@ Link__StyledLink
 
     window.removeEventListener('message', interuptMessageHandler, false)
     window.addEventListener('message', interuptMessageHandler, false)
+    isShowLyricsIsCancelledByUser = false
     isShowLyricsInterrupted = false
 
     let isCancelLoadingEnabled = true
@@ -3502,6 +3504,7 @@ Link__StyledLink
       if (window.showLyricsIdentifier !== currentFunctionClosureIdentifier) return
       if (isCancelLoadingEnabled === false) return
       // such as user clicking back btn
+      isShowLyricsIsCancelledByUser = true
       isShowLyricsInterrupted = true
       unScroll()
       try {
@@ -3570,7 +3573,7 @@ Link__StyledLink
           // b. clear() when failed (after 30s)
           window.removeEventListener('message', interuptMessageHandler, false)
           if ('onLyricsReady' in custom) {
-            // only on success ???
+            // only on success ???; not reliable
             custom.onLyricsReady(songInfo, container)
           }
           if (iv > 0) {
@@ -3590,7 +3593,7 @@ Link__StyledLink
 
         // event listeners
         addOneMessageListener('genius-iframe-waiting', function () {
-          if (window.showLyricsIdentifier !== currentFunctionClosureIdentifier) return
+          if (isShowLyricsIsCancelledByUser || window.showLyricsIdentifier !== currentFunctionClosureIdentifier) return
           if (iv === 0) {
             return
           }
@@ -3599,7 +3602,7 @@ Link__StyledLink
           iv = 0
         })
         addOneMessageListener('htmlwritten', function () {
-          if (window.showLyricsIdentifier !== currentFunctionClosureIdentifier) return
+          if (isShowLyricsIsCancelledByUser || window.showLyricsIdentifier !== currentFunctionClosureIdentifier) return
           if (iv > 0) {
             clearInterval(iv)
             iv = 0
@@ -3607,7 +3610,7 @@ Link__StyledLink
           spinnerUpdate('1', 'Calculating...', 302, 'htmlwritten')
         })
         addOneMessageListener('pageready', function (ev) {
-          if (window.showLyricsIdentifier !== currentFunctionClosureIdentifier) return
+          if (isShowLyricsIsCancelledByUser || window.showLyricsIdentifier !== currentFunctionClosureIdentifier) return
           // note: this is not called after the whole page is rendered
           // console.log(ev.data)
           clear() // loaded
@@ -3620,13 +3623,15 @@ Link__StyledLink
           }, 240)
         })
         addOneMessageListener('iframeContentRendered', function (ev) {
-          if (window.showLyricsIdentifier !== currentFunctionClosureIdentifier) return
+          if (isShowLyricsIsCancelledByUser || window.showLyricsIdentifier !== currentFunctionClosureIdentifier) return
           unScroll()
         })
 
         function reloadFrame () {
           // no use if the iframe is detached
           tv1 = 0
+          if (window.showLyricsIdentifier !== currentFunctionClosureIdentifier) return
+          if (isShowLyricsIsCancelledByUser) return
           console.debug('tv1')
           iframe.src = 'data:text/html,%3Ch1%3ELoading...%21%3C%2Fh1%3E'
           setTimeout(function () {
@@ -3638,6 +3643,8 @@ Link__StyledLink
 
         function fresh () {
           tv2 = 0
+          if (window.showLyricsIdentifier !== currentFunctionClosureIdentifier) return
+          if (isShowLyricsIsCancelledByUser) return
           console.debug('tv2')
           clear() // unable to load
           spinnerUpdate(null, null, 902, 'failed')
