@@ -3763,6 +3763,8 @@ Link__StyledLink
   }
 
   function config () {
+    if (document.querySelector('#myconfigwin39457845') !== null) return // avoid showing duplicating option window
+
     loadCache()
 
     // Blur background
