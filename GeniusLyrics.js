@@ -3156,6 +3156,7 @@ pre{white-space:pre-wrap}
   }
 
   let isShowLyricsInterrupted = false
+  let isShowLyricsIsCancelledByUser = false
   function interuptMessageHandler (ev) {
     const data = (ev || 0).data || 0
     if (data.iAm === custom.scriptName && data.type === 'lyricsDisplayState' && typeof data.visibility === 'string') {
@@ -3495,6 +3496,7 @@ Link__StyledLink
 
     window.removeEventListener('message', interuptMessageHandler, false)
     window.addEventListener('message', interuptMessageHandler, false)
+    isShowLyricsIsCancelledByUser = false
     isShowLyricsInterrupted = false
 
     let isCancelLoadingEnabled = true
@@ -3502,6 +3504,7 @@ Link__StyledLink
       if (window.showLyricsIdentifier !== currentFunctionClosureIdentifier) return
       if (isCancelLoadingEnabled === false) return
       // such as user clicking back btn
+      isShowLyricsIsCancelledByUser = true
       isShowLyricsInterrupted = true
       unScroll()
       try {
@@ -3627,6 +3630,7 @@ Link__StyledLink
         function reloadFrame () {
           // no use if the iframe is detached
           tv1 = 0
+          if (isShowLyricsIsCancelledByUser) return
           console.debug('tv1')
           iframe.src = 'data:text/html,%3Ch1%3ELoading...%21%3C%2Fh1%3E'
           setTimeout(function () {
@@ -3638,6 +3642,7 @@ Link__StyledLink
 
         function fresh () {
           tv2 = 0
+          if (isShowLyricsIsCancelledByUser) return
           console.debug('tv2')
           clear() // unable to load
           spinnerUpdate(null, null, 902, 'failed')
