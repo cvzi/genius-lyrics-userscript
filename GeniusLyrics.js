@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.7.2
+// @version      5.7.3
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2020, cuzi (https://github.com/cvzi)
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -709,19 +709,20 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     })
   }
 
-  async function delayScrolling (scrollLyricsGeneric) {
+  async function waitForStableScrollTop () {
     let p1
     let p2 = document.scrollingElement.scrollTop
+    const ct = Date.now()
     do {
       p1 = p2
       await new Promise(r => window.requestAnimationFrame(r)) // eslint-disable-line promise/param-names
       p2 = document.scrollingElement.scrollTop
+      if (Date.now() - ct > 2800) break
     } while (`${p1}` !== `${p2}`)
-    // the scrollTop is stable now
-    window.scrollLyricsBusy = false
-    if (typeof window.latestScrollPos === 'number') {
-      scrollLyricsGeneric(window.latestScrollPos, true)
-    }
+  }
+
+  function delay (ms) {
+    return new Promise(resolve => setTimeout(resolve, ms)) // eslint-disable-line promise/param-names
   }
 
   function setArrowUpDownStyle (resumeButton) {
@@ -733,7 +734,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     }
   }
 
-  function onResumeAutoScrollClick () {
+  async function onResumeAutoScrollClick () {
     const resumeAutoScrollButtonContainer = document.querySelector('#resumeAutoScrollButtonContainer')
     if (resumeAutoScrollButtonContainer === null || typeof window.newScrollTopPosition !== 'number') return
     window.scrollLyricsBusy = true
@@ -744,9 +745,11 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       top: window.newScrollTopPosition,
       behavior: 'smooth'
     })
-    setTimeout(() => {
-      window.scrollLyricsBusy = false
-    }, 100)
+    await delay(100)
+    if (document.visibilityState === 'visible') {
+      await waitForStableScrollTop()
+    }
+    window.scrollLyricsBusy = false
   }
 
   function onResumeAutoScrollFromHereClick () {
@@ -762,138 +765,168 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       window.first = false
     }
     window.lastScrollTopPosition = null
-    window.staticOffsetTop += document.scrollingElement.scrollTop - window.newScrollTopPosition
+    let newScrollTop = window.newScrollTopPosition
+    let count = 4
+    while (+newScrollTop.toFixed(1) !== +document.scrollingElement.scrollTop.toFixed(1)) {
+      window.staticOffsetTop += document.scrollingElement.scrollTop - newScrollTop
+      newScrollTop = getNewScrollTop().newScrollTop
+      if (--count === 0) break
+    }
     setTimeout(() => {
       window.scrollLyricsBusy = false
     }, 30)
   }
 
-  function scrollLyricsFunction (lyricsContainerSelector, defaultStaticOffsetTop) {
-    // Creates a scroll function for a specific theme
-    return async function scrollLyricsGeneric (position, force) {
-      window.latestScrollPos = position
+  function getNewScrollTop (div) {
+    const staticTop = typeof window.staticOffsetTop === 'number' ? window.staticOffsetTop : theme.defaultStaticOffsetTop
+    div = div || document.querySelector(theme.scrollableContainer)
+    const offsetTop = (div.getBoundingClientRect().top - document.scrollingElement.getBoundingClientRect().top)
+    const iframeHeight = document.scrollingElement.clientHeight
+    const position = window.latestScrollPos
+    const newScrollTop = staticTop + (div.scrollHeight - iframeHeight) * position + offsetTop
+    return {
+      newScrollTop, iframeHeight, staticTop
+    }
+  }
 
-      if (window.scrollLyricsBusy) return
-      window.scrollLyricsBusy = true
+  async function scrollLyricsGeneric (position) {
+    window.latestScrollPos = position
 
-      const staticTop = typeof window.staticOffsetTop === 'number' ? window.staticOffsetTop : defaultStaticOffsetTop
+    if (window.scrollLyricsBusy) return
+    window.scrollLyricsBusy = true
 
-      const div = document.querySelector(lyricsContainerSelector)
-      const offset = genius.debug ? sumOffsets(div) : null
-      const offsetTop = (div.getBoundingClientRect().top - document.scrollingElement.getBoundingClientRect().top)
+    if (document.visibilityState === 'visible') {
+      await waitForStableScrollTop()
+    }
 
-      const lastPos = window.lastScrollTopPosition
-      const iframeHeight = document.scrollingElement.clientHeight
-      let newScrollTop = staticTop + (div.scrollHeight - iframeHeight) * position + offsetTop
-      const maxScrollTop = document.scrollingElement.scrollHeight - iframeHeight
-      let btnContainer = document.querySelector('#resumeAutoScrollButtonContainer')
+    const div = document.querySelector(theme.scrollableContainer)
 
-      if (newScrollTop > maxScrollTop) {
-        newScrollTop = maxScrollTop
-      } else if (newScrollTop < 0) {
-        newScrollTop = 0
-      }
+    const offset = genius.debug ? sumOffsets(div) : null
+    const lastPos = window.lastScrollTopPosition
+    let { newScrollTop, iframeHeight, staticTop } = getNewScrollTop(div)
+    const maxScrollTop = document.scrollingElement.scrollHeight - iframeHeight
+    let btnContainer = document.querySelector('#resumeAutoScrollButtonContainer')
 
-      if (lastPos > 0 && Math.abs(lastPos - document.scrollingElement.scrollTop) > 5) { // lastPos !== null
-        if (!force && document.visibilityState === 'visible') {
-          // it is possible that the scrolltop is updating by scrollTo({behavior:'smooth'})
-          delayScrolling(scrollLyricsGeneric)
-          return
-        }
+    async function showButtons () {
+      const staticTopChanged = window.staticOffsetTop !== staticTop
+      window.newScrollTopPosition = newScrollTop
+      if (staticTopChanged) {
         window.staticOffsetTop = staticTop
-        window.newScrollTopPosition = newScrollTop
-
-        // User scrolled -> stop auto scroll
-        if (!btnContainer) {
-          const resumeButton = document.createElement('div')
-          const resumeButtonFromHere = document.createElement('div')
-          const resumeAutoScrollButtonContainer = document.createElement('div')
-          resumeAutoScrollButtonContainer.id = 'resumeAutoScrollButtonContainer'
-          resumeButton.addEventListener('click', onResumeAutoScrollClick, false)
-          resumeButtonFromHere.addEventListener('click', onResumeAutoScrollFromHereClick, false)
-          resumeButton.id = 'resumeAutoScrollButton'
-          resumeButton.setAttribute('title', 'Resume auto scrolling')
-          resumeButton.appendChild(document.createElement('div'))
-          setArrowUpDownStyle(resumeButton)
-          resumeButtonFromHere.id = 'resumeAutoScrollFromHereButton'
-          resumeButtonFromHere.setAttribute('title', 'Resume auto scrolling from here')
-          resumeButtonFromHere.appendChild(document.createElement('div'))
-          appendElements(resumeAutoScrollButtonContainer, [resumeButton, resumeButtonFromHere])
-          document.body.appendChild(resumeAutoScrollButtonContainer)
-          btnContainer = resumeAutoScrollButtonContainer
-        } else {
-          const resumeButton = document.querySelector('#resumeAutoScrollButton')
-          setArrowUpDownStyle(resumeButton)
-        }
-        await Promise.resolve(0) // wait for DOM
-        if (newScrollTop > 0 && newScrollTop < maxScrollTop) {
-          btnContainer.classList.add('btn-show')
-        }
-        await Promise.resolve(0) // wait for DOM
-        window.scrollLyricsBusy = false
-        return
       }
 
-      if (btnContainer) {
-        btnContainer.classList.remove('btn-show')
+      // User scrolled -> stop auto scroll
+      if (!btnContainer) {
+        const resumeButton = document.createElement('div')
+        const resumeButtonFromHere = document.createElement('div')
+        const resumeAutoScrollButtonContainer = document.createElement('div')
+        resumeAutoScrollButtonContainer.id = 'resumeAutoScrollButtonContainer'
+        resumeButton.addEventListener('click', onResumeAutoScrollClick, false)
+        resumeButtonFromHere.addEventListener('click', onResumeAutoScrollFromHereClick, false)
+        resumeButton.id = 'resumeAutoScrollButton'
+        resumeButton.setAttribute('title', 'Resume auto scrolling')
+        resumeButton.appendChild(document.createElement('div'))
+        setArrowUpDownStyle(resumeButton)
+        resumeButtonFromHere.id = 'resumeAutoScrollFromHereButton'
+        resumeButtonFromHere.setAttribute('title', 'Resume auto scrolling from here')
+        resumeButtonFromHere.appendChild(document.createElement('div'))
+        appendElements(resumeAutoScrollButtonContainer, [resumeButton, resumeButtonFromHere])
+        document.body.appendChild(resumeAutoScrollButtonContainer)
+        btnContainer = resumeAutoScrollButtonContainer
+      } else {
+        const resumeButton = document.querySelector('#resumeAutoScrollButton')
+        setArrowUpDownStyle(resumeButton)
       }
+      await Promise.resolve(0) // wait for DOM
+      // if (newScrollTop > 0 && newScrollTop < maxScrollTop) {
+      btnContainer.classList.add('btn-show')
+      // }
+      await Promise.resolve(0) // wait for DOM
+      window.scrollLyricsBusy = false
+    }
 
+    function isShowButtonRequired () {
+      if (typeof lastPos === 'number' && lastPos >= 0 && Math.abs(lastPos - document.scrollingElement.scrollTop) > 5) { // lastPos !== null
+        showButtons()
+        return true
+      }
+      return false
+    }
+
+    function smoothScroll () {
       window.lastScrollTopPosition = newScrollTop
       document.scrollingElement.scrollTo({
         top: newScrollTop,
         behavior: 'smooth'
       })
+    }
 
-      if (genius.debug) {
-        if (!window.first) {
-          window.first = true
+    function debug () {
+      if (!window.first) {
+        window.first = true
 
-          for (let i = 0; i < 11; i++) {
-            const label = document.body.appendChild(document.createElement('div'))
-            label.classList.add('scrolllabel')
-            label.textContent = (`${i * 10}% + ${window.staticOffsetTop}px`)
-            label.style.position = 'absolute'
-            label.style.top = `${offset.top + window.staticOffsetTop + div.scrollHeight * 0.1 * i}px`
-            label.style.color = 'rgba(255,0,0,0.5)'
-            label.style.zIndex = 1000
-          }
-
-          let label = document.body.appendChild(document.createElement('div'))
+        for (let i = 0; i < 11; i++) {
+          const label = document.body.appendChild(document.createElement('div'))
           label.classList.add('scrolllabel')
-          label.textContent = `Start @ offset.top +  window.staticOffsetTop = ${offset.top}px + ${window.staticOffsetTop}px`
+          label.textContent = (`${i * 10}% + ${window.staticOffsetTop}px`)
           label.style.position = 'absolute'
-          label.style.top = `${offset.top + window.staticOffsetTop}px`
-          label.style.left = '200px'
-          label.style.color = '#008000a6'
-          label.style.zIndex = 1000
-
-          label = document.body.appendChild(document.createElement('div'))
-          label.classList.add('scrolllabel')
-          label.textContent = `Base @ offset.top = ${offset.top}px`
-          label.style.position = 'absolute'
-          label.style.top = `${offset.top}px`
-          label.style.left = '200px'
-          label.style.color = '#008000a6'
+          label.style.top = `${offset.top + window.staticOffsetTop + div.scrollHeight * 0.1 * i}px`
+          label.style.color = 'rgba(255,0,0,0.5)'
           label.style.zIndex = 1000
         }
 
-        let indicator = document.getElementById('scrollindicator')
-        if (!indicator) {
-          indicator = document.body.appendChild(document.createElement('div'))
-          indicator.classList.add('scrolllabel')
-          indicator.id = 'scrollindicator'
-          indicator.style.position = 'absolute'
-          indicator.style.left = '150px'
-          indicator.style.color = '#00dbff'
-          indicator.style.zIndex = 1000
-        }
-        indicator.style.top = `${offset.top + window.staticOffsetTop + div.scrollHeight * position}px`
-        indicator.innerHTML = `${parseInt(position * 100)}%  -> ${parseInt(newScrollTop)}px`
+        let label = document.body.appendChild(document.createElement('div'))
+        label.classList.add('scrolllabel')
+        label.textContent = `Start @ offset.top +  window.staticOffsetTop = ${offset.top}px + ${window.staticOffsetTop}px`
+        label.style.position = 'absolute'
+        label.style.top = `${offset.top + window.staticOffsetTop}px`
+        label.style.left = '200px'
+        label.style.color = '#008000a6'
+        label.style.zIndex = 1000
+
+        label = document.body.appendChild(document.createElement('div'))
+        label.classList.add('scrolllabel')
+        label.textContent = `Base @ offset.top = ${offset.top}px`
+        label.style.position = 'absolute'
+        label.style.top = `${offset.top}px`
+        label.style.left = '200px'
+        label.style.color = '#008000a6'
+        label.style.zIndex = 1000
       }
 
-      await Promise.resolve(0) // wait for DOM
-      window.scrollLyricsBusy = false
+      let indicator = document.getElementById('scrollindicator')
+      if (!indicator) {
+        indicator = document.body.appendChild(document.createElement('div'))
+        indicator.classList.add('scrolllabel')
+        indicator.id = 'scrollindicator'
+        indicator.style.position = 'absolute'
+        indicator.style.left = '150px'
+        indicator.style.color = '#00dbff'
+        indicator.style.zIndex = 1000
+      }
+      indicator.style.top = `${offset.top + window.staticOffsetTop + div.scrollHeight * position}px`
+      indicator.innerHTML = `${parseInt(position * 100)}%  -> ${parseInt(newScrollTop)}px`
     }
+
+    let bool2 = true
+    if (((newScrollTop < 0 || newScrollTop > maxScrollTop))) {
+      if (newScrollTop < 0) newScrollTop = 0
+      else if (newScrollTop > maxScrollTop) newScrollTop = maxScrollTop
+      bool2 = (lastPos === 0 || lastPos === maxScrollTop) && lastPos === newScrollTop
+    }
+    if (bool2 && isShowButtonRequired()) {
+      return
+    }
+    if (btnContainer) {
+      btnContainer.classList.remove('btn-show')
+    }
+    smoothScroll()
+    if (genius.debug) {
+      debug()
+    }
+    if (document.visibilityState === 'visible') {
+      await waitForStableScrollTop()
+    }
+    window.scrollLyricsBusy = false
   }
 
   function loadGeniusAnnotations (song, html, annotationsEnabled, cb) {
@@ -1230,6 +1263,16 @@ Genius:     ${originalUrl}
       <br>
       <br>
        </div>`
+    },
+    fixInstrumentalBridge () {
+      for (const div of document.querySelectorAll('div[data-lyrics-container="true"]')) {
+        let innerHTML = div.innerHTML
+        const before = innerHTML
+        innerHTML = innerHTML.replace(/<br><br>\[Instrumental Bridge\]<br><br>/g, '<br><br>[Instrumental Bridge]<a id="Instrumental-Bridge"></a><br><br>')
+        if (before !== innerHTML) {
+          div.innerHTML = innerHTML
+        }
+      }
     }
   }
 
@@ -1482,6 +1525,9 @@ Genius:     ${originalUrl}
   [data-lyrics-container="true"] + [data-exclude-from-selection="true"] {
     display: none;
   }
+  a#Instrumental-Bridge {
+    line-height: 420%;
+  }
   `
 
   function setAnnotationsContainerTop (c, a, isContentChanged) {
@@ -1520,16 +1566,11 @@ Genius:     ${originalUrl}
   async function scrollToBegining () {
     document.documentElement.classList.add('instant-scroll')
     await new Promise(resolve => setTimeout(resolve, 100))
-    let selector = null
     const isContentStylesIsAdded = !!document.querySelector('style#egl-contentstyles')
     if (isContentStylesIsAdded) {
-      selector = 'html #application'
-      theme.scrollableContainer = selector
-      theme.scrollLyrics = scrollLyricsFunction(selector, 0)
-    } else {
-      selector = theme.scrollableContainer
+      theme.scrollableContainer = 'html #application'
     }
-    let scrollable = document.querySelector(selector)
+    let scrollable = document.querySelector(theme.scrollableContainer)
     if (isScrollLyricsEnabled()) {
       // scrollable.scrollIntoView(true)
     } else if (scrollable) {
@@ -1553,6 +1594,7 @@ Genius:     ${originalUrl}
       name: 'Genius (Default)',
       themeKey: 'genius',
       scrollableContainer: 'div[class*="SongPage__LyricsWrapper"]',
+      defaultStaticOffsetTop: 0,
       scripts: function themeGeniusScripts () {
         const onload = []
 
@@ -1621,6 +1663,9 @@ Genius:     ${originalUrl}
         })
         onload.push(hideStuff)
 
+        // fixInstrumentalBridge
+        onload.push(themeCommon.fixInstrumentalBridge)
+
         // Make expandable content buttons work
         function expandContent () {
           const button = this
@@ -1644,6 +1689,9 @@ Genius:     ${originalUrl}
 
         onload.push(themeCommon.targetBlankLinks)
         onload.push(() => setTimeout(themeCommon.targetBlankLinks, 1000))
+
+        // fixInstrumentalBridge
+        onload.push(themeCommon.fixInstrumentalBridge)
 
         // Handle annotations
         if (!annotationsEnabled) {
@@ -1709,15 +1757,14 @@ Genius:     ${originalUrl}
         html = appendHeadText(html, headhtml)
 
         return cb(html)
-      },
-      // scrollLyrics: scrollLyricsFunction('div[class^="Lyrics__Container"]', -200)
-      scrollLyrics: scrollLyricsFunction('div[class*="SongPage__LyricsWrapper"]', 0)
+      }
     },
 
     cleanwhite: {
       name: 'Clean white', // secondary theme
       themeKey: 'cleanwhite',
       scrollableContainer: '.lyrics_body_pad',
+      defaultStaticOffsetTop: 0,
       scripts: function themeCleanWhiteScripts () {
         const onload = []
 
@@ -1829,14 +1876,14 @@ Genius:     ${originalUrl}
           </body>
           </html>
           `)
-      },
-      scrollLyrics: scrollLyricsFunction('.lyrics_body_pad', 0)
+      }
     },
 
     spotify: {
       name: 'Spotify', // secondary theme
       themeKey: 'spotify',
       scrollableContainer: '.lyrics_body_pad',
+      defaultStaticOffsetTop: 0,
       scripts: function themeSpotifyScripts () {
         const onload = []
 
@@ -1848,6 +1895,9 @@ Genius:     ${originalUrl}
         onload.push(themeCommon.hideFooter)
         onload.push(themeCommon.hideSecondaryFooter)
         onload.push(themeCommon.hideStuff235)
+
+        // fixInstrumentalBridge
+        onload.push(themeCommon.fixInstrumentalBridge)
 
         // Make song title clickable
         function clickableTitle () {
@@ -1992,8 +2042,7 @@ Genius:     ${originalUrl}
           </body>
           </html>
           `)
-      },
-      scrollLyrics: scrollLyricsFunction('.lyrics_body_pad', 0)
+      }
     }
   }
 
@@ -3716,11 +3765,11 @@ Link__StyledLink
     autoScrollEnabled = newValue
   }
   function isScrollLyricsEnabled () {
-    return autoScrollEnabled && ('scrollLyrics' in theme) // note: if iframe is not ready, still no action
+    return autoScrollEnabled // note: if iframe is not ready, still no action
   }
 
   function isScrollLyricsCallable () {
-    return autoScrollEnabled && ('scrollLyrics' in theme) && window.isPageAbleForAutoScroll === true // note: if iframe is not ready, still no action
+    return autoScrollEnabled && window.isPageAbleForAutoScroll === true // note: if iframe is not ready, still no action
   }
 
   function scrollLyrics (positionFraction) {
@@ -4302,14 +4351,12 @@ Link__StyledLink
       }
     }
     // Scroll lyrics event
-    if ('scrollLyrics' in theme) {
-      window.addEventListener('message', function (e) {
-        if (typeof e.data !== 'object' || !('iAm' in e.data) || e.data.iAm !== custom.scriptName || e.data.type !== 'scrollLyrics' || !('scrollLyrics' in theme)) {
-          return
-        }
-        theme.scrollLyrics(e.data.position)
-      })
-    }
+    window.addEventListener('message', function (e) {
+      if (typeof e.data !== 'object' || !('iAm' in e.data) || e.data.iAm !== custom.scriptName || e.data.type !== 'scrollLyrics') {
+        return
+      }
+      scrollLyricsGeneric(e.data.position)
+    })
     if ('toggleLyricsKey' in custom) {
       addKeyboardShortcutInFrame(custom.toggleLyricsKey)
     }
