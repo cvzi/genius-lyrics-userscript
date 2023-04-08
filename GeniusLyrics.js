@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.8.1
+// @version      5.8.2
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2020, cuzi (https://github.com/cvzi)
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -1208,7 +1208,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     },
 
     removeAnnotations () {
-      document.querySelectorAll('div[class^="SongPage__Section"] a[class^="ReferentFragment"]').forEach(removeTagsKeepText)
+      document.querySelectorAll('#lyrics-root a[class^="ReferentFragment"]').forEach(removeTagsKeepText)
     },
     addAnnotationHandling () {
       try {
@@ -1219,7 +1219,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       }
 
       // Add click handler to annotations
-      for (const a of document.querySelectorAll('div[class^="SongPage__Section"] a[class^="ReferentFragment"]')) {
+      for (const a of document.querySelectorAll('#lyrics-root a[class^="ReferentFragment"]')) {
         a.classList.add('annotated')
         a.addEventListener('click', themeCommon.showAnnotation)
       }
@@ -1484,19 +1484,28 @@ Genius:     ${originalUrl}
     z-index:4;
   }
   #annotationcontainer958 .arrow {
-    height:30px;
-    background: white;
+    height:10px;
+    background: transparent;
   }
   #annotationcontainer958 .arrow:before {
     content: "";
     position: absolute;
     width: 0px;
     height: 0px;
+    top:0%;
     margin-top: 6px;
     ${isChrome ? 'margin-left: calc(50% - 15px);' : 'inset: -1rem 0px 0px 50%;'}
     border-style: solid;
     border-width: 0px 25px 20px;
     border-color: transparent transparent rgb(170, 170, 170);
+  }
+  #annotationcontainer958[location-dir="up"] .arrow {
+    height:0px;
+  }
+  #annotationcontainer958[location-dir="up"] .arrow:before {
+    top:100%;
+    transform: rotate(180deg);
+    margin-top:0px;
   }
   #annotationcontainer958 .annotationcontent {
     background-color:#E9E9E9;
@@ -1506,6 +1515,7 @@ Genius:     ${originalUrl}
     border-top-right-radius: 0px;
     border-top-left-radius: 0px;
     box-shadow: #646464 5px 5px 5px;
+    scrollbar-color: #7d8fe885 transparent;
   }
   #annotationcontainer958 .annotationtab {
     display:none
@@ -1767,18 +1777,23 @@ Genius:     ${originalUrl}
         headhtml += `
         <style>
           html{
-            background-color: #181818;
-            scrollbar-color: hsla(0,0%,100%,.3) transparent;
+            background-color: #181818 !important;
+            scrollbar-color: hsla(0,0%,100%,.3) transparent !important;
             scrollbar-width: auto;
           }
           .annotated span {
-            background-color: #f0f0f0;
+            background-color: #f0f0f0 !important;
+            text-decoration: none !important;
           }
           .annotated:hover span, .annotated.highlighted span {
-            background-color: #ddd;
+            background-color: #ddd !important;
+            text-decoration: none !important;
+          }
+         .annotated.highlighted span {
+            filter: drop-shadow(0px 0px 5px #555);
           }
           a[href].annotated {
-            padding: 5px 0px; /* make the whole <a> clickable; including gap between lines*/
+            padding: 5px 0px !important; /* make the whole <a> clickable; including gap between lines*/
           }
           html div[class*="SongPage__LyricsWrapper"] {
             padding-top: var(--egl-page-pt);
@@ -1899,7 +1914,7 @@ Genius:     ${originalUrl}
             <main>
               <div class="lyrics_body_pad">
                 ${titlehtml}
-                <div class="mylyrics song_body-lyrics">
+                <div id="lyrics-root" class="mylyrics song_body-lyrics">
                 ${lyricshtml}
                 </div>
               </div>
@@ -2065,7 +2080,7 @@ Genius:     ${originalUrl}
             <main>
               <div class="lyrics_body_pad">
                 ${titlehtml}
-                <div class="mylyrics song_body-lyrics">
+                <div id="lyrics-root" class="mylyrics song_body-lyrics">
                 ${lyricshtml}
                 </div>
               </div>
@@ -4310,6 +4325,11 @@ Link__StyledLink
       const elm = (evTarget || 0)
       if (elm && elm.matches('div.LSongHeader__CenterInfo')) {
         const elmSongHeaderContainer = elm.closest('div.LSongHeader__Container:not(.genius-lyrics-header-container)')
+        // TODO fix this
+        if (!elmSongHeaderContainer) {
+          console.error('elmSongHeaderContainer is', elmSongHeaderContainer)
+          return
+        }
         let p = elm
         while (p) {
           const t = p.parentNode
