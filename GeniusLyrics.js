@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.8.0
+// @version      5.8.1
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2020, cuzi (https://github.com/cvzi)
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -1403,7 +1403,13 @@ Genius:     ${originalUrl}
   div[class*="AnnotationEditActions"], div[class*="AnnotationActions"] {
     display: none;
   }
-  
+  div[class*="StickyContributorToolbar"] {
+    display: none;
+  }
+  div[class*="LyricsHeader__Container"] {
+    display: none;
+  }
+
   @keyframes appDomAppended {
     0% {
       background-position-x: 1px;
@@ -2793,15 +2799,13 @@ pre{white-space:pre-wrap}
       margin-bottom: 8px;
     }
 
-    div[class*="MetadataStats__Container"] {
-      display: block;
-      /* not flexbox */
-      width: 100%;
-    }
-
     div[class].LSongHeader__Left {
       display: none;
       /* just empty space */
+    }
+
+    div[class].LSongHeader__Bottom {
+      margin-bottom:1em;
     }
 
     div[class*="SongPageGriddesktop"] {
@@ -2833,6 +2837,10 @@ pre{white-space:pre-wrap}
     }
     div[class*="MetadataStats"] [class] {
       cursor: inherit;
+    }
+
+    div[class*="MetadataStats__Container"] {
+      font-size: 0.75rem;
     }
 
     div[class].LSongHeader__CenterInfo {
@@ -3058,7 +3066,6 @@ pre{white-space:pre-wrap}
       opacity: 0.65;
       /* coloring only */
     }
-    
 
     h1,
     div[class*="SongPage__LyricsWrapper"] {
@@ -3294,6 +3301,9 @@ pre{white-space:pre-wrap}
       case 'SongHeaderdesktop__Left':
       case 'SongHeaderWithPrimis__Left':
         return 'LSongHeader__Left'
+      case 'SongHeaderdesktop__Bottom':
+      case 'SongHeaderWithPrimis__Bottom':
+        return 'LSongHeader__Bottom'
       case 'SongHeaderdesktop__Center':
       case 'SongHeaderWithPrimis__Information':
         return 'LSongHeader__CenterInfo'
