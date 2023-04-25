@@ -180,9 +180,9 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   }
   function getTrueWindow () {
     // this can bypass Spotify's window Proxy Object and obtain the original window object
-    try{
+    try {
       return new Function('return window')() // eslint-disable-line no-new-func
-    }catch(e){
+    } catch (e) {
       console.warn('the actual window object cannot be obtained.', e) // e.g. YouTube Music
       return window // fallback
     }
