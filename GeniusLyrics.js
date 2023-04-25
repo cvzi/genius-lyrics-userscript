@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.8.2
+// @version      5.8.3
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2020, cuzi (https://github.com/cvzi)
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -180,7 +180,12 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   }
   function getTrueWindow () {
     // this can bypass Spotify's window Proxy Object and obtain the original window object
-    return new Function('return window')() // eslint-disable-line no-new-func
+    try {
+      return new Function('return window')() // eslint-disable-line no-new-func
+    } catch (e) {
+      console.warn('the actual window object cannot be obtained.', e) // e.g. YouTube Music
+      return window // fallback
+    }
   }
 
   let trueWindow = isFakeWindow() ? getTrueWindow() : window
