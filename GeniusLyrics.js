@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.8.3
+// @version      5.8.4
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2020, cuzi (https://github.com/cvzi)
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -3305,7 +3305,19 @@ pre{white-space:pre-wrap}
       "<svg><path d=\"M16.03 7.39v12.7H1.91V7.39H0V22h17.94V7.39h-1.91\"></path><path d=\"M8.08 3.7v11.81h1.91V3.63l2.99 2.98 1.35-1.35L9.07 0 3.61 5.46l1.36 1.35L8.08 3.7\"></path></svg>",
       "<svg><path d=\"M11 2c4 0 7.26 3.85 8.6 5.72-1.34 1.87-4.6 5.73-8.6 5.73S3.74 9.61 2.4 7.73C3.74 5.86 7 2 11 2m0-2C4.45 0 0 7.73 0 7.73s4.45 7.73 11 7.73 11-7.73 11-7.73S17.55 0 11 0z\"></path><path d=\"M11 5a2.73 2.73 0 1 1-2.73 2.73A2.73 2.73 0 0 1 11 5m0-2a4.73 4.73 0 1 0 4.73 4.73A4.73 4.73 0 0 0 11 3z\"></path></svg>",
       "<svg><path d=\"M24 10h-10v-10h-4v10h-10v4h10v10h4v-10h10z\"></path></svg>",
-  ]
+      "<svg><path d=\"M21.82,20.62,17,15.83l3.59-3.59L17.55,9.17l-3.36.12L10.09,5.19v-3L7.91,0,0,7.91l2.16,2.16L5,10.25,9.1,14.37,9,17.73l3.08,3.08,3.59-3.59L20.43,22ZM11,16.94l.12-3.36L5.85,8.34,3,8.16l-.25-.25L7.91,2.77,8.13,3V6l5.27,5.27,3.36-.12,1.09,1.09L12.06,18Z\"></path></svg>",
+      "<svg><path d=\"M20.07,1.93V20.07H1.93V1.93H20.07M22,0H0V22H22V0Z\"></path><path d=\"M7.24,8.38l4.07-4.66L13.5,8.38H11.8s-.92,3.35-.92,3.4h3.88l-3.49,6.5s.44-4.61.44-4.66H7.82L9.74,8.38Z\"></path></svg>",
+      "<svg><path d=\"M16,13.05v-6a7.05,7.05,0,0,0-14.11,0v6H0v6.66H6.65a2.29,2.29,0,0,0,4.57,0h6.65V13.05Zm-12.2-6a5.15,5.15,0,1,1,10.3,0v6H3.79ZM1.9,17.81V15.23H16v2.58Z\"></path></svg>",
+      "<svg><path d=\"M0,0V15.34H22V0ZM12.32,8.2,11,9.47,9.68,8.2,8.3,6.88l-5.18-5H18.88l-5.18,5ZM6.82,8.1,1.9,12.17V3.37ZM8.21,9.42,11,12.1l2.79-2.68,4.86,4H3.35Zm7-1.33L20.1,3.37v8.8Z\"></path></svg>",
+      "<svg><path d=\"M20.07,1.93V20.07H1.93V1.93H20.07M22,0H0V22H22V0Z\"></path><path d=\"M3.83,16.29V5.71h2.1V16.29Z\"></path><path d=\"M16.35,16.57l-.65-.71a5.23,5.23,0,0,1-2.83.71A5.43,5.43,0,0,1,7.26,11a5.45,5.45,0,0,1,5.62-5.57A5.45,5.45,0,0,1,18.5,11,5.23,5.23,0,0,1,17,14.82l1.47,1.75ZM12.88,7.29A3.55,3.55,0,0,0,9.36,11a3.56,3.56,0,0,0,3.57,3.69,3.27,3.27,0,0,0,1.48-.28l-1.93-2.12,2.13-.16,1.09,1.22A3.74,3.74,0,0,0,16.4,11,3.55,3.55,0,0,0,12.88,7.29Z\"></path></svg>",
+      "<svg><path fill-rule=\"evenodd\" d=\"M4 16.483A9 9 0 1 0 14 1.518 9 9 0 0 0 4 16.483Zm.714-13.897a7.714 7.714 0 1 1 8.572 12.828A7.714 7.714 0 0 1 4.714 2.586Zm3.643 6.678 3.594 3.593.906-.906L9.643 8.73V3.214H8.357v6.05Z\" clip-rule=\"evenodd\"></path></svg>",
+      "<svg><path fill-rule=\"evenodd\" d=\"M20.418 2.53a13.655 13.655 0 0 1 4.806 6.192.818.818 0 0 1 0 .556A13.655 13.655 0 0 1 13 18 13.655 13.655 0 0 1 .776 9.278a.818.818 0 0 1 0-.556A13.655 13.655 0 0 1 13 0c2.667.1 5.246.98 7.418 2.53ZM2.421 9C4.08 13.148 8.664 16.364 13 16.364S21.918 13.148 23.58 9C21.917 4.852 17.335 1.636 13 1.636S4.082 4.852 2.42 9Zm7.852-4.082a4.91 4.91 0 1 1 5.454 8.164 4.91 4.91 0 0 1-5.454-8.164Zm.909 6.803a3.272 3.272 0 1 0 3.636-5.442 3.272 3.272 0 0 0-3.636 5.442Z\" clip-rule=\"evenodd\"></path></svg>",
+      "<svg><path fill-rule=\"evenodd\" d=\"M3.577 0H18v14.423h-2.394V4.083L1.689 18 0 16.31 13.916 2.395H3.576V0Z\" clip-rule=\"evenodd\"></path></svg>",
+      '<svg><path d="M15.923 1.385h-2.77V0H11.77v1.385H6.231V0H4.846v1.385h-2.77c-.76 0-1.384.623-1.384 1.384v13.846c0 .762.623 1.385 1.385 1.385h13.846c.762 0 1.385-.623 1.385-1.385V2.77c0-.761-.623-1.384-1.385-1.384Zm0 15.23H2.077V6.923h13.846v9.692Zm0-11.077H2.077V2.77h2.77v1.385H6.23V2.769h5.538v1.385h1.385V2.769h2.77v2.77Z"></path></svg>',
+      "<svg><path fill-rule=\"evenodd\" d=\"M11.335 2.6v1.333H9.2A11.76 11.76 0 0 1 6.588 9.02a9.654 9.654 0 0 0 3.413 2.247l-.473 1.226a11.279 11.279 0 0 1-3.84-2.56 12.314 12.314 0 0 1-3.853 2.574l-.5-1.24a11.227 11.227 0 0 0 3.44-2.28 10.98 10.98 0 0 1-2-3.72h1.4A9 9 0 0 0 5.7 8.053a9.807 9.807 0 0 0 2.127-4.12H.668V2.6h4.667v-2h1.333v2h4.667Zm7.997 16h-1.433l-1.067-2.667h-4.567L11.2 18.6H9.765l4-10h1.567l4 10Zm-4.787-8.373L12.8 14.6h3.5l-1.754-4.373Z\" clip-rule=\"evenodd\"></path></svg>",
+      "<svg><path d=\"M4.488 7 0 0h8.977L4.488 7Z\"></path></svg>",
+      "<svg><path d=\"M4 16.483A9 9 0 1 0 14 1.516 9 9 0 0 0 4 16.483Zm.714-13.897a7.714 7.714 0 1 1 8.572 12.828A7.714 7.714 0 0 1 4.714 2.586ZM9 3.857a.964.964 0 1 0 0 1.928.964.964 0 0 0 0-1.928Zm.643 9V7.714H7.07V9h1.286v3.857H6.428v1.286h5.143v-1.286H9.643Z\"></path></svg>",
+    ]
   /* eslint-enable quotes, comma-dangle, indent */
 
   function normalizeClassNameInner (d, k1, k2) {
@@ -3321,6 +3333,9 @@ pre{white-space:pre-wrap}
       case 'SongHeaderdesktop__Left':
       case 'SongHeaderWithPrimis__Left':
         return 'LSongHeader__Left'
+      case 'SongHeaderdesktop__Right':
+      case 'SongHeaderWithPrimis__Right':
+        return 'LSongHeader__Right'
       case 'SongHeaderdesktop__Bottom':
       case 'SongHeaderWithPrimis__Bottom':
         return 'LSongHeader__Bottom'
@@ -4161,7 +4176,7 @@ Link__StyledLink
   function addCss () {
     document.head.appendChild(document.createElement('style')).innerHTML = `
     #myconfigwin39457845 {
-      position:absolute;
+      position:fixed;
       top:120px;
       right:10px;
       padding:15px;
@@ -4329,10 +4344,8 @@ Link__StyledLink
       /** @type {HTMLElement | null} */
       const elm = (evTarget || 0)
       if (elm && elm.matches('div.LSongHeader__CenterInfo')) {
-        const elmSongHeaderContainer = elm.closest('div.LSongHeader__Container:not(.genius-lyrics-header-container)')
-        // TODO fix this
-        if (!elmSongHeaderContainer) {
-          console.error('elmSongHeaderContainer is', elmSongHeaderContainer)
+        const elmSongHeaderContainer = elm.closest('.LSongHeader__Right').parentNode
+        if (!elmSongHeaderContainer || elmSongHeaderContainer.classList.contains('genius-lyrics-header-container')) {
           return
         }
         let p = elm
