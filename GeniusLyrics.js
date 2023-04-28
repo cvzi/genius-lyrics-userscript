@@ -1522,6 +1522,9 @@ Genius:     ${originalUrl}
     box-shadow: #646464 5px 5px 5px;
     scrollbar-color: #7d8fe885 transparent;
   }
+  #annotationcontainer958 .annotationcontent a {
+    color: var(--egl-link-color);
+  }
   #annotationcontainer958 .annotationtab {
     display:none
   }
@@ -1787,7 +1790,7 @@ Genius:     ${originalUrl}
             scrollbar-width: auto;
           }
           .annotated span {
-            background-color: #f0f0f0 !important;
+            background-color: #c0c0c060 !important;
             text-decoration: none !important;
           }
           .annotated:hover span, .annotated.highlighted span {
