@@ -128,8 +128,8 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       config
     },
     current: { // store the title and artists of the current lyrics [cached and able to reload]
-      title: '',
-      artists: ''
+      title: '', // these shall be replaced by CompoundTitle
+      artists: '' // these shall be replaced by CompoundTitle
     },
     iv: {
       main: null // unless setupMain is provided and the interval / looping is controlled externally
@@ -146,7 +146,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       noRawReleaseDate: false,
       shortenArtistName: false,
       fixArtistName: false,
-      removeStats: false, // note: true for YoutubeGeniusLyrics only
+      removeStats: false, // note: true for YoutubeGeniusLyrics only; as YoutubeGeniusLyrics will not show this info
       noRelatedLinks: false,
       onlyCompleteLyrics: false
     },
@@ -2645,6 +2645,11 @@ pre{white-space:pre-wrap}
 `
     ]
 
+    // there are three pieces of texts in defaultCSSTexts. First one is the font files imported in Genius.com which shall be the same no matter whether it is WithPrimis or not.
+    // the 2nd and 3rd are used to make the styling which is similar to the Genius.com
+    // if there are matched, REPX1 or REPX2 will be assigned for caching.
+    // svg might be also replaced if the same svg is found in the pre-defined svg in this UserScript.
+
     html = html
       .replace('<style id="REPX1"></style>', () => {
         return `<style>${defaultCSSTexts[0]}</style>` // font-face
@@ -2667,6 +2672,7 @@ pre{white-space:pre-wrap}
   function contentStyling () {
     // contentStyling is to generate a specific css for the styling matching the main window
     // mainly background-color and text colors
+    // (this is part of the contentStylingIframe)
 
     // only if genius.style.enable is set to true by external script
     if (genius.style.enabled !== true) return null
@@ -2689,6 +2695,11 @@ pre{white-space:pre-wrap}
   }
 
   function contentStylingIframe (html, contentStyle) {
+    // contentStylingIframe is a function to customize the styling to the html. As the original styles are removed and this is a generic style to apply to every lyrics
+    // this can make the cache size of lyrics become small and guarantee the style align all the time.
+    // however, this contracts the original way that GeniusLyrics.js used.
+    // the original way is to adopt the Genius.com 's style as much as possible.
+    // the new way is to extract the lyrics and song/album info only to make the cache and then apply the own styles according to the website (YouTube/Spotify)
     if (!contentStyle) return html
     const css = `
     body {
@@ -3279,7 +3290,7 @@ pre{white-space:pre-wrap}
   // to check validity of the content style being used in defaultCSS
   const defaultStyleCheckerArr = [".dTXQYT", ".ilfajN", ".bIwkeM", ".dIgauN", ".jOhzET", ".kokouQ", ".xQwqG", ".jDxAhO", ".dawSPu", ".cmIqeW", ".hTPksM", ".hVAZmF", ".cLBJdA", ".cpvLYi", ".kMDkxm", ".leLkHK", ".cRrFdP", ".dvOJud", ".huhsMa", ".dCKKNS", ".kMItKF", ".gjSNHg", ".itbKya", ".eMjKRh", ".eQViPi", ".ctylSH", ".gAieh", ".csMTdh", ".jecoie", ".ENCiS", ".bBMTMQ", ".dyewdM", ".ePvBqA", ".kJxpEi", ".ueUKD", ".fraZOY", ".kMKmmz", ".hQgDBO", ".fUyrrM", ".fVWWod", ".lfAvEQ", ".fdEmdh", ".fHdUT", ".jrjShc", ".YYrds", ".fMoZxb", ".hXQMRu", ".eDBQeK", ".rncXA", ".kkpCaw", ".eqRvkr", ".bcLwQh", ".hFPGxa", ".lbdVJq", ".hGLtDM", ".bXbziL", ".ldjaSd", ".cSKAwQ", ".fPpEQG", ".vrxkS", ".cabqMy", ".fyUjsz", ".esoPOn", ".uEMeZ", ".ceKRFE", ".bZsZHM", ".iRKrFW", ".dWcYSx", ".fognin", ".lopKUj", ".eSiFpi", ".cVjBCj", ".frgRKG", ".bIlJhm", ".lgbAKX", ".kojbqH", ".jZrfsi", ".euQZer", ".gRiFtA", ".fOsBvT", ".gTBWpu", ".fHiIPi", ".iXrcWP", ".cziiuX", ".fRTMWj", ".iuNSEV", ".uGviF", ".kTXFZQ", ".hAxKUd", ".boDKcJ", ".gwrcCS", ".gUdeqB", ".iDkyVM", ".kNXBDG", ".eIiYRJ", ".hNrwqx", ".bMBKQI", ".dcpJwP", ".cXvCRB", ".bcJzkW", ".UKjRP", ".noscroll"]
   // store all the svgs displayed in the lyrics panel; reduce cache size
-  const defaultSVGBoxs =
+  const defaultSVGBoxs = 
     [
       "<svg><path d=\"M11.7 2.9s0-.1 0 0c-.8-.8-1.7-1.2-2.8-1.2-1.1 0-2.1.4-2.8 1.1-.2.2-.3.4-.5.6v.1c0 .1.1.1.1.1.4-.2.9-.3 1.4-.3 1.1 0 2.2.5 2.9 1.2h1.6c.1 0 .1-.1.1-.1V2.9c.1 0 0 0 0 0zm-.1 4.6h-1.5c-.8 0-1.4-.6-1.5-1.4.1 0 0-.1 0-.1-.3 0-.6.2-.8.4v.2c-.6 1.8.1 2.4.9 2.4h1.1c.1 0 .1.1.1.1v.4c0 .1.1.1.1.1.6-.1 1.2-.4 1.7-.8V7.6c.1 0 0-.1-.1-.1z\"></path><path d=\"M11.6 11.9s-.1 0 0 0c-.1 0-.1 0 0 0-.1 0-.1 0 0 0-.8.3-1.6.5-2.5.5-3.7 0-6.8-3-6.8-6.8 0-.9.2-1.7.5-2.5 0-.1-.1-.1-.2-.1h-.1C1.4 4.2.8 5.7.8 7.5c0 3.6 2.9 6.4 6.4 6.4 1.7 0 3.3-.7 4.4-1.8V12c.1 0 0-.1 0-.1zm13.7-3.1h3.5c.8 0 1.4-.5 1.4-1.3v-.2c0-.1-.1-.1-.1-.1h-4.8c-.1 0-.1.1-.1.1v1.4c-.1 0 0 .1.1.1zm5.1-6.7h-5.2c-.1 0-.1.1-.1.1v1.4c0 .1.1.1.1.1H29c.8 0 1.4-.5 1.4-1.3v-.2c.1-.1.1-.1 0-.1z\"></path><path d=\"M30.4 12.3h-6.1c-1 0-1.6-.6-1.6-1.6V1c0-.1-.1-.1-.1-.1-1.1 0-1.8.7-1.8 1.8V12c0 1.1.7 1.8 1.8 1.8H29c.8 0 1.4-.6 1.4-1.3v-.1c.1 0 .1-.1 0-.1zm12 0c-.6-.1-.9-.6-.9-1.3V1.1s0-.1-.1-.1H41c-.9 0-1.5.6-1.5 1.5v9.9c0 .9.6 1.5 1.5 1.5.8 0 1.4-.6 1.5-1.5 0-.1 0-.1-.1-.1zm8.2 0h-.2c-.9 0-1.4-.4-1.8-1.1l-4.5-7.4-.1-.1c-.1 0-.1.1-.1.1V8l2.8 4.7c.4.6.9 1.2 2 1.2 1 0 1.7-.5 2-1.4 0-.2-.1-.2-.1-.2zm-.9-3.8c.1 0 .1-.1.1-.1V1.1c0-.1 0-.1-.1-.1h-.4c-.9 0-1.5.6-1.5 1.5v3.1l1.7 2.8c.1 0 .1.1.2.1zm13 3.8c-.6-.1-.9-.6-.9-1.2v-10c0-.1 0-.1-.1-.1h-.3c-.9 0-1.5.6-1.5 1.5v9.9c0 .9.6 1.5 1.5 1.5.8 0 1.4-.6 1.5-1.5l-.2-.1zm18.4-.5H81c-.7.3-1.5.5-2.5.5-1.6 0-2.9-.5-3.7-1.4-.9-1-1.4-2.4-1.4-4.2V1c0-.1 0-.1-.1-.1H73c-.9 0-1.5.6-1.5 1.5V8c0 3.7 2 5.9 5.4 5.9 1.9 0 3.4-.7 4.3-1.9v-.1c0-.1 0-.1-.1-.1z\"></path><path d=\"M81.2.9h-.3c-.9 0-1.5.6-1.5 1.5v5.7c0 .7-.1 1.3-.3 1.8 0 .1.1.1.1.1 1.4-.3 2.1-1.4 2.1-3.3V1c0-.1-.1-.1-.1-.1zm12.7 7.6l1.4.3c1.5.3 1.6.8 1.6 1.2 0 .1.1.1.1.1 1.1-.1 1.8-.7 1.8-1.5s-.6-1.2-1.9-1.5l-1.4-.3c-3.2-.6-3.8-2.3-3.8-3.6 0-.7.2-1.3.6-1.9v-.2c0-.1-.1-.1-.1-.1-1.5.7-2.3 1.9-2.3 3.4-.1 2.3 1.3 3.7 4 4.1zm5.2 3.2c-.1.1-.1.1 0 0-.9.4-1.8.6-2.8.6-1.6 0-3-.5-4.3-1.4-.3-.3-.5-.6-.5-1 0-.1 0-.1-.1-.1s-.3-.1-.4-.1c-.4 0-.8.2-1.1.6-.2.3-.4.7-.3 1.1.1.4.3.7.6 1 1.4 1 2.8 1.5 4.5 1.5 2 0 3.7-.7 4.5-1.9v-.1c0-.1 0-.2-.1-.2z\"></path><path d=\"M94.1 3.2c0 .1.1.1.1.1h.2c1.1 0 1.7.3 2.4.8.3.2.6.3 1 .3s.8-.2 1.1-.6c.2-.3.3-.6.3-.9 0-.1 0-.1-.1-.1-.2 0-.3-.1-.5-.2-.8-.6-1.4-.9-2.6-.9-1.2 0-2 .6-2 1.4.1 0 .1 0 .1.1z\"></path></svg>",
       "<svg><path d=\"M21.48 20.18L14.8 13.5a8.38 8.38 0 1 0-1.43 1.4l6.69 6.69zM2 8.31a6.32 6.32 0 1 1 6.32 6.32A6.32 6.32 0 0 1 2 8.31z\"></path></svg>",
@@ -3321,9 +3332,16 @@ pre{white-space:pre-wrap}
       "<svg><path d=\"M4.488 7 0 0h8.977L4.488 7Z\"></path></svg>",
       "<svg><path d=\"M4 16.483A9 9 0 1 0 14 1.516 9 9 0 0 0 4 16.483Zm.714-13.897a7.714 7.714 0 1 1 8.572 12.828A7.714 7.714 0 0 1 4.714 2.586ZM9 3.857a.964.964 0 1 0 0 1.928.964.964 0 0 0 0-1.928Zm.643 9V7.714H7.07V9h1.286v3.857H6.428v1.286h5.143v-1.286H9.643Z\"></path></svg>",
     ]
+  // note: the script can detect that the fetched svg might be missing in the defaultSVGBoxs, 
+  // but if those SVGs are no longer used in all lyrics / theme, there will be no warning or logging to alert the developer.
+  // in such a case, they will just remains as trash code.
+  // ( the icon usages are highly dependent on the lyrics and themes )
+
   /* eslint-enable quotes, comma-dangle, indent */
 
   function normalizeClassNameInner (d, k1, k2) {
+    // in normal version and WithPrimis version, they share some similarity of the Layout Design.
+    // This is a case by case study to make the generalized class names for the content and styling control in GeniusLyrics.js
     switch (d) {
       case 'SongHeaderdesktop__Column':
         return 'LDESKTOPONLY__Column'
@@ -3428,7 +3446,7 @@ Link__StyledLink
 
     const originalHtmlText = htmlText
 
-    // unicode fix
+    // unicode fix - including various unicodes for "space" and zero-width spaces
     htmlText = htmlText.replace(/[\t\x20\u0009-\u000D\u0085\u00A0\u1680\u2000-\u200A\u2028-\u2029\u202F\u205F\u3000]+/g, ' ') /* spacing */ // eslint-disable-line no-control-regex
     htmlText = htmlText.replace(/[\u180E\u200B-\u200D\u2060\uFEFF]/g, '')
 
@@ -3456,6 +3474,10 @@ Link__StyledLink
           console.log('Genius Lyrics - REPX1')
           return '<style id="REPX1"></style>'
         } else if (genius.style.enabled === true && m.indexOf('<style data-styled="true" data-styled-version="5.1.0">') >= 0) {
+          // it is neccessary to check that the fetched style content contains at least the classes that specified in the array defaultStyleCheckerArr.
+          // if any of them cannot be found in the fetched style content, it might imply the layout design of Genius.com might have changed.
+          // In such a case, REPX2 would not be applied and the cache will just keep the original copy of the style text.
+          // defaultStyleCheckerArr shall be applied regardless of WithPrimis.
           const arr = defaultStyleCheckerArr
           let match = true
           const p = []
@@ -4259,7 +4281,7 @@ Link__StyledLink
     if (Object.prototype.hasOwnProperty.call(themes, values[1])) {
       genius.option.themeKey = values[1]
     } else {
-      genius.option.themeKey = Reflect.ownKeys(themes)[0]
+      genius.option.themeKey = Reflect.ownKeys(themes)[0] // might consider to be replaced by `Object.getOwnPropertyNames(themes)[0]`
       custom.GM.setValue('theme', genius.option.themeKey)
       console.error(`Invalid value for theme key: custom.GM.getValue("theme") = '${values[1]}', using default theme key: '${genius.option.themeKey}'`)
     }
