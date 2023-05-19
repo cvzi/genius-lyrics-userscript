@@ -2764,6 +2764,10 @@ pre{white-space:pre-wrap}
       row-gap: 3px;
     }
 
+    .LSongHeader__Outer a[href] {
+      text-decoration: none;
+    }
+
     html #application {
       padding-top: var(--egl-page-pt);
       padding-bottom: var(--egl-page-pb);
