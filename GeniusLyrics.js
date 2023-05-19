@@ -1451,6 +1451,15 @@ Genius:     ${originalUrl}
       background-position-x: 2px;
     }
   }
+  @keyframes headerSongTitleDOMAppended {
+    0% {
+      background-position-x: 1px;
+    }
+  
+    100% {
+      background-position-x: 2px;
+    }
+  }
   #application {
     animation: appDomAppended 1ms linear 0s 1 normal forwards;
   }
