@@ -2780,6 +2780,10 @@ pre{white-space:pre-wrap}
       margin: 0;
     }
 
+    .LSongHeader__Outer [class*="MetadataStats__LabelWithIcon"] {
+      column-gap: 8px;
+    }
+
     html #application {
       padding-top: var(--egl-page-pt);
       padding-bottom: var(--egl-page-pb);
