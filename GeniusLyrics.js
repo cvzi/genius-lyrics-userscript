@@ -1633,15 +1633,16 @@ Genius:     ${originalUrl}
     await new Promise(resolve => setTimeout(resolve, 100))
     const isContentStylesIsAdded = !!document.querySelector('style#egl-contentstyles')
     if (isContentStylesIsAdded) {
-      // theme.scrollableContainer = 'html #application'
-      theme.scrollableContainer = '.LSongHeader__Outer_Container'
+      theme.scrollableContainer = 'html #application'
+      // theme.scrollableContainer = '.LSongHeader__Outer_Container'
     }
     let scrollable = document.querySelector(theme.scrollableContainer)
     if (isScrollLyricsEnabled()) {
       // scrollable.scrollIntoView(true)
     } else if (scrollable) {
       const innerTopElement = isContentStylesIsAdded
-        ? scrollable.querySelector('.genius-lyrics-header-content')
+        // ? scrollable.querySelector('.genius-lyrics-header-content')
+        ? scrollable.querySelector('.LSongHeader__Outer_Container')
         : scrollable.firstElementChild
       scrollable = (innerTopElement || scrollable)
       // scrollable.scrollIntoView(true)
