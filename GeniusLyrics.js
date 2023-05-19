@@ -2754,7 +2754,9 @@ pre{white-space:pre-wrap}
     .LSongHeader__Outer [class*="HeaderArtistAndTracklist"][class*="_Container"] {
       flex-wrap: wrap;
     }
-    .LSongHeader__Outer [class*="HeaderCredits"] {
+
+    .LSongHeader__Outer [class*="HeaderCredits"],
+    .LSongHeader__Outer [class*="HeaderArtistAndTracklist"] {
       font-size: inherit;
     }
 
