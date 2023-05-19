@@ -1634,7 +1634,7 @@ Genius:     ${originalUrl}
     const isContentStylesIsAdded = !!document.querySelector('style#egl-contentstyles')
     if (isContentStylesIsAdded) {
       // theme.scrollableContainer = 'html #application'
-      theme.scrollableContainer = '#lyrics-root'
+      theme.scrollableContainer = '.LSongHeader__Outer_Container'
     }
     let scrollable = document.querySelector(theme.scrollableContainer)
     if (isScrollLyricsEnabled()) {
