@@ -2751,13 +2751,8 @@ pre{white-space:pre-wrap}
       ${contentStyle.includes('--egl-background') ? 'background-color: var(--egl-background);' : ''} /* for scroll bar color */
     }
 
-    HeaderArtistAndTracklistdesktop__Tracklist > a[href]:first-of-type {
-      margin-left: 6px;
-    }
-  
-
-    .LSongHeader__Outer_Container {
-      position: relative;
+    [class*="HeaderArtistAndTracklist"][class*="_Container"] {
+      flex-wrap: wrap;
     }
 
     html #application {
