@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.8.8
+// @version      5.9.0
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2020, cuzi (https://github.com/cvzi)
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -37,7 +37,7 @@
       * connect genius.com
 */
 
-/* global Reflect, top */
+/* global Reflect, top, HTMLElement */
 
 if (typeof module !== 'undefined') {
   module.exports = geniusLyrics
@@ -1451,6 +1451,15 @@ Genius:     ${originalUrl}
       background-position-x: 2px;
     }
   }
+  @keyframes headerSongTitleDOMAppended {
+    0% {
+      background-position-x: 1px;
+    }
+  
+    100% {
+      background-position-x: 2px;
+    }
+  }
   #application {
     animation: appDomAppended 1ms linear 0s 1 normal forwards;
   }
@@ -1472,6 +1481,10 @@ Genius:     ${originalUrl}
   #application.app11 div.LUNDETERMINED__Container .LHeaderArtistAndTracklist__Artist {
     animation: headerArtistAndTracklistDOMAppended 1ms linear 0s 1 normal forwards;
     /* animation removed once the class is determined */
+  }
+
+  #application.app11 .LSongHeader__Title {
+    animation: headerSongTitleDOMAppended 1ms linear 0s 1 normal forwards;
   }
 
   /* CSS for annotation container */
@@ -1621,13 +1634,15 @@ Genius:     ${originalUrl}
     const isContentStylesIsAdded = !!document.querySelector('style#egl-contentstyles')
     if (isContentStylesIsAdded) {
       theme.scrollableContainer = 'html #application'
+      // theme.scrollableContainer = '.LSongHeader__Outer_Container'
     }
     let scrollable = document.querySelector(theme.scrollableContainer)
     if (isScrollLyricsEnabled()) {
       // scrollable.scrollIntoView(true)
     } else if (scrollable) {
       const innerTopElement = isContentStylesIsAdded
-        ? scrollable.querySelector('.genius-lyrics-header-content')
+        // ? scrollable.querySelector('.genius-lyrics-header-content')
+        ? scrollable.querySelector('.LSongHeader__Outer_Container')
         : scrollable.firstElementChild
       scrollable = (innerTopElement || scrollable)
       // scrollable.scrollIntoView(true)
@@ -2721,7 +2736,54 @@ pre{white-space:pre-wrap}
     }
 
     html body {
-      padding-top: var(--egl-page-offset-top);
+      /* padding-top: var(--egl-page-offset-top); */
+    }
+
+    .LSongHeader__Outer_Container {
+      position: relative;
+      ${contentStyle.includes('--egl-background') ? 'background-color: var(--egl-background);' : ''} /* play safe */
+    }
+
+    .LSongHeader__Outer_Container > .LSongHeader__Outer {
+      transform: translateY(calc( -100% - 10vh ));
+      position: absolute;
+      height: var(--egl-page-offset-top);
+      overflow: auto;
+      width: 100%;
+      ${contentStyle.includes('--egl-background') ? 'background-color: var(--egl-background);' : ''} /* for scroll bar color */
+    }
+
+    .LSongHeader__Outer [class*="HeaderArtistAndTracklist"][class*="_Container"] {
+      flex-wrap: wrap;
+    }
+
+    .LSongHeader__Outer [class*="HeaderCredits"],
+    .LSongHeader__Outer [class*="HeaderArtistAndTracklist"] {
+      font-size: inherit;
+    }
+
+    .LSongHeader__Outer div[class] {
+      row-gap: 3px;
+    }
+
+    .LSongHeader__Outer a[href] {
+      text-decoration: none;
+      border-bottom: 1px solid rgba(127, 127, 127, 0.5);
+    }
+
+    .LSongHeader__Outer .LSongHeader__Title a[href] {
+      text-decoration: none;
+      border-bottom: 0px;
+    }
+
+    .LSongHeader__Outer [class*="SongHeader"][class*="_Information"] ~ [class*="SongHeader"][class*="Container"] {
+      width: auto;
+      min-width: initial;
+      margin: 0;
+    }
+
+    .LSongHeader__Outer [class*="MetadataStats__LabelWithIcon"] {
+      column-gap: 8px;
     }
 
     html #application {
@@ -3022,19 +3084,19 @@ pre{white-space:pre-wrap}
     /* the following shall apply with padding-top: XXX */
     /* the content might be hidden if height > XXX */
     /* the max-height allow the header box to be scrolled if height > XXX */
-    .genius-lyrics-header-container {
+    disabled.genius-lyrics-header-container {
       position: relative;
       /* set 100% width for inner absolute box */
     }
 
-    .genius-lyrics-header-container > * {
+    disabled.genius-lyrics-header-container > * {
       /* main purpose for adding class using CSS event triggering; avoid :has() */
       --genius-lyrics-header-content-display: none;
       display: var(--genius-lyrics-header-content-display);
       /* none by default */
     }
 
-    .genius-lyrics-header-container > .genius-lyrics-header-content {
+    disabled.genius-lyrics-header-container > .genius-lyrics-header-content {
 
       ${contentStyle.includes('--egl-infobox-background') ? 'background-color: var(--egl-infobox-background);' : ''}
       /* give some color to info container background */
@@ -3079,7 +3141,8 @@ pre{white-space:pre-wrap}
     }
 
     div[class*="HeaderArtistAndTracklistPrimis__Container"] div[class*="HeaderArtistAndTracklistPrimis__Tracklist"]>a[href], /* desktop_react_atf */
-    div[class*="HeaderTracklist__Container"] div[class*="HeaderTracklist__Album"] a[href] /* desktop_react */
+    div[class*="HeaderTracklist__Container"] div[class*="HeaderTracklist__Album"] a[href], /* desktop_react */
+    div[class*="HeaderArtistAndTracklistdesktop__Container"] div[class*="HeaderArtistAndTracklistdesktop__Tracklist"] a[href] /* new desktop */
      {
       margin: 6px;
     }
@@ -3106,7 +3169,7 @@ pre{white-space:pre-wrap}
       white-space: normal;
     }
 
-    .genius-lyrics-header-content div[class*="MetadataStats__Stats"] {
+    disabled.genius-lyrics-header-content div[class*="MetadataStats__Stats"] {
       /* using flexbox with wrapping */
       display: flex;
       flex-wrap: wrap;
@@ -3131,7 +3194,7 @@ pre{white-space:pre-wrap}
       justify-self: center;
     }
 
-    .genius-lyrics-header-content div[class*="MetadataStats__Stats"] > [class] {
+    disabled.genius-lyrics-header-content div[class*="MetadataStats__Stats"] > [class] {
       margin-right: 0;
       display: flex;
       justify-content: center;
@@ -3139,13 +3202,13 @@ pre{white-space:pre-wrap}
       column-gap: 2px;
     }
 
-    .genius-lyrics-header-content div[class*="MetadataStats__Stats"] button[class*="LabelWithIcon__Container"] {
+    disabled.genius-lyrics-header-content div[class*="MetadataStats__Stats"] button[class*="LabelWithIcon__Container"] {
       display: flex;
       justify-content: center;
       cursor: default;
     }
 
-    .genius-lyrics-header-content div[class*="MetadataStats__Stats"] span[class*="LabelWithIcon__Container"] {
+    disabled.genius-lyrics-header-content div[class*="MetadataStats__Stats"] span[class*="LabelWithIcon__Container"] {
       display: flex;
       flex-direction: row;
       flex-wrap: nowrap;
@@ -3173,11 +3236,11 @@ pre{white-space:pre-wrap}
     }
 
 
-    .genius-lyrics-header-content div[class].LHeaderMetaCredits__List{
+    disabled.genius-lyrics-header-content div[class].LHeaderMetaCredits__List{
       font-size: 92%;
     }
-    .genius-lyrics-header-content div[class].LHeaderMetaCredits__List span,
-    .genius-lyrics-header-content div[class].LHeaderMetaCredits__List button{
+    disabled.genius-lyrics-header-content div[class].LHeaderMetaCredits__List span,
+    disabled.genius-lyrics-header-content div[class].LHeaderMetaCredits__List button{
       font-size: inherit;
     }
     button[class*="List__More"] {
@@ -3212,7 +3275,7 @@ pre{white-space:pre-wrap}
       flex-direction: column;
     }
 
-    .genius-lyrics-header-content a[href][class*="Link__"] {
+    disabled.genius-lyrics-header-content a[href][class*="Link__"] {
       color: var(--egl-link-color);
       font-weight: 100;
       text-decoration: none;
@@ -3223,28 +3286,28 @@ pre{white-space:pre-wrap}
     }
 
     /* anchor links like #about, #primary-album */
-    .genius-lyrics-header-content a[href^="#"][class*="Link_"]
+    disabled.genius-lyrics-header-content a[href^="#"][class*="Link_"]
     {
       --egl-link-color: '--NULL--';
       pointer-events: none;
       text-decoration: inherit;
     }
 
-    .genius-lyrics-header-content a[href^="#"][class*="Link_"] *
+    disabled.genius-lyrics-header-content a[href^="#"][class*="Link_"] *
     {
       pointer-events: all; /* text can be selected */
       text-decoration: inherit;
     }
 
-    .genius-lyrics-header-content a[href^="#"][class*="Link_"] > span[class*="InlineSvg"]:last-child,
-    .genius-lyrics-header-content a[href^="#"][class*="Link_"] > span[class*="InlineSvg"]:last-child > svg
+    disabled.genius-lyrics-header-content a[href^="#"][class*="Link_"] > span[class*="InlineSvg"]:last-child,
+    disabled.genius-lyrics-header-content a[href^="#"][class*="Link_"] > span[class*="InlineSvg"]:last-child > svg
     {
       display: none;
     }
     
     /* only for #about Read More */
-    .genius-lyrics-header-content a[href^="#"][class*="Link_"] > span[class*="HeaderBio__ViewBio"]:last-child,
-    .genius-lyrics-header-content a[href^="#"][class*="Link_"] > span[class*="HeaderBio__ViewBio"]:last-child svg
+    disabled.genius-lyrics-header-content a[href^="#"][class*="Link_"] > span[class*="HeaderBio__ViewBio"]:last-child,
+    disabled.genius-lyrics-header-content a[href^="#"][class*="Link_"] > span[class*="HeaderBio__ViewBio"]:last-child svg
     {
       display: none;
     }
@@ -4415,6 +4478,24 @@ Link__StyledLink
       }
     }
 
+    function addClassNameHeaderOuter (evTarget) {
+      /** @type {HTMLElement | null} */
+      const elm = (evTarget || 0)
+      if (elm && elm.matches('.LSongHeader__Title')) {
+        let lastMatchParent = null
+        for (let parent = elm.parentNode; parent instanceof HTMLElement; parent = parent.parentNode) {
+          if (parent.querySelector('#lyrics-root')) {
+            break
+          }
+          lastMatchParent = parent
+        }
+        if (lastMatchParent !== null && lastMatchParent.nodeName === 'DIV') {
+          lastMatchParent.classList.add('LSongHeader__Outer')
+          lastMatchParent.parentNode.classList.add('LSongHeader__Outer_Container')
+        }
+      }
+    }
+
     function cssTriggeringHook (resolve) {
       document.addEventListener('animationstart', (ev) => {
         const evTarget = ev.target
@@ -4435,6 +4516,9 @@ Link__StyledLink
         }
         if (ev.animationName === 'headerArtistAndTracklistDOMAppended') {
           Promise.resolve(evTarget).then(addClassNameToHeaderArtistAndTracklist)
+        }
+        if (ev.animationName === 'headerSongTitleDOMAppended') {
+          Promise.resolve(evTarget).then(addClassNameHeaderOuter)
         }
       }, true)
     }
