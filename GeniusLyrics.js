@@ -2769,6 +2769,11 @@ pre{white-space:pre-wrap}
       border-bottom: 1px solid rgba(127, 127, 127, 0.5);
     }
 
+    .LSongHeader__Outer .LSongHeader__Title a[href] {
+      text-decoration: none;
+      border-bottom: 0px;
+    }
+
     .LSongHeader__Outer [class*="SongHeader"][class*="_Information"] ~ [class*="SongHeader"][class*="Container"] {
       width: auto;
       min-width: initial;
@@ -4470,7 +4475,6 @@ Link__StyledLink
     function addClassNameHeaderOuter (evTarget) {
       /** @type {HTMLElement | null} */
       const elm = (evTarget || 0)
-      console.log(elm, elm.matches('.LSongHeader__Title'))
       if (elm && elm.matches('.LSongHeader__Title')) {
         let lastMatchParent = null
         for (let parent = elm.parentNode; parent instanceof HTMLElement; parent = parent.parentNode) {
