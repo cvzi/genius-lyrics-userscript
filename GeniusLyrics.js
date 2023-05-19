@@ -2739,6 +2739,7 @@ pre{white-space:pre-wrap}
 
     .LSongHeader__Outer_Container {
       position: relative;
+      ${contentStyle.includes('--egl-background') ? 'background-color: var(--egl-background);' : ''} /* play safe */
     }
 
     .LSongHeader__Outer_Container > .LSongHeader__Outer {
@@ -2747,6 +2748,7 @@ pre{white-space:pre-wrap}
       height: var(--egl-page-offset-top);
       overflow: auto;
       width: 100%;
+      ${contentStyle.includes('--egl-background') ? 'background-color: var(--egl-background);' : ''} /* for scroll bar color */
     }
 
     HeaderArtistAndTracklistdesktop__Tracklist > a[href]:first-of-type {
