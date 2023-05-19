@@ -3056,19 +3056,19 @@ pre{white-space:pre-wrap}
     /* the following shall apply with padding-top: XXX */
     /* the content might be hidden if height > XXX */
     /* the max-height allow the header box to be scrolled if height > XXX */
-    .genius-lyrics-header-container {
+    disabled.genius-lyrics-header-container {
       position: relative;
       /* set 100% width for inner absolute box */
     }
 
-    .genius-lyrics-header-container > * {
+    disabled.genius-lyrics-header-container > * {
       /* main purpose for adding class using CSS event triggering; avoid :has() */
       --genius-lyrics-header-content-display: none;
       display: var(--genius-lyrics-header-content-display);
       /* none by default */
     }
 
-    .genius-lyrics-header-container > .genius-lyrics-header-content {
+    disabled.genius-lyrics-header-container > .genius-lyrics-header-content {
 
       ${contentStyle.includes('--egl-infobox-background') ? 'background-color: var(--egl-infobox-background);' : ''}
       /* give some color to info container background */
@@ -3141,7 +3141,7 @@ pre{white-space:pre-wrap}
       white-space: normal;
     }
 
-    .genius-lyrics-header-content div[class*="MetadataStats__Stats"] {
+    disabled.genius-lyrics-header-content div[class*="MetadataStats__Stats"] {
       /* using flexbox with wrapping */
       display: flex;
       flex-wrap: wrap;
@@ -3166,7 +3166,7 @@ pre{white-space:pre-wrap}
       justify-self: center;
     }
 
-    .genius-lyrics-header-content div[class*="MetadataStats__Stats"] > [class] {
+    disabled.genius-lyrics-header-content div[class*="MetadataStats__Stats"] > [class] {
       margin-right: 0;
       display: flex;
       justify-content: center;
@@ -3174,13 +3174,13 @@ pre{white-space:pre-wrap}
       column-gap: 2px;
     }
 
-    .genius-lyrics-header-content div[class*="MetadataStats__Stats"] button[class*="LabelWithIcon__Container"] {
+    disabled.genius-lyrics-header-content div[class*="MetadataStats__Stats"] button[class*="LabelWithIcon__Container"] {
       display: flex;
       justify-content: center;
       cursor: default;
     }
 
-    .genius-lyrics-header-content div[class*="MetadataStats__Stats"] span[class*="LabelWithIcon__Container"] {
+    disabled.genius-lyrics-header-content div[class*="MetadataStats__Stats"] span[class*="LabelWithIcon__Container"] {
       display: flex;
       flex-direction: row;
       flex-wrap: nowrap;
@@ -3208,11 +3208,11 @@ pre{white-space:pre-wrap}
     }
 
 
-    .genius-lyrics-header-content div[class].LHeaderMetaCredits__List{
+    disabled.genius-lyrics-header-content div[class].LHeaderMetaCredits__List{
       font-size: 92%;
     }
-    .genius-lyrics-header-content div[class].LHeaderMetaCredits__List span,
-    .genius-lyrics-header-content div[class].LHeaderMetaCredits__List button{
+    disabled.genius-lyrics-header-content div[class].LHeaderMetaCredits__List span,
+    disabled.genius-lyrics-header-content div[class].LHeaderMetaCredits__List button{
       font-size: inherit;
     }
     button[class*="List__More"] {
@@ -3247,7 +3247,7 @@ pre{white-space:pre-wrap}
       flex-direction: column;
     }
 
-    .genius-lyrics-header-content a[href][class*="Link__"] {
+    disabled.genius-lyrics-header-content a[href][class*="Link__"] {
       color: var(--egl-link-color);
       font-weight: 100;
       text-decoration: none;
@@ -3258,28 +3258,28 @@ pre{white-space:pre-wrap}
     }
 
     /* anchor links like #about, #primary-album */
-    .genius-lyrics-header-content a[href^="#"][class*="Link_"]
+    disabled.genius-lyrics-header-content a[href^="#"][class*="Link_"]
     {
       --egl-link-color: '--NULL--';
       pointer-events: none;
       text-decoration: inherit;
     }
 
-    .genius-lyrics-header-content a[href^="#"][class*="Link_"] *
+    disabled.genius-lyrics-header-content a[href^="#"][class*="Link_"] *
     {
       pointer-events: all; /* text can be selected */
       text-decoration: inherit;
     }
 
-    .genius-lyrics-header-content a[href^="#"][class*="Link_"] > span[class*="InlineSvg"]:last-child,
-    .genius-lyrics-header-content a[href^="#"][class*="Link_"] > span[class*="InlineSvg"]:last-child > svg
+    disabled.genius-lyrics-header-content a[href^="#"][class*="Link_"] > span[class*="InlineSvg"]:last-child,
+    disabled.genius-lyrics-header-content a[href^="#"][class*="Link_"] > span[class*="InlineSvg"]:last-child > svg
     {
       display: none;
     }
     
     /* only for #about Read More */
-    .genius-lyrics-header-content a[href^="#"][class*="Link_"] > span[class*="HeaderBio__ViewBio"]:last-child,
-    .genius-lyrics-header-content a[href^="#"][class*="Link_"] > span[class*="HeaderBio__ViewBio"]:last-child svg
+    disabled.genius-lyrics-header-content a[href^="#"][class*="Link_"] > span[class*="HeaderBio__ViewBio"]:last-child,
+    disabled.genius-lyrics-header-content a[href^="#"][class*="Link_"] > span[class*="HeaderBio__ViewBio"]:last-child svg
     {
       display: none;
     }
@@ -4453,11 +4453,12 @@ Link__StyledLink
     function addClassNameHeaderOuter (evTarget) {
       /** @type {HTMLElement | null} */
       const elm = (evTarget || 0)
+      console.log(elm, elm.matches('.LSongHeader__Title'))
       if (elm && elm.matches('.LSongHeader__Title')) {
-        let lastMatchParent = null;
+        let lastMatchParent = null
         for (let parent = elm.parentNode; parent instanceof HTMLElement; parent = parent.parentNode) {
-          if (parent.contains('#lyrics-root')) {
-            break;
+          if (parent.querySelector('#lyrics-root')) {
+            break
           }
           lastMatchParent = parent;
         }
