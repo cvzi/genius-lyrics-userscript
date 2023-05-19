@@ -1633,7 +1633,8 @@ Genius:     ${originalUrl}
     await new Promise(resolve => setTimeout(resolve, 100))
     const isContentStylesIsAdded = !!document.querySelector('style#egl-contentstyles')
     if (isContentStylesIsAdded) {
-      theme.scrollableContainer = 'html #application'
+      // theme.scrollableContainer = 'html #application'
+      theme.scrollableContainer = '#lyrics-root'
     }
     let scrollable = document.querySelector(theme.scrollableContainer)
     if (isScrollLyricsEnabled()) {
