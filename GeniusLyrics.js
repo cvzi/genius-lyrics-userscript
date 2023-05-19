@@ -1474,6 +1474,10 @@ Genius:     ${originalUrl}
     /* animation removed once the class is determined */
   }
 
+  #application.app11 .LSongHeader__Title {
+    animation: headerSongTitleDOMAppended 1ms linear 0s 1 normal forwards;
+  }
+
   /* CSS for annotation container */
   #annotationcontainer958 {
     opacity:0.0;
@@ -2721,7 +2725,28 @@ pre{white-space:pre-wrap}
     }
 
     html body {
-      padding-top: var(--egl-page-offset-top);
+      /* padding-top: var(--egl-page-offset-top); */
+    }
+
+    .LSongHeader__Outer_Container {
+      position: relative;
+    }
+
+    .LSongHeader__Outer_Container > .LSongHeader__Outer {
+      transform: translateY(calc( -100% - 10vh ));
+      position: absolute;
+      height: var(--egl-page-offset-top);
+      overflow: auto;
+      width: 100%;
+    }
+
+    HeaderArtistAndTracklistdesktop__Tracklist > a[href]:first-of-type {
+      margin-left: 6px;
+    }
+  
+
+    .LSongHeader__Outer_Container {
+      position: relative;
     }
 
     html #application {
@@ -3079,7 +3104,8 @@ pre{white-space:pre-wrap}
     }
 
     div[class*="HeaderArtistAndTracklistPrimis__Container"] div[class*="HeaderArtistAndTracklistPrimis__Tracklist"]>a[href], /* desktop_react_atf */
-    div[class*="HeaderTracklist__Container"] div[class*="HeaderTracklist__Album"] a[href] /* desktop_react */
+    div[class*="HeaderTracklist__Container"] div[class*="HeaderTracklist__Album"] a[href], /* desktop_react */
+    div[class*="HeaderArtistAndTracklistdesktop__Container"] div[class*="HeaderArtistAndTracklistdesktop__Tracklist"] a[href] /* new desktop */
      {
       margin: 6px;
     }
@@ -4415,6 +4441,24 @@ Link__StyledLink
       }
     }
 
+    function addClassNameHeaderOuter (evTarget) {
+      /** @type {HTMLElement | null} */
+      const elm = (evTarget || 0)
+      if (elm && elm.matches('.LSongHeader__Title')) {
+        let lastMatchParent = null;
+        for (let parent = elm.parentNode; parent instanceof HTMLElement; parent = parent.parentNode) {
+          if (parent.contains('#lyrics-root')) {
+            break;
+          }
+          lastMatchParent = parent;
+        }
+        if (lastMatchParent !== null && lastMatchParent.nodeName === 'DIV') {
+          lastMatchParent.classList.add('LSongHeader__Outer');
+          lastMatchParent.parentNode.classList.add('LSongHeader__Outer_Container');
+        }
+      }
+    }
+
     function cssTriggeringHook (resolve) {
       document.addEventListener('animationstart', (ev) => {
         const evTarget = ev.target
@@ -4435,6 +4479,9 @@ Link__StyledLink
         }
         if (ev.animationName === 'headerArtistAndTracklistDOMAppended') {
           Promise.resolve(evTarget).then(addClassNameToHeaderArtistAndTracklist)
+        }
+        if (ev.animationName === 'headerSongTitleDOMAppended') {
+          Promise.resolve(evTarget).then(addClassNameHeaderOuter)
         }
       }, true)
     }
