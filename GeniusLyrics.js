@@ -2751,8 +2751,11 @@ pre{white-space:pre-wrap}
       ${contentStyle.includes('--egl-background') ? 'background-color: var(--egl-background);' : ''} /* for scroll bar color */
     }
 
-    [class*="HeaderArtistAndTracklist"][class*="_Container"] {
+    .LSongHeader__Outer [class*="HeaderArtistAndTracklist"][class*="_Container"] {
       flex-wrap: wrap;
+    }
+    .LSongHeader__Outer [class*="HeaderCredits"] {
+      font-size: inherit;
     }
 
     html #application {
