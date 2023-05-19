@@ -37,7 +37,7 @@
       * connect genius.com
 */
 
-/* global Reflect, top */
+/* global Reflect, top, HTMLElement */
 
 if (typeof module !== 'undefined') {
   module.exports = geniusLyrics
@@ -4487,11 +4487,11 @@ Link__StyledLink
           if (parent.querySelector('#lyrics-root')) {
             break
           }
-          lastMatchParent = parent;
+          lastMatchParent = parent
         }
         if (lastMatchParent !== null && lastMatchParent.nodeName === 'DIV') {
-          lastMatchParent.classList.add('LSongHeader__Outer');
-          lastMatchParent.parentNode.classList.add('LSongHeader__Outer_Container');
+          lastMatchParent.classList.add('LSongHeader__Outer')
+          lastMatchParent.parentNode.classList.add('LSongHeader__Outer_Container')
         }
       }
     }
