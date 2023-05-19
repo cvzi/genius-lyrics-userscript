@@ -2766,6 +2766,13 @@ pre{white-space:pre-wrap}
 
     .LSongHeader__Outer a[href] {
       text-decoration: none;
+      border-bottom: 1px solid rgba(127, 127, 127, 0.5);
+    }
+
+    .LSongHeader__Outer [class*="SongHeader"][class*="_Information"] ~ [class*="SongHeader"][class*="Container"] {
+      width: auto;
+      min-width: initial;
+      margin: 0;
     }
 
     html #application {
