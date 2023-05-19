@@ -2760,6 +2760,10 @@ pre{white-space:pre-wrap}
       font-size: inherit;
     }
 
+    .LSongHeader__Outer div[class] {
+      row-gap: 3px;
+    }
+
     html #application {
       padding-top: var(--egl-page-pt);
       padding-bottom: var(--egl-page-pb);
