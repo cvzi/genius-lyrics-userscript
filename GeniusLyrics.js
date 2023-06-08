@@ -973,6 +973,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         'X-Requested-With': 'XMLHttpRequest'
       },
       t: 'annotations', // differentiate with other types of requesting
+      responseType: 'json',
       error: function loadGeniusAnnotationsOnError (response) {
         window.alert(custom.scriptName + '\n\nError loadGeniusAnnotations(' + JSON.stringify(song) + ', cb):\n' + response)
         cb(annotations)
