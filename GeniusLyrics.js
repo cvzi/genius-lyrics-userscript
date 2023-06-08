@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.9.1
+// @version      5.9.2
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2020, cuzi (https://github.com/cvzi)
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -4213,7 +4213,7 @@ Link__StyledLink
         debugButton.style.opacity = '0.2'
       }
     }
-    updateDebugButton()
+    updateDebugButton(debugButton)
     debugButton.addEventListener('click', function onDebugButtonClick (evt) {
       const debugButton = evt.target
       genius.debug = !genius.debug
