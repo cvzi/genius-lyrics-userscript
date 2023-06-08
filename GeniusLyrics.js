@@ -482,6 +482,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     }
 
     if (obj.responseType) req.responseType = obj.responseType
+    if (obj.responseType === 'json') req.overrideMimeType = 'application/json; charset=utf-8'
 
     return custom.GM.xmlHttpRequest(req)
   }
