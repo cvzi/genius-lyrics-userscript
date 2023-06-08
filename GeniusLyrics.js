@@ -429,20 +429,22 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     if (cachekey in requestCache) {
       return obj.load(JSON.parse(requestCache[cachekey].split('\n')[1]), null)
     }
+    let method = obj.method ? obj.method : 'GET'
 
     let headers = {
       Referer: obj.url,
-      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+      // 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
       Host: getHostname(obj.url),
       'User-Agent': navigator.userAgent
     }
+    if (method === 'POST') headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8'
     if (obj.headers) {
       headers = Object.assign(headers, obj.headers)
     }
 
     const req = {
       url: obj.url,
-      method: obj.method ? obj.method : 'GET',
+      method,
       data: obj.data,
       headers,
       onerror: obj.error ? obj.error : function xmlHttpRequestGenericOnError (response) { console.error('xmlHttpRequestGenericOnError: ' + response) },
