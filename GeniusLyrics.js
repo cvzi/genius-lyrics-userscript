@@ -440,7 +440,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       headers = Object.assign(headers, obj.headers)
     }
 
-    return custom.GM.xmlHttpRequest({
+    const req = {
       url: obj.url,
       method: obj.method ? obj.method : 'GET',
       data: obj.data,
@@ -476,7 +476,11 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         }
         obj.load(cacheObject, cacheResult)
       }
-    })
+    }
+
+    if (obj.responseType) req.responseType = obj.responseType
+
+    return custom.GM.xmlHttpRequest(req)
   }
 
   function generateCompoundTitle (title, artists) {
@@ -665,6 +669,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         'X-Requested-With': 'XMLHttpRequest'
       },
       t: 'search', // differentiate with other types of requesting
+      responseType: 'json',
       error: function geniusSearchOnError (response) {
         window.alert(custom.scriptName + '\n\nError in geniusSearch(' + JSON.stringify(query) + ', ' + ('name' in cb ? cb.name : 'cb') + '):\n' + response)
         invalidateRequestCache(requestObj)
