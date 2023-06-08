@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.9.2
+// @version      5.9.3
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2020, cuzi (https://github.com/cvzi)
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -552,7 +552,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       if (!result) return
       const primaryArtist = result.primary_artist || 0
       const minimizeHit = genius.minimizeHit
-      const isGeniusTranslationLike = (primaryArtist && (primaryArtist.slug || '').startsWith('Genius-') && hit.result.language !== 'romanization') || (/\bgenius\b\S+\btranslations?\b/.test(hit.result.path || ''))
+      const isGeniusTranslationLike = (primaryArtist && (primaryArtist.slug || '').startsWith('Genius-') && hit.result.language !== 'romanization') || (/\b[Gg]enius\b\S+\btranslations?\b/.test(hit.result.path || ''))
       delete hit.highlights // always []
       delete result.annotation_count // always 0
       delete result.pyongs_count // always null
