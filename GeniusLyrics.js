@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.9.0
+// @version      5.9.1
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2020, cuzi (https://github.com/cvzi)
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -99,6 +99,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     option: {
       autoShow: true,
       themeKey: null,
+      romajiPriority: 'low',
       cacheHTMLRequest: true, // be careful of cache size if trimHTMLReponseText is false; around 50KB per lyrics including selection cache
       requestCallbackResponseTextOnly: true, // default true; just need the request text
       enableStyleSubstitution: false, // default false; some checking are provided but not guaranteed
@@ -129,7 +130,8 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     },
     current: { // store the title and artists of the current lyrics [cached and able to reload]
       title: '', // these shall be replaced by CompoundTitle
-      artists: '' // these shall be replaced by CompoundTitle
+      artists: '', // these shall be replaced by CompoundTitle
+      compoundTitle: ''
     },
     iv: {
       main: null // unless setupMain is provided and the interval / looping is controlled externally
@@ -550,7 +552,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       if (!result) return
       const primaryArtist = result.primary_artist || 0
       const minimizeHit = genius.minimizeHit
-      const isGeniusTranslationLike = primaryArtist && (primaryArtist.slug || '').startsWith('Genius-') && hit.result.language !== 'romanization'
+      const isGeniusTranslationLike = (primaryArtist && (primaryArtist.slug || '').startsWith('Genius-') && hit.result.language !== 'romanization') || (/\bgenius\b\S+\btranslations?\b/.test(hit.result.path || ''))
       delete hit.highlights // always []
       delete result.annotation_count // always 0
       delete result.pyongs_count // always null
@@ -628,7 +630,11 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
           hit._order = 1300
         }
         if (hit.result.language === 'romanization') {
-          hit._order -= 50
+          if (genius.option.romajiPriority === 'low') {
+            hit._order -= 50
+          } else if (genius.option.romajiPriority === 'high') {
+            hit._order += 50
+          }
         }
         if (hit.result.updated_by_human_at) {
           hit._order += 400
@@ -3993,6 +3999,13 @@ Link__StyledLink
 
     loadCache()
 
+    const clearCacheFn = () => {
+      return Promise.all([custom.GM.setValue('selectioncache', '{}'), custom.GM.setValue('requestcache', '{}')]).then(function () {
+        selectionCache = cleanSelectionCache()
+        requestCache = {}
+      })
+    }
+
     // Blur background
     for (const e of document.querySelectorAll('body > *')) {
       e.style.filter = 'blur(4px)'
@@ -4027,7 +4040,8 @@ Link__StyledLink
       genius.option.autoShow = v === true || v === 'true'
       checkAutoShow.checked = genius.option.autoShow
     })
-    const onAutoShow = function onAutoShowListener () {
+    const onAutoShow = function onAutoShowListener (evt) {
+      const checkAutoShow = evt.target
       custom.GM.setValue('optionautoshow', checkAutoShow.checked === true)
       genius.option.autoShow = checkAutoShow.checked === true
     }
@@ -4053,7 +4067,8 @@ Link__StyledLink
       }
       option.textContent = themes[key].name
     }
-    const onSelectTheme = function onSelectThemeListener () {
+    const onSelectTheme = function onSelectThemeListener (evt) {
+      const selectTheme = evt.target
       const hasChanged = genius.option.themeKey !== selectTheme.selectedOptions[0].value
       if (hasChanged) {
         genius.option.themeKey = selectTheme.selectedOptions[0].value
@@ -4076,7 +4091,8 @@ Link__StyledLink
     checkAnnotationsEnabled.type = 'checkbox'
     checkAnnotationsEnabled.id = 'checkAnnotationsEnabled748'
     checkAnnotationsEnabled.checked = annotationsEnabled === true
-    const onAnnotationsEnabled = function onAnnotationsEnabledListener () {
+    const onAnnotationsEnabled = function onAnnotationsEnabledListener (evt) {
+      const checkAnnotationsEnabled = evt.target
       if (checkAnnotationsEnabled.checked !== annotationsEnabled) {
         annotationsEnabled = checkAnnotationsEnabled.checked === true
         custom.addLyrics(true)
@@ -4096,7 +4112,8 @@ Link__StyledLink
     checkAutoScrollEnabled.type = 'checkbox'
     checkAutoScrollEnabled.id = 'checkAutoScrollEnabled748'
     checkAutoScrollEnabled.checked = autoScrollEnabled === true
-    const onAutoScrollEnabled = function onAutoScrollEnabledListener () {
+    const onAutoScrollEnabled = function onAutoScrollEnabledListener (evt) {
+      const checkAutoScrollEnabled = evt.target
       const newValue = checkAutoScrollEnabled.checked === true
       if (newValue !== autoScrollEnabled) {
         custom.GM.setValue('autoscrollenabled', newValue).then(() => {
@@ -4121,6 +4138,43 @@ Link__StyledLink
       }
     }
 
+    // Select: RomajiPriority
+    div = win.appendChild(document.createElement('div'))
+    div.textContent = 'Romaji: '
+    const selectRomajiPriority = div.appendChild(document.createElement('select'))
+    const romajiPriorities = [
+      {
+        text: 'Low Priority',
+        value: 'low'
+      },
+      {
+        text: 'High Priority',
+        value: 'high'
+      }
+    ]
+    for (const o of romajiPriorities) {
+      const option = selectRomajiPriority.appendChild(document.createElement('option'))
+      option.value = o.value
+      if (genius.option.romajiPriority === o.value) {
+        option.selected = true
+      }
+      option.textContent = o.text
+    }
+    const onSelectRomajiPriority = function onSelectRomajiListener (evt) {
+      const selectRomajiPriority = evt.target
+      const hasChanged = genius.option.romajiPriority !== selectRomajiPriority.selectedOptions[0].value
+      if (hasChanged) {
+        genius.option.romajiPriority = selectRomajiPriority.selectedOptions[0].value
+        custom.GM.setValue('romajipriority', genius.option.romajiPriority).then(() => {
+          // cache is required to clear for the reselection
+          clearCacheFn().then(() => {
+            // Callback = ?
+          })
+        })
+      }
+    }
+    selectRomajiPriority.addEventListener('change', onSelectRomajiPriority)
+
     // Buttons
     div = win.appendChild(document.createElement('div'))
 
@@ -4140,18 +4194,17 @@ Link__StyledLink
     const bytes = metricPrefix(JSON.stringify(selectionCache).length + JSON.stringify(requestCache).length, 2, 1024) + 'Bytes'
     const clearCacheButton = div.appendChild(document.createElement('button'))
     clearCacheButton.textContent = `Clear cache (${bytes})`
-    clearCacheButton.addEventListener('click', function onClearCacheButtonClick () {
-      Promise.all([custom.GM.setValue('selectioncache', '{}'), custom.GM.setValue('requestcache', '{}')]).then(function () {
+    clearCacheButton.addEventListener('click', function onClearCacheButtonClick (evt) {
+      const clearCacheButton = evt.target
+      clearCacheFn().then(function () {
         clearCacheButton.innerHTML = 'Cleared'
-        selectionCache = cleanSelectionCache()
-        requestCache = {}
       })
     })
 
     const debugButton = div.appendChild(document.createElement('button'))
     debugButton.title = 'Do not enable this.'
     debugButton.style.float = 'right'
-    const updateDebugButton = function () {
+    const updateDebugButton = function (debugButton) {
       if (genius.debug) {
         debugButton.innerHTML = 'Debug is on'
         debugButton.style.opacity = '1.0'
@@ -4161,10 +4214,11 @@ Link__StyledLink
       }
     }
     updateDebugButton()
-    debugButton.addEventListener('click', function onDebugButtonClick () {
+    debugButton.addEventListener('click', function onDebugButtonClick (evt) {
+      const debugButton = evt.target
       genius.debug = !genius.debug
       custom.GM.setValue('debug', genius.debug).then(function () {
-        updateDebugButton()
+        updateDebugButton(debugButton)
       })
     })
 
@@ -4348,7 +4402,8 @@ Link__StyledLink
       custom.GM.getValue('debug', genius.debug),
       custom.GM.getValue('theme', genius.option.themeKey),
       custom.GM.getValue('annotationsenabled', annotationsEnabled),
-      custom.GM.getValue('autoscrollenabled', autoScrollEnabled)
+      custom.GM.getValue('autoscrollenabled', autoScrollEnabled),
+      custom.GM.getValue('romajipriority', genius.option.romajiPriority)
     ])
 
     // set up variables
@@ -4363,6 +4418,7 @@ Link__StyledLink
     theme = themes[genius.option.themeKey]
     annotationsEnabled = !!values[2]
     autoScrollEnabled = !!values[3]
+    genius.option.romajiPriority = values[4] || 'low'
 
     if (genius.onThemeChanged) {
       for (const f of genius.onThemeChanged) {
