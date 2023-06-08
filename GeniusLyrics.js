@@ -429,7 +429,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     if (cachekey in requestCache) {
       return obj.load(JSON.parse(requestCache[cachekey].split('\n')[1]), null)
     }
-    let method = obj.method ? obj.method : 'GET'
+    const method = obj.method ? obj.method : 'GET'
 
     let headers = {
       Referer: obj.url,
@@ -438,6 +438,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       'User-Agent': navigator.userAgent
     }
     if (method === 'POST') headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8'
+    if (obj.responseType === 'json') headers['Accept'] = 'application/json' // eslint-disable-line dot-notation
     if (obj.headers) {
       headers = Object.assign(headers, obj.headers)
     }
