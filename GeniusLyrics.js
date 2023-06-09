@@ -5,7 +5,7 @@
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
 // @version      5.9.3
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
-// @copyright    2020, cuzi (https://github.com/cvzi)
+// @copyright    2019, cuzi (cuzi@openmail.cc) and contributors
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
 // @icon         https://avatars.githubusercontent.com/u/2738430?s=200&v=4
 // ==/UserLibrary==
@@ -13,7 +13,7 @@
 // ==/UserScript==
 
 /*
-    Copyright (C) 2019 cuzi (cuzi@openmail.cc)
+    Copyright (C) 2019, cuzi (cuzi@openmail.cc) and contributors
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -4225,7 +4225,7 @@ Link__StyledLink
     // Footer
     div = win.appendChild(document.createElement('div'))
     div.innerHTML = `<p style="font-size:15px;">
-      Powered by <a style="font-size:15px;" target="_blank" href="https://github.com/cvzi/genius-lyrics-userscript/">GeniusLyrics.js</a>, Copyright © 2019 <a style="font-size:15px;" href="mailto:cuzi@openmail.cc">cuzi</a>.
+      Powered by <a style="font-size:15px;" target="_blank" href="https://github.com/cvzi/genius-lyrics-userscript/">GeniusLyrics.js</a>, Copyright © 2019 <a style="font-size:15px;" href="mailto:cuzi@openmail.cc">cuzi</a> and contributors.
       <br>Licensed under the GNU General Public License v3.0</p>`
   }
 
