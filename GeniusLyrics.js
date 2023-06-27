@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.9.3
+// @version      5.9.4
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2019, cuzi (cuzi@openmail.cc) and contributors
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -666,6 +666,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       },
       t: 'search', // differentiate with other types of requesting
       error: function geniusSearchOnError (response) {
+        console.debug(custom.scriptName + '\n\nError in geniusSearch(' + JSON.stringify(query) + ', ' + ('name' in cb ? cb.name : 'cb') + '):\n' + response) // log into the console window for copying
         window.alert(custom.scriptName + '\n\nError in geniusSearch(' + JSON.stringify(query) + ', ' + ('name' in cb ? cb.name : 'cb') + '):\n' + response)
         invalidateRequestCache(requestObj)
         if (typeof cbError === 'function') cbError()
