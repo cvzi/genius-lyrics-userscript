@@ -168,6 +168,13 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     }
   }
 
+  const clearCacheFn = () => {
+    return Promise.all([custom.GM.setValue('selectioncache', '{}'), custom.GM.setValue('requestcache', '{}')]).then(function () {
+      selectionCache = cleanSelectionCache()
+      requestCache = {}
+    })
+  }
+
   let loadingFailed = false
   let requestCache = cleanRequestCache()
   let selectionCache = cleanSelectionCache()
@@ -3865,11 +3872,13 @@ Link__StyledLink
           tv1 = 0
           if (window.showLyricsIdentifier !== currentFunctionClosureIdentifier) return
           if (isShowLyricsIsCancelledByUser) return
-          console.debug('tv1')
-          iframe.src = 'data:text/html,%3Ch1%3ELoading...%21%3C%2Fh1%3E'
-          setTimeout(function () {
-            iframe.src = custom.emptyURL + '#html:post'
-          }, 400)
+          clearCacheFn().then(() => { // clearCacheFn before retry
+            console.debug('tv1')
+            iframe.src = 'data:text/html,%3Ch1%3ELoading...%21%3C%2Fh1%3E'
+            setTimeout(function () {
+              iframe.src = custom.emptyURL + '#html:post'
+            }, 400)
+          })
         }
         // After 15 seconds, try to reload the iframe
         tv1 = setTimeout(reloadFrame, 15000)
@@ -3878,19 +3887,21 @@ Link__StyledLink
           tv2 = 0
           if (window.showLyricsIdentifier !== currentFunctionClosureIdentifier) return
           if (isShowLyricsIsCancelledByUser) return
-          console.debug('tv2')
-          clear() // unable to load
-          spinnerUpdate(null, null, 902, 'failed')
-          unScroll()
-          window.postMessage({ iAm: custom.scriptName, type: 'lyricsDisplayState', visibility: 'loaded', lyricsSuccess: false }, '*')
-          if (!loadingFailed) {
-            console.debug('try again fresh')
-            loadingFailed = true
-            hideLyricsWithMessage()
-            setTimeout(function () {
-              custom.addLyrics(true) // new function closure
-            }, 100)
-          }
+          clearCacheFn().then(() => { // clearCacheFn before retry
+            console.debug('tv2')
+            clear() // unable to load
+            spinnerUpdate(null, null, 902, 'failed')
+            unScroll()
+            window.postMessage({ iAm: custom.scriptName, type: 'lyricsDisplayState', visibility: 'loaded', lyricsSuccess: false }, '*')
+            if (!loadingFailed) {
+              console.debug('try again fresh')
+              loadingFailed = true
+              hideLyricsWithMessage()
+              setTimeout(function () {
+                custom.addLyrics(true) // new function closure
+              }, 100)
+            }
+          })
         }
         // After 30 seconds, try again fresh (only once)
         tv2 = setTimeout(fresh, 30000)
@@ -3999,13 +4010,6 @@ Link__StyledLink
     if (document.querySelector('#myconfigwin39457845') !== null) return // avoid showing duplicating option window
 
     loadCache()
-
-    const clearCacheFn = () => {
-      return Promise.all([custom.GM.setValue('selectioncache', '{}'), custom.GM.setValue('requestcache', '{}')]).then(function () {
-        selectionCache = cleanSelectionCache()
-        requestCache = {}
-      })
-    }
 
     // Blur background
     for (const e of document.querySelectorAll('body > *')) {
