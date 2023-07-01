@@ -37,7 +37,7 @@
       * connect genius.com
 */
 
-/* global Reflect, top, HTMLElement */
+/* global Reflect, top, HTMLElement, GM_openInTab */
 
 if (typeof module !== 'undefined') {
   module.exports = geniusLyrics
