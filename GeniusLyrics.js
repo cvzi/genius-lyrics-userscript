@@ -168,6 +168,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     }
   }
 
+  let askedToSolveCaptcha = false
   let loadingFailed = false
   let requestCache = cleanRequestCache()
   let selectionCache = cleanSelectionCache()
@@ -692,8 +693,11 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
           section.hits = modifyHits(hits)
           return jsonData
         } else {
+          if (response.responseText.startsWith('<') && !askedToSolveCaptcha) {
+            askedToSolveCaptcha = true
+            captchaHint(response.responseText)
+          }
           console.debug(custom.scriptName + '\n\n' + (errorMsg || 'Error') + ' in geniusSearch(' + JSON.stringify(query) + ', ' + ('name' in cb ? cb.name : 'cb') + '):\n\n' + response.responseText) // log into the console window for copying
-          window.alert(custom.scriptName + '\n\n' + (errorMsg || 'Error') + ' in geniusSearch(' + JSON.stringify(query) + ', ' + ('name' in cb ? cb.name : 'cb') + '):\n\n' + response.responseText)
           invalidateRequestCache(requestObj)
           if (typeof cbError === 'function') cbError()
           requestObj = null
@@ -3995,6 +3999,64 @@ Link__StyledLink
     })
   }
 
+  async function captchaHint (responseText) {
+    if (document.querySelector('#mycaptchahint897454') !== null) return // avoid showing duplicating option window
+
+    if (await custom.GM.getValue('noMoreCaptchaHint', false)) return
+
+    if (typeof GM_openInTab === 'function') {
+      GM_openInTab('https://genius.com/', { active: true })
+    }
+
+    // Blur background
+    for (const e of document.querySelectorAll('body > *')) {
+      e.style.filter = 'blur(4px)'
+    }
+    const lyricscontainer = document.getElementById('lyricscontainer')
+    if (lyricscontainer) {
+      lyricscontainer.style.filter = 'blur(1px)'
+    }
+
+    const win = document.body.appendChild(document.createElement('div'))
+    win.setAttribute('id', 'mycaptchahint897454')
+
+    let div = win.appendChild(document.createElement('div'))
+    div.innerHTML = `genius.com has blocked you.<br>Please open
+    <a style="color:#0066ff; text-decoration:underline;" target="_blank" href="https://genius.com">genius.com</a>
+    and solve the captcha/prove you are not a robot.<br>
+    Then reload the page.`
+    div.style = 'font-size:30px; width:70%'
+
+    div.appendChild(document.createElement('br'))
+
+    const reloadButton = div.appendChild(document.createElement('span'))
+    reloadButton.textContent = 'Reload'
+    reloadButton.style = 'font-size:20px; background-color:#0066ff; color:white; padding:5px 10px; border-radius:10px; cursor:pointer;'
+    reloadButton.addEventListener('click', function () {
+      window.location.reload()
+    })
+
+    div.appendChild(document.createElement('br'))
+
+    const closeButton = div.appendChild(document.createElement('span'))
+    closeButton.textContent = "Don't show this hint again"
+    closeButton.style = 'font-size:20px; background-color:#88aaff; color:white; padding:5px 10px; border-radius:10px; cursor:pointer;'
+    closeButton.addEventListener('click', function () {
+      win.remove()
+      // Un-blur background
+      for (const e of document.querySelectorAll('body > *, #lyricscontainer')) {
+        e.style.filter = ''
+      }
+      custom.GM.setValue('noMoreCaptchaHint', true)
+    })
+
+    div = win.appendChild(document.createElement('div'))
+    div.appendChild(document.createElement('br'))
+    div.appendChild(document.createTextNode('Error text (in case you want to report a bug):'))
+    div.appendChild(document.createElement('br'))
+    div.appendChild(document.createElement('textarea')).value = responseText
+  }
+
   function config () {
     if (document.querySelector('#myconfigwin39457845') !== null) return // avoid showing duplicating option window
 
@@ -4330,6 +4392,19 @@ Link__StyledLink
 
   function addCss () {
     document.head.appendChild(document.createElement('style')).innerHTML = `
+    #mycaptchahint897454 {
+      position:fixed;
+      top:120px;
+      right:10px;
+      padding:15px;
+      background:white;
+      border-radius:10%;
+      border:2px solid black;
+      color:black;
+      z-index:104;
+      font-size:1.2em
+    }
+
     #myconfigwin39457845 {
       position:fixed;
       top:120px;
