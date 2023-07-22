@@ -483,20 +483,23 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     if (cachekey in requestCache) {
       return obj.load(JSON.parse(requestCache[cachekey].split('\n')[1]), null)
     }
+    const method = obj.method ? obj.method : 'GET'
 
     let headers = {
       Referer: obj.url,
-      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+      // 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
       Host: getHostname(obj.url),
       'User-Agent': navigator.userAgent
     }
+    if (method === 'POST') headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8'
+    if (obj.responseType === 'json') headers['Accept'] = 'application/json' // eslint-disable-line dot-notation
     if (obj.headers) {
       headers = Object.assign(headers, obj.headers)
     }
 
-    return custom.GM.xmlHttpRequest({
+    const req = {
       url: obj.url,
-      method: obj.method ? obj.method : 'GET',
+      method,
       data: obj.data,
       headers,
       onerror: obj.error ? obj.error : function xmlHttpRequestGenericOnError (response) { console.error('xmlHttpRequestGenericOnError: ' + response) },
@@ -530,7 +533,12 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         }
         obj.load(cacheObject, cacheResult)
       }
-    })
+    }
+
+    if (obj.responseType) req.responseType = obj.responseType
+    if (obj.responseType === 'json') req.overrideMimeType = 'application/json; charset=utf-8'
+
+    return custom.GM.xmlHttpRequest(req)
   }
 
   function generateCompoundTitle (title, artists) {
@@ -719,6 +727,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         'X-Requested-With': 'XMLHttpRequest'
       },
       t: 'search', // differentiate with other types of requesting
+      responseType: 'json',
       error: function geniusSearchOnError (response) {
         window.alert(custom.scriptName + '\n\nError in geniusSearch(' + JSON.stringify(query) + ', ' + ('name' in cb ? cb.name : 'cb') + '):\n' + response)
         invalidateRequestCache(requestObj)
@@ -1022,6 +1031,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         'X-Requested-With': 'XMLHttpRequest'
       },
       t: 'annotations', // differentiate with other types of requesting
+      responseType: 'json',
       error: function loadGeniusAnnotationsOnError (response) {
         window.alert(custom.scriptName + '\n\nError loadGeniusAnnotations(' + JSON.stringify(song) + ', cb):\n' + response)
         cb(annotations)
