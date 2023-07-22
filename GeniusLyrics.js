@@ -46,6 +46,9 @@ if (typeof module !== 'undefined') {
 function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   'use strict'
 
+  const __SELECTION_CACHE_VERSION__ = 2
+  const __REQUEST_CACHE_VERSION__ = 1
+
   if (typeof custom !== 'object') {
     if (typeof window !== 'undefined') window.alert('geniusLyrics requires options argument')
     throw new Error('geniusLyrics requires options argument')
@@ -92,8 +95,79 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     window.postMessage({ iAm: custom.scriptName, type: 'cancelLoading' }, '*')
   }
 
-  const __SELECTION_CACHE_VERSION__ = 2
-  const __REQUEST_CACHE_VERSION__ = 1
+  const { requestAnimationFrame, setTimeout, setInterval, clearTimeout, clearInterval } = (() => {
+    let win = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window // eslint-disable-line no-undef
+    let removeIframeFn = null
+    try {
+      const frameId = 'vanillajs-iframe-v1'
+      let frame = document.getElementById(frameId)
+      if (!frame) {
+        frame = document.createElement('iframe')
+        frame.id = 'vanillajs-iframe-v1'
+        frame.sandbox = 'allow-same-origin' // script cannot be run inside iframe but API can be obtained from iframe
+        let n = document.createElement('noscript') // wrap into NOSCRPIT to avoid reflow (layouting)
+        n.appendChild(frame)
+        const root = document.documentElement
+        if (root) {
+          root.appendChild(n)
+          removeIframeFn = (setTimeout) => {
+            const removeIframeOnDocumentReady = (e) => {
+              e && win.removeEventListener('DOMContentLoaded', removeIframeOnDocumentReady, false)
+              win = null
+              setTimeout(() => {
+                n.remove()
+                n = null
+              }, 200)
+            }
+            if (document.readyState !== 'loading') {
+              removeIframeOnDocumentReady()
+            } else {
+              win.addEventListener('DOMContentLoaded', removeIframeOnDocumentReady, false)
+            }
+          }
+        }
+      }
+
+      const fc = frame ? frame.contentWindow : null
+      if (fc) {
+        const { requestAnimationFrame, setTimeout, setInterval, clearTimeout, clearInterval } = fc
+        const res = { requestAnimationFrame, setTimeout, setInterval, clearTimeout, clearInterval }
+        for (const k in res) res[k] = res[k].bind(win) // necessary
+        if (removeIframeFn) Promise.resolve(res.setTimeout).then(removeIframeFn)
+        return res
+      }
+    } catch (e) {
+      console.warn(e)
+    }
+
+    // since the mechanism does not utilize async/await, use the old method as fallback.
+    function isFakeWindow () {
+      // window is not window in Spotify Web App
+      return (window instanceof window.constructor) === false
+    }
+    /**
+     * getTrueWindow
+     * @returns {Window}
+     */
+    function getTrueWindow () {
+      // this can bypass Spotify's window Proxy Object and obtain the original window object
+      try {
+        return new Function('return window')() // eslint-disable-line no-new-func
+      } catch (e) {
+        console.warn('the actual window object cannot be obtained.', e) // e.g. YouTube Music
+        return window // fallback
+      }
+    }
+
+    let trueWindow = isFakeWindow() ? getTrueWindow() : win
+    const { requestAnimationFrame, setTimeout, setInterval, clearTimeout, clearInterval } = trueWindow
+    const res = { requestAnimationFrame, setTimeout, setInterval, clearTimeout, clearInterval }
+    for (const k in res) res[k] = res[k].bind(trueWindow) // necessary
+    trueWindow = null
+
+    if (removeIframeFn) Promise.resolve(res.setTimeout).then(removeIframeFn)
+    return res
+  })()
 
   const genius = {
     option: {
@@ -176,27 +250,6 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   let annotationsEnabled = true
   let autoScrollEnabled = false
   const onMessage = {}
-
-  function isFakeWindow () {
-    // window is not window in Spotify Web App
-    return (window instanceof window.constructor) === false
-  }
-  function getTrueWindow () {
-    // this can bypass Spotify's window Proxy Object and obtain the original window object
-    try {
-      return new Function('return window')() // eslint-disable-line no-new-func
-    } catch (e) {
-      console.warn('the actual window object cannot be obtained.', e) // e.g. YouTube Music
-      return window // fallback
-    }
-  }
-
-  let trueWindow = isFakeWindow() ? getTrueWindow() : window
-  const setTimeout = trueWindow.setTimeout.bind(trueWindow)
-  const setInterval = trueWindow.setInterval.bind(trueWindow)
-  const clearTimeout = trueWindow.clearTimeout.bind(trueWindow)
-  const clearInterval = trueWindow.clearInterval.bind(trueWindow)
-  trueWindow = null
 
   function getHostname (url) {
     // absolute path
@@ -731,7 +784,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     const ct = Date.now()
     do {
       p1 = p2
-      await new Promise(r => window.requestAnimationFrame(r)) // eslint-disable-line promise/param-names
+      await new Promise(r => requestAnimationFrame(r)) // eslint-disable-line promise/param-names
       p2 = document.scrollingElement.scrollTop
       if (Date.now() - ct > 2800) break
     } while (`${p1}` !== `${p2}`)
@@ -1626,7 +1679,7 @@ Genius:     ${originalUrl}
   }
 
   function scrollUpdateLocationHandler () {
-    window.requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
       let c = document.querySelector('#annotationcontainer958[style*="display: block;"]')
       if (c !== null) {
         let a = document.querySelector('.annotated.highlighted')
