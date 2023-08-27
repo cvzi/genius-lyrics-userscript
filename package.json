@@ -1,6 +1,6 @@
 {
   "name": "genius-lyrics-userscript",
-  "version": "5.7.3",
+  "version": "5.9.12",
   "description": "A userscript library to show lyrics from genius.com on other websites",
   "main": "GeniusLyrics.js",
   "scripts": {
@@ -25,7 +25,7 @@
   },
   "homepage": "https://github.com/cvzi/genius-lyrics-userscript",
   "devDependencies": {
-    "standard": "^17.0.0"
+    "standard": "^17.1.0"
   },
   "standard": {
     "ignore": [
