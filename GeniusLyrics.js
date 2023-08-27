@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.9.11
+// @version      5.9.12
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2019, cuzi (cuzi@openmail.cc) and contributors
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -1081,25 +1081,9 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       }
       application = null
     },
-    // Hide footer
-    hideFooter () {
-      const f = document.querySelectorAll('.footer div')
-      if (f.length) {
-        removeIfExists(f[0])
-        removeIfExists(f[1])
-      }
-    },
-    hideSecondaryFooter () {
-      removeIfExists(document.querySelector('.footer.footer--secondary'))
-    },
-    // Hide other stuff
-    hideStuff235 () {
-      const grayBox = document.querySelector('.column_layout-column_span-initial_content>.dfp_unit.u-x_large_bottom_margin.dfp_unit--in_read')
-      removeIfExists(grayBox)
-      removeIfExists(document.querySelector('.header .header-expand_nav_menu'))
-    },
     // Change links to target=_blank
     targetBlankLinks () {
+      const originalUrl = document.querySelector('meta[property="og:url"]') ? document.querySelector('meta[property="og:url"]').content : null
       const as = document.querySelectorAll('body a[href]:not([href|="#"]):not([target="_blank"])')
       for (const a of as) {
         const href = a.getAttribute('href')
@@ -1110,6 +1094,10 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
           } else if (href.startsWith(custom.domain)) {
             a.href = href.replace(custom.domain, 'https://genius.com')
           }
+        } else if (originalUrl) {
+          // Convert internal anchor to external anchor
+          a.target = '_blank'
+          a.href = originalUrl + a.hash
         }
       }
     },
@@ -1355,6 +1343,59 @@ Genius:     ${originalUrl}
           div.innerHTML = innerHTML
         }
       }
+    },
+    extractLyrics (html) {
+      /*
+      Extract the lyrics and title/album header from genius page html
+      */
+
+      const doc = new window.DOMParser().parseFromString(html, 'text/html')
+
+      const originalUrl = doc.querySelector('meta[property="og:url"]') ? doc.querySelector('meta[property="og:url"]').content : null
+      if (html.indexOf('class="Lyrics__Container') === -1) {
+        return {
+          error: true,
+          errorHtml: themeCommon.themeError(theme.name, 'html.indexOf(\'class="Lyrics__Container\') === -1', originalUrl)
+        }
+      }
+
+      const bodyWidth = parseInt(document.getElementById('lyricsiframe').style.width || (document.getElementById('lyricsiframe').getBoundingClientRect().width + 'px'))
+
+      // Change album links from anchor to real url
+      const albumLinkA = doc.querySelector('[class*="PrimaryAlbum__Title"][href^="https://genius"]')
+      if (albumLinkA) {
+        doc.querySelectorAll('[href="#primary-album"]').forEach(a => {
+          a.href = albumLinkA.href
+          a.target = '_blank'
+        })
+      }
+
+      const parts = html.split('class="Lyrics__Container')[1].split('>')
+      parts.shift()
+
+      const lyricsHtml = '<div class="SongPage__Section"><div class="Lyrics__Container">' + parts.join('>').split('<div class="SidebarLyrics__Sidebar')[0] + '</div>'
+
+      const h1 = doc.querySelector('div[class^=SongHeader] h1')
+      const titleNode = h1.firstChild
+      const titleA = h1.appendChild(document.createElement('a'))
+      titleA.href = originalUrl
+      titleA.target = '_blank'
+      titleA.appendChild(titleNode)
+      h1.classList.add('mytitle')
+
+      h1.parentNode.querySelectorAll('a[href^=https]').forEach(a => (a.target = '_blank'))
+      h1.parentNode.querySelectorAll('[class*="InlineSvg__Wrapper"]').forEach(e => e.remove())
+      h1.parentNode.querySelectorAll('[class*="HeaderCredits__"]').forEach(e => e.remove())
+      removeIfExists(h1.parentNode.querySelector('div[class^="HeaderTracklist"]'))
+
+      const headerHtml = '<div class="myheader">' + h1.parentNode.outerHTML + '</div>'
+
+      return {
+        error: false,
+        lyricsHtml,
+        headerHtml,
+        bodyWidth
+      }
     }
   }
 
@@ -1390,10 +1431,10 @@ Genius:     ${originalUrl}
     scroll-behavior: auto;
   }
   #resumeAutoScrollButtonContainer{
-    position: fixed; 
-    right: 20px; 
-    top: 30%; 
-    z-index: 101; 
+    position: fixed;
+    right: 20px;
+    top: 30%;
+    z-index: 101;
     display: flex;
     flex-direction: row;
     gap: 4px;
@@ -1445,7 +1486,7 @@ Genius:     ${originalUrl}
     border-bottom: var(--egl-btn-half-border-size) inset transparent;
     border-left: calc(1.732*var(--egl-btn-half-border-size)) solid var(--egl-btn-color);
   }
-  
+
   body div[class*="__Container"] iframe,
   body div[class*="__Container"] div[class*="_preview"] iframe,
   body div[class*="__Container"] div[class*="embed"] iframe {
@@ -1492,11 +1533,15 @@ Genius:     ${originalUrl}
     display: none;
   }
 
+  [class*="StartSongBioButton"] {
+    display: none;
+  }
+
   @keyframes appDomAppended {
     0% {
       background-position-x: 1px;
     }
-  
+
     100% {
       background-position-x: 2px;
     }
@@ -1505,7 +1550,7 @@ Genius:     ${originalUrl}
     0% {
       background-position-x: 3px;
     }
-  
+
     100% {
       background-position-x: 4px;
     }
@@ -1514,7 +1559,7 @@ Genius:     ${originalUrl}
     0% {
       background-position-x: 1px;
     }
-  
+
     100% {
       background-position-x: 2px;
     }
@@ -1523,7 +1568,7 @@ Genius:     ${originalUrl}
     0% {
       background-position-x: 1px;
     }
-  
+
     100% {
       background-position-x: 2px;
     }
@@ -1532,7 +1577,7 @@ Genius:     ${originalUrl}
     0% {
       background-position-x: 1px;
     }
-  
+
     100% {
       background-position-x: 2px;
     }
@@ -1917,8 +1962,8 @@ Genius:     ${originalUrl}
       scripts: function themeCleanWhiteScripts () {
         const onload = []
 
-        onload.push(themeCommon.targetBlankLinks)
-        onload.push(() => setTimeout(themeCommon.targetBlankLinks, 1000))
+        // fixInstrumentalBridge
+        onload.push(themeCommon.fixInstrumentalBridge)
 
         // Handle annotations
         if (!annotationsEnabled) {
@@ -1927,6 +1972,9 @@ Genius:     ${originalUrl}
         } else {
           onload.push(themeCommon.addAnnotationHandling)
         }
+
+        onload.push(themeCommon.targetBlankLinks)
+        onload.push(() => setTimeout(themeCommon.targetBlankLinks, 1000))
 
         onload.push(() => {
           Promise.resolve(0).then(() => {
@@ -1941,32 +1989,13 @@ Genius:     ${originalUrl}
       },
 
       combine: function themeCleanWhiteCombineGeniusResources (song, html, annotations, onCombine) {
-        const doc = new window.DOMParser().parseFromString(html, 'text/html')
-        const originalUrl = doc.querySelector('meta[property="og:url"]') ? doc.querySelector('meta[property="og:url"]').content : null
-        if (html.indexOf('class="Lyrics__Container') === -1) {
-          return onCombine(themeCommon.themeError(theme.name, 'html.indexOf(\'class="Lyrics__Container\') === -1', originalUrl))
+        const result = themeCommon.extractLyrics(html)
+        if (result.error) {
+          return onCombine(result.errorHtml)
         }
-        let headhtml = ''
-        const bodyWidth = document.getElementById('lyricsiframe').style.width || (document.getElementById('lyricsiframe').getBoundingClientRect().width + 'px')
+        const { lyricsHtml, headerHtml, bodyWidth } = result
 
-        const parts = html.split('class="Lyrics__Container')[1].split('>')
-        parts.shift()
-
-        const lyricshtml = '<div class="SongPage__Section"><div class="Lyrics__Container">' + parts.join('>').split('<div class="RightSidebar')[0] + '</div>'
-
-        const h1 = doc.querySelector('div[class^=SongHeader] h1')
-        const titleNode = h1.firstChild
-        const titleA = h1.appendChild(document.createElement('a'))
-        titleA.href = originalUrl
-        titleA.target = '_blank'
-        titleA.appendChild(titleNode)
-        h1.classList.add('mytitle')
-
-        removeIfExists(h1.parentNode.querySelector('div[class^="HeaderTracklist"]'))
-
-        const titlehtml = '<div class="myheader">' + h1.parentNode.outerHTML + '</div>'
-
-        headhtml += `
+        let headhtml = `
         <link rel="stylesheet" href="//fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=YouTube+Sans:wght@300..900&display=swap">
         <style>
             body {
@@ -1976,14 +2005,27 @@ Genius:     ${originalUrl}
               max-width:${bodyWidth - 20}px;
               overflow-x:hidden;
             }
-            .mylyrics {color: black;}
+            .mylyrics {color: black; margin-top:1em;}
             .mylyrics a:link,.mylyrics a:visited,.mylyrics a:hover{color:black; }
             .myheader a:link,.myheader a:visited {color: rgb(96, 96, 96);}
+            .myheader {
+              border-bottom: 1px solid #0002;
+              padding-bottom: 1em;
+              margin: 0 10px;
+              max-width:  ${bodyWidth - 20 - 20}px;
+            }
             h1.mytitle a:link,h1.mytitle a:visited {color: rgb(96, 96, 96);}
             .annotationbox {position:absolute; display:none; max-width:95%; min-width: 160px;padding: 3px 7px;margin: 2px 0 0;background-color: rgba(245, 245, 245, 0.98);background-clip: padding-box;border: 1px solid rgba(0,0,0,.15);border-radius: .25rem;}
             .annotationbox .annotationlabel {display:block;color:rgb(10, 10, 10);border-bottom:1px solid rgb(200,200,200);padding: 0;font-weight:600}
             .annotationbox .annotation_rich_text_formatting {color: black}
             .annotationbox .annotation_rich_text_formatting a {color: rgb(6, 95, 212)}
+
+            *[class*=HeaderArtistAndTracklist][class*=__Tracklist] {
+              font-size:smaller;
+            }
+            *[class*=HeaderArtistAndTracklist][class*=__Tracklist] [class*=Link__StyledLink] {
+              padding-left:0.3em;
+            }
 
             div[class*="HeaderArtistAndTracklistPrimis"] /* desktop_react_atf */ {
               display:none;
@@ -2013,9 +2055,9 @@ Genius:     ${originalUrl}
             <div id="application">
             <main>
               <div class="lyrics_body_pad">
-                ${titlehtml}
+                ${headerHtml}
                 <div id="lyrics-root" class="mylyrics song_body-lyrics">
-                ${lyricshtml}
+                ${lyricsHtml}
                 </div>
               </div>
               <div class="annotationbox" id="annotationbox"></div>
@@ -2036,47 +2078,8 @@ Genius:     ${originalUrl}
       scripts: function themeSpotifyScripts () {
         const onload = []
 
-        // Hide cookies box function
-        // var iv458
-        // function hideCookieBox458 () {if(document.querySelector(".optanon-allow-all")){document.querySelector(".optanon-allow-all").click(); clearInterval(iv458)}}
-        // onload.push(function() { iv458 = setInterval(hideCookieBox458, 500) })
-
-        onload.push(themeCommon.hideFooter)
-        onload.push(themeCommon.hideSecondaryFooter)
-        onload.push(themeCommon.hideStuff235)
-
         // fixInstrumentalBridge
         onload.push(themeCommon.fixInstrumentalBridge)
-
-        // Make song title clickable
-        function clickableTitle () {
-          if (!document.querySelector('.header_with_cover_art-primary_info-title')) {
-            return
-          }
-          const url = document.querySelector('meta[property="og:url"]').content
-          const h1 = document.querySelector('.header_with_cover_art-primary_info-title')
-          h1.innerHTML = '<a target="_blank" href="' + url + '">' + h1.innerHTML + '</a>'
-          // Featuring and album name
-          const h2 = document.querySelector('.header_with_cover_art-primary_info-primary_artist').parentNode
-          let s1 = ''
-          let s2 = ''
-          for (const el of document.querySelectorAll('.metadata_unit-label')) {
-            if (el.innerText.toLowerCase().indexOf('feat') !== -1) {
-              s1 += ' ' + el.parentNode.innerText.trim()
-            } else if (el.innerText.toLowerCase().indexOf('album') !== -1) {
-              s2 += ' \u2022 ' + el.parentNode.querySelector('a').parentNode.innerHTML.trim()
-            }
-          }
-          h1.innerHTML += s1
-          h2.innerHTML += s2
-          // Remove other meta like Producer
-          removeElements(document.querySelectorAll('h3'))
-        }
-
-        onload.push(clickableTitle)
-
-        onload.push(themeCommon.targetBlankLinks)
-        onload.push(() => setTimeout(themeCommon.targetBlankLinks, 1000))
 
         // Handle annotations
         if (!annotationsEnabled) {
@@ -2085,6 +2088,9 @@ Genius:     ${originalUrl}
         } else {
           onload.push(themeCommon.addAnnotationHandling)
         }
+
+        onload.push(themeCommon.targetBlankLinks)
+        onload.push(() => setTimeout(themeCommon.targetBlankLinks, 1000))
 
         onload.push(() => {
           Promise.resolve(0).then(() => {
@@ -2098,33 +2104,13 @@ Genius:     ${originalUrl}
         return onload
       },
       combine: function themeSpotifyCombineGeniusResources (song, html, annotations, onCombine) {
-        let headhtml = ''
-        const bodyWidth = document.getElementById('lyricsiframe').style.width || (document.getElementById('lyricsiframe').getBoundingClientRect().width + 'px')
-
-        const doc = new window.DOMParser().parseFromString(html, 'text/html')
-        const originalUrl = doc.querySelector('meta[property="og:url"]').content
-
-        if (html.indexOf('class="Lyrics__Container') === -1) {
-          return onCombine(themeCommon.themeError(theme.name, 'html.indexOf(\'class="Lyrics__Container\') === -1', originalUrl))
+        const result = themeCommon.extractLyrics(html)
+        if (result.error) {
+          return onCombine(result.errorHtml)
         }
+        const { lyricsHtml, headerHtml, bodyWidth } = result
 
-        const parts = html.split('class="Lyrics__Container')[1].split('>')
-        parts.shift()
-
-        const lyricshtml = '<div class="SongPage__Section"><div class="Lyrics__Container">' + parts.join('>').split('<div class="RightSidebar')[0] + '</div>'
-
-        const h1 = doc.querySelector('div[class^=SongHeader] h1')
-        const titleNode = h1.firstChild
-        const titleA = h1.appendChild(document.createElement('a'))
-        titleA.href = originalUrl
-        titleA.target = '_blank'
-        titleA.appendChild(titleNode)
-        h1.classList.add('mytitle')
-
-        removeIfExists(h1.parentNode.querySelector('div[class^="HeaderTracklist"]'))
-
-        const titlehtml = '<div class="myheader">' + h1.parentNode.outerHTML + '</div>'
-
+        let headhtml = ''
         const spotifyOriginalCSS = document.head.querySelector('link[rel="stylesheet"][href*="spotifycdn.com"][href*="web-player"]')
         if (spotifyOriginalCSS) {
           headhtml += spotifyOriginalCSS.outerHTML
@@ -2141,8 +2127,14 @@ Genius:     ${originalUrl}
               font-family:CircularSp,CircularSp-Arab,CircularSp-Hebr,CircularSp-Cyrl,CircularSp-Grek,CircularSp-Deva,'HelveticaNeue',Arial,sans-serif;
               padding:10px;
             }
-            .mylyrics {color: #bebebe}
+            .mylyrics {color: #bebebe; margin-top:1em;}
             .mylyrics a:link,.mylyrics a:visited,.mylyrics a:hover{color:#f3f3f3}
+            .myheader {
+              border-bottom: 1px solid #FFF2;
+              padding-bottom: 1em;
+              margin: 0 10px;
+              max-width:  ${bodyWidth - 20 - 20}px;
+            }
             .myheader a:link,.myheader a:visited {color: #f3f3f3; }
             h1.mytitle a:link,h1.mytitle a:visited {color: #bebebe; }
             ::-webkit-scrollbar-thumb {background-color: hsla(0,0%,100%,.3);}
@@ -2150,6 +2142,13 @@ Genius:     ${originalUrl}
             .annotationbox .annotationlabel {display:inline-block;background-color: hsla(0,0%,100%,.6);color: #000;border-radius: 2px;padding: 0 .3em;}
             .annotationbox .annotation_rich_text_formatting {color: black}
             .annotationbox .annotation_rich_text_formatting a {color: black)}
+
+            *[class*=HeaderArtistAndTracklist][class*=__Tracklist] {
+              font-size:smaller;
+            }
+            *[class*=HeaderArtistAndTracklist][class*=__Tracklist] [class*=Link__StyledLink] {
+              padding-left:0.3em;
+            }
 
             div[class*="HeaderArtistAndTracklistPrimis"] {
               display:none;
@@ -2179,9 +2178,9 @@ Genius:     ${originalUrl}
             <div id="application">
             <main>
               <div class="lyrics_body_pad">
-                ${titlehtml}
+                ${headerHtml}
                 <div id="lyrics-root" class="mylyrics song_body-lyrics">
-                ${lyricshtml}
+                ${lyricsHtml}
                 </div>
               </div>
               <div class="annotationbox" id="annotationbox"></div>
@@ -3179,7 +3178,7 @@ pre{white-space:pre-wrap}
       /* give some color to info container background */
       padding: 18px 26px;
       /* looks better */
-    
+
       --genius-lyrics-header-content-display: '--NULL--';
       /* override none */
       position: absolute;
@@ -3232,7 +3231,7 @@ pre{white-space:pre-wrap}
       padding: 0;
       margin: 0;
     }
-    
+
     .LSongHeader__CenterInfo a[href="#about"]
     {
       font-weight: 300;
@@ -3381,7 +3380,7 @@ pre{white-space:pre-wrap}
     {
       display: none;
     }
-    
+
     /* only for #about Read More */
     disabled.genius-lyrics-header-content a[href^="#"][class*="Link_"] > span[class*="HeaderBio__ViewBio"]:last-child,
     disabled.genius-lyrics-header-content a[href^="#"][class*="Link_"] > span[class*="HeaderBio__ViewBio"]:last-child svg
@@ -3483,6 +3482,12 @@ pre{white-space:pre-wrap}
       "<svg><path fill-rule=\"evenodd\" d=\"M11.335 2.6v1.333H9.2A11.76 11.76 0 0 1 6.588 9.02a9.654 9.654 0 0 0 3.413 2.247l-.473 1.226a11.279 11.279 0 0 1-3.84-2.56 12.314 12.314 0 0 1-3.853 2.574l-.5-1.24a11.227 11.227 0 0 0 3.44-2.28 10.98 10.98 0 0 1-2-3.72h1.4A9 9 0 0 0 5.7 8.053a9.807 9.807 0 0 0 2.127-4.12H.668V2.6h4.667v-2h1.333v2h4.667Zm7.997 16h-1.433l-1.067-2.667h-4.567L11.2 18.6H9.765l4-10h1.567l4 10Zm-4.787-8.373L12.8 14.6h3.5l-1.754-4.373Z\" clip-rule=\"evenodd\"></path></svg>",
       "<svg><path d=\"M4.488 7 0 0h8.977L4.488 7Z\"></path></svg>",
       "<svg><path d=\"M4 16.483A9 9 0 1 0 14 1.516 9 9 0 0 0 4 16.483Zm.714-13.897a7.714 7.714 0 1 1 8.572 12.828A7.714 7.714 0 0 1 4.714 2.586ZM9 3.857a.964.964 0 1 0 0 1.928.964.964 0 0 0 0-1.928Zm.643 9V7.714H7.07V9h1.286v3.857H6.428v1.286h5.143v-1.286H9.643Z\"></path></svg>",
+      '<svg><path d="M4.488.5 0 7.5h8.977L4.488.5Z"></path></svg>',
+      '<svg><path fill-rule="evenodd" d="M9 .5a9 9 0 1 0 0 18 9 9 0 0 0 0-18Zm0 16.714a7.715 7.715 0 1 1 0-15.43 7.715 7.715 0 0 1 0 15.43Zm.643-12.857H8.357v7.072h1.286V4.357ZM8.464 13.52a.964.964 0 1 1 1.072 1.603.964.964 0 0 1-1.072-1.603Z" clip-rule="evenodd"></path></svg>',
+      '<svg><path fill-rule="evenodd" d="M4 2.017a9 9 0 1 1 10 14.966A9 9 0 0 1 4 2.017Zm.714 13.897a7.715 7.715 0 1 0 8.572-12.829 7.715 7.715 0 0 0-8.572 12.83ZM4.5 9.765l3.214 3.215L13.5 7.195l-.91-.91-4.876 4.877-2.306-2.305-.908.909Z" clip-rule="evenodd"></path></svg>',
+      '<svg><path fill-rule="evenodd" d="M3.214 11.671h.643a1.287 1.287 0 0 1 1.286 1.286v1.286a1.287 1.287 0 0 1-1.286 1.286h-.643V18.1H1.93v-2.57h-.643A1.287 1.287 0 0 1 0 14.243v-1.286a1.287 1.287 0 0 1 1.286-1.286h.643V.101h1.285v11.57Zm-1.928 2.572h2.571v-1.286H1.286v1.286Zm9-11.571h-.643V.1H8.357v2.572h-.643A1.287 1.287 0 0 0 6.43 3.957v1.286a1.287 1.287 0 0 0 1.285 1.286h.643V18.1h1.286V6.53h.643a1.287 1.287 0 0 0 1.285-1.286V3.957a1.287 1.287 0 0 0-1.285-1.285Zm0 2.571H7.714V3.957h2.572v1.286Zm6.428 2.571h-.643V.1h-1.285v7.714h-.643A1.287 1.287 0 0 0 12.857 9.1v1.286a1.287 1.287 0 0 0 1.286 1.286h.643V18.1h1.285v-6.429h.643A1.287 1.287 0 0 0 18 10.386V9.1a1.287 1.287 0 0 0-1.286-1.286Zm0 2.572h-2.571V9.1h2.571v1.286Z" clip-rule="evenodd"></path></svg>',
+      '<svg><path d="M17.51 5.827c.654-.654.654-1.636 0-2.29L14.563.59c-.655-.655-1.637-.655-2.291 0L0 12.864V18.1h5.236L17.51 5.827Zm-4.092-4.09 2.946 2.945-2.455 2.454-2.945-2.945 2.454-2.455ZM1.636 16.463v-2.946l8.182-8.182 2.946 2.946-8.182 8.182H1.636Z"></path></svg>',
+      '<svg><path fill-rule="evenodd" d="M2.948.1h10.97v1.371H2.948V.101ZM15.29 2.843H1.578v1.372H15.29V2.843Zm.567 15.257H2.144a1.373 1.373 0 0 1-1.371-1.37v-9.6a1.373 1.373 0 0 1 1.37-1.37h13.713a1.373 1.373 0 0 1 1.371 1.37v9.599a1.373 1.373 0 0 1-1.37 1.371ZM2.144 7.13v9.599h13.712V7.13H2.144Z" clip-rule="evenodd"></path></svg>',
     ]
   // note: the script can detect that the fetched svg might be missing in the defaultSVGBoxs,
   // but if those SVGs are no longer used in all lyrics / theme, there will be no warning or logging to alert the developer.
