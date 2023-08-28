@@ -601,7 +601,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     return null
   }
 
-  function removeSymbolsAndWhitespace(s) {
+  function removeSymbolsAndWhitespace (s) {
     return s.replace(/[\s\p{P}$+<=>^`|~]/gu, '')
   }
 
@@ -756,7 +756,6 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
             }
           }
         }
-
       }
     }
 
