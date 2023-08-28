@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.9.12
+// @version      5.10.0
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2019, cuzi (cuzi@openmail.cc) and contributors
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -46,8 +46,8 @@ if (typeof module !== 'undefined') {
 function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   'use strict'
 
-  const __SELECTION_CACHE_VERSION__ = 3
-  const __REQUEST_CACHE_VERSION__ = 2
+  const __SELECTION_CACHE_VERSION__ = 4
+  const __REQUEST_CACHE_VERSION__ = 3
 
   /** @type {globalThis.PromiseConstructor} */
   const Promise = (async () => { })().constructor // YouTube polyfill to Promise in older browsers will make the feature being unstable.
@@ -316,6 +316,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     songTitle = songTitle.replace(/fe?a?t\.?u?r?i?n?g?\s+[^)]+/i, '')
     songTitle = songTitle.replace(/\(\s*\)/, ' ').replace('"', ' ').replace('[', ' ').replace(']', ' ').replace('|', ' ')
     songTitle = songTitle.replace(/\s\s+/, ' ')
+    songTitle = songTitle.replace(/[\u200B-\u200D\uFEFF]/g, '') // zero width spaces
     songTitle = songTitle.trim()
     return songTitle
   }
@@ -600,7 +601,11 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     return null
   }
 
-  function modifyHits (hits) {
+  function removeSymbolsAndWhitespace(s) {
+    return s.replace(/[\s\p{P}$+<=>^`|~]/gu, '')
+  }
+
+  function modifyHits (hits, query) {
     // the original hits store too much and not in a proper ordering
     // only song.result.url is neccessary
 
@@ -612,6 +617,18 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       if (genius.minimizeHit.onlyCompleteLyrics === true && hit.result.lyrics_state !== 'complete') return false
       return true
     })
+
+    const removeZeroWidthSpaceAndTrimStringsInObject = function (obj) {
+      // Recursively traverse object, and remove zero width spaces and trim string values
+      if (obj !== null && typeof obj === 'object') {
+        Object.entries(obj).forEach(([key, value]) => {
+          obj[key] = removeZeroWidthSpaceAndTrimStringsInObject(value)
+        })
+      } else if (typeof obj === 'string') {
+        return obj.replace(/[\u200B-\u200D\uFEFF]/g, '').trim()
+      }
+      return obj
+    }
 
     for (const hit of hits) {
       const result = hit.result
@@ -689,6 +706,9 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         delete result.stats
       }
 
+      // Remove zero width spaces in strings and trim strings
+      removeZeroWidthSpaceAndTrimStringsInObject(result)
+
       if (hits.length > 1) {
         if (hit.type === 'song') {
           hit._order = 2600
@@ -710,6 +730,33 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
           // if all results are en, no different for hit._order reduction
           hit._order -= 1000
         }
+
+        // Sort hits by comparing to the query
+        if (query) {
+          query = query.toLowerCase()
+          const queryNoSymbols = removeSymbolsAndWhitespace(query)
+          const title = result.title.toLowerCase()
+          const artist = primaryArtist ? primaryArtist.name.toLowerCase() : ''
+          const titleNoSymbols = removeSymbolsAndWhitespace(title)
+          const artistNoSymbols = removeSymbolsAndWhitespace(artist)
+          if (artist && `${artist} ${title}` === query) {
+            hit._order += 10
+          } else if (titleNoSymbols && artistNoSymbols && artistNoSymbols + titleNoSymbols === queryNoSymbols) {
+            hit._order += 9
+          } else {
+            if (query.indexOf(title) !== -1) {
+              hit._order += 4
+            } else if (titleNoSymbols && queryNoSymbols.indexOf(titleNoSymbols) !== -1) {
+              hit._order += 3
+            }
+            if (primaryArtist && query.indexOf(primaryArtist.name) !== -1) {
+              hit._order += 4
+            } else if (artistNoSymbols && queryNoSymbols.indexOf(artistNoSymbols) !== -1) {
+              hit._order += 3
+            }
+          }
+        }
+
       }
     }
 
@@ -756,7 +803,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
             requestObj = null
             return
           }
-          section.hits = modifyHits(hits)
+          section.hits = modifyHits(hits, query)
           return jsonData
         } else {
           if (response.responseText.startsWith('<') && !askedToSolveCaptcha) {
