@@ -1269,7 +1269,6 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
             footer += annotation.votes_total
             footer += '👍'
           } else if (annotation.votes_total < 0) {
-            footer += '-'
             footer += annotation.votes_total
             footer += '👎'
           } else {
