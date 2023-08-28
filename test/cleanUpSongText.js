@@ -38,7 +38,7 @@ function testCleanUpSongTitle () {
     ['Fisherman\'s Blues - 2006 Remaster', 'Fisherman\'s Blues'],
     ['A test master', 'A test master'],
     ['The 2020 deluxe', 'The 2020 deluxe'],
-    ['Louie Louie - Remastered Studio', 'Louie Louie'],
+    ['Louie Louie - Remastered Studio', 'Louie Louie']
   ]
 
   for (let i = 0; i < cases.length; i++) {
