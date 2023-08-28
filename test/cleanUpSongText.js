@@ -3,6 +3,7 @@ const assert = require('assert')
 function cleanUpSongTitle (songTitle) {
   // Remove featuring artists and version info from song title
   songTitle = songTitle.replace(/\((master|stereo|mono|anniversary|digital|edition|naked|original|re|ed|no.*?\d+|mix|version|\d+th|\d{4}|\s|\.|-|\/)+\)/i, '').trim()
+  songTitle = songTitle.replace(/[-‧⋅·ᐧ•‐‒–—―﹘]\s*(master|stereo|mono|anniversary|digital|edition|naked|original|re|ed|no.*?\d+|mix|version|\d+th|\d{4}|\s|\.|-|\/)+/i, '').trim()
   songTitle = songTitle.replace(/fe?a?t\.?u?r?i?n?g?\s+[^)]+/i, '')
   songTitle = songTitle.replace(/\(\s*\)/, ' ').replace('"', ' ').replace('[', ' ').replace(']', ' ').replace('|', ' ')
   songTitle = songTitle.replace(/\s\s+/, ' ')
@@ -11,6 +12,8 @@ function cleanUpSongTitle (songTitle) {
 }
 
 function testCleanUpSongTitle () {
+  console.log('testCleanUpSongTitle()...')
+
   const cases = [
     ['Come Together (Remastered 2009)', 'Come Together'],
     ["Don't Let Me Down (Naked Version / Remastered 2013)", "Don't Let Me Down"],
@@ -30,13 +33,17 @@ function testCleanUpSongTitle () {
     ['Spicy (ft. Fivio Foreign & A$AP Ferg)', 'Spicy'],
     ['Spicy (feat. Fivio Foreign & A$AP Ferg)', 'Spicy'],
     ['Spicy (featuring Fivio Foreign & A$AP Ferg)', 'Spicy'],
-    ['Spicy (feat. Fivio Foreign) the song', 'Spicy the song']
+    ['Spicy (feat. Fivio Foreign) the song', 'Spicy the song'],
+    ['Fisherman\'s Blues - 2006 Remaster', 'Fisherman\'s Blues'],
+    ['A test master', 'A test master'],
+    ['The 2020 deluxe', 'The 2020 deluxe'],
   ]
 
   for (let i = 0; i < cases.length; i++) {
     const r = cleanUpSongTitle(cases[i][0])
     assert.equal(r, cases[i][1])
   }
+  console.log('Ok')
 }
 
 testCleanUpSongTitle()

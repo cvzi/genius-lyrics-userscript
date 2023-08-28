@@ -5,7 +5,8 @@
   "main": "GeniusLyrics.js",
   "scripts": {
     "test": "standard",
-    "lint": "standard --fix"
+    "lint": "standard --fix",
+    "title": "node test/cleanUpSongText.js"
   },
   "repository": {
     "type": "git",
