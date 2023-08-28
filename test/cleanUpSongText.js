@@ -36,7 +36,7 @@ function testCleanUpSongTitle () {
     ['Spicy (feat. Fivio Foreign) the song', 'Spicy the song'],
     ['Fisherman\'s Blues - 2006 Remaster', 'Fisherman\'s Blues'],
     ['A test master', 'A test master'],
-    ['The 2020 deluxe', 'The 2020 deluxe'],
+    ['The 2020 deluxe', 'The 2020 deluxe']
   ]
 
   for (let i = 0; i < cases.length; i++) {
