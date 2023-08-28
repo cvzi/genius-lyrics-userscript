@@ -7,6 +7,7 @@ function cleanUpSongTitle (songTitle) {
   songTitle = songTitle.replace(/fe?a?t\.?u?r?i?n?g?\s+[^)]+/i, '')
   songTitle = songTitle.replace(/\(\s*\)/, ' ').replace('"', ' ').replace('[', ' ').replace(']', ' ').replace('|', ' ')
   songTitle = songTitle.replace(/\s\s+/, ' ')
+  songTitle = songTitle.replace(/[\u200B-\u200D\uFEFF]/g, '') // zero width spaces
   songTitle = songTitle.trim()
   return songTitle
 }
