@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.10.0
+// @version      5.10.1
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2019, cuzi (cuzi@openmail.cc) and contributors
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -104,23 +104,25 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     try {
       const frameId = 'vanillajs-iframe-v1'
       let frame = document.getElementById(frameId)
+
       if (!frame) {
         frame = document.createElement('iframe')
-        frame.id = 'vanillajs-iframe-v1'
+        frame.id = frameId
+        const blobURL = typeof webkitCancelAnimationFrame === 'function' ? (frame.src = URL.createObjectURL(new Blob([], { type: 'text/html' }))) : null // avoid Brave Crash
         frame.sandbox = 'allow-same-origin' // script cannot be run inside iframe but API can be obtained from iframe
         let n = document.createElement('noscript') // wrap into NOSCRPIT to avoid reflow (layouting)
         n.appendChild(frame)
         const root = document.documentElement
         if (root) {
           root.appendChild(n)
+          if (blobURL) Promise.resolve().then(() => URL.revokeObjectURL(blobURL))
           removeIframeFn = (setTimeout) => {
             const removeIframeOnDocumentReady = (e) => {
               e && win.removeEventListener('DOMContentLoaded', removeIframeOnDocumentReady, false)
               win = null
-              setTimeout(() => {
-                n.remove()
-                n = null
-              }, 200)
+              const m = n
+              n = null
+              setTimeout(() => m.remove(), 200)
             }
             if (document.readyState !== 'loading') {
               removeIframeOnDocumentReady()
