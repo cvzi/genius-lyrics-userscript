@@ -37,7 +37,7 @@
       * connect genius.com
 */
 
-/* global Reflect, top, HTMLElement, GM_openInTab */
+/* global Blob, Reflect, top, HTMLElement, GM_openInTab */
 
 if (typeof module !== 'undefined') {
   module.exports = geniusLyrics
@@ -205,7 +205,10 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       isScrollLyricsEnabled, // refer to user setting
       isScrollLyricsCallable, // refer to content rendering
       scrollLyrics,
-      config
+      config,
+      modalAlert,
+      modalConfirm,
+      closeModalUIs
     },
     current: { // store the title and artists of the current lyrics [cached and able to reload]
       title: '', // these shall be replaced by CompoundTitle
@@ -781,7 +784,8 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       t: 'search', // differentiate with other types of requesting
       responseType: 'json',
       error: function geniusSearchOnError (response) {
-        window.alert(custom.scriptName + '\n\nError in geniusSearch(' + JSON.stringify(query) + ', ' + ('name' in cb ? cb.name : 'cb') + '):\n' + response)
+        console.error(response)
+        modalAlert(custom.scriptName + '\n\nError in geniusSearch(' + JSON.stringify(query) + ', ' + ('name' in cb ? cb.name : 'cb') + '):\n' + response)
         invalidateRequestCache(requestObj)
         if (typeof cbError === 'function') cbError()
         requestObj = null
@@ -798,7 +802,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
           const section = (((jsonData || 0).response || 0).sections[0] || 0)
           const hits = section.hits || 0
           if (typeof hits !== 'object') {
-            window.alert(custom.scriptName + '\n\n' + 'Incorrect Response Format' + ' in geniusSearch(' + JSON.stringify(query) + ', ' + ('name' in cb ? cb.name : 'cb') + '):\n\n' + response.responseText)
+            modalAlert(custom.scriptName + '\n\n' + 'Incorrect Response Format' + ' in geniusSearch(' + JSON.stringify(query) + ', ' + ('name' in cb ? cb.name : 'cb') + '):\n\n' + response.responseText)
             invalidateRequestCache(requestObj)
             if (typeof cbError === 'function') cbError()
             requestObj = null
@@ -830,7 +834,8 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       url: song.result.url,
       theme: `${genius.option.themeKey}`, // different theme, differnt html cache
       error: function loadGeniusSongOnError (response) {
-        window.alert(custom.scriptName + '\n\nError loadGeniusSong(' + JSON.stringify(song) + ', cb):\n' + response)
+        console.error(response)
+        modalAlert(custom.scriptName + '\n\nError loadGeniusSong(' + JSON.stringify(song) + ', cb):\n' + response)
       },
       load: function loadGeniusSongOnLoad (response, cacheResult) {
         // cacheResult(response)
@@ -1085,7 +1090,8 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       t: 'annotations', // differentiate with other types of requesting
       responseType: 'json',
       error: function loadGeniusAnnotationsOnError (response) {
-        window.alert(custom.scriptName + '\n\nError loadGeniusAnnotations(' + JSON.stringify(song) + ', cb):\n' + response)
+        console.error(response)
+        modalAlert(custom.scriptName + '\n\nError loadGeniusAnnotations(' + JSON.stringify(song) + ', cb):\n' + response)
         cb(annotations)
       },
       preProcess: function loadGeniusAnnotationsPreProcess (response) {
@@ -4099,7 +4105,7 @@ Link__StyledLink
           const res = { hits, status: 200 }
           callback(res)
         } else {
-          window.alert(custom.scriptName + '\n\nNo search results')
+          modalAlert(custom.scriptName + '\n\nNo search results')
         }
       } else {
         if (typeof callback === 'function') {
@@ -4409,6 +4415,79 @@ Link__StyledLink
     div.innerHTML = `<p style="font-size:15px;">
       Powered by <a style="font-size:15px;" target="_blank" href="https://github.com/cvzi/genius-lyrics-userscript/">GeniusLyrics.js</a>, Copyright © 2019 <a style="font-size:15px;" href="mailto:cuzi@openmail.cc">cuzi</a> and contributors.
       <br>Licensed under the GNU General Public License v3.0</p>`
+  }
+
+  function closeModalUIs () {
+    document.querySelectorAll('.modal_ui_spotify_genius_lyrics').forEach(div => div.remove())
+  }
+
+  function modalAlert (text, buttons = { OK: true }) {
+    return new Promise(function (resolve) {
+      const bg = document.body.appendChild(document.createElement('div'))
+      bg.style = `
+        display: block;
+        position: fixed;
+        background-color: rgba(0,0,0,0.5);
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 999`
+      bg.classList.add('modal_ui_spotify_genius_lyrics')
+      const div = bg.appendChild(document.createElement('div'))
+      div.style = `
+        display: block;
+        position: fixed;
+        background-color: #bbb;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px 0 rgba(0,0,0,0.5);
+        z-index: 1000;
+        width: 400px;
+        height: auto;
+        text-align: center;
+        font-size: 20px;
+        line-height: 1.5;
+        font-family: sans-serif;
+        color: black;
+        word-break: break-word;
+        overflow-wrap: break-word;
+        white-space: pre-wrap;
+        overflow: auto;
+        max-height: 80%;
+        max-width: 80%`
+      div.innerHTML = text
+      const buttonDiv = div.appendChild(document.createElement('div'))
+      buttonDiv.style.marginTop = '20px'
+      Object.entries(buttons).forEach(function (pair) {
+        const button = buttonDiv.appendChild(document.createElement('button'))
+        button.style = `
+          margin: 0 10px;
+          padding: 10px;
+          border-radius: 5px;
+          border: none;
+          background-color: #ddd;
+          color: black;
+          font-family: sans-serif;
+          font-size: 16px;
+          cursor: pointer`
+        button.innerHTML = pair[0]
+        button.addEventListener('click', function () {
+          bg.remove()
+          resolve(pair[1])
+        })
+      })
+    })
+  }
+
+  function modalConfirm (text) {
+    return modalAlert(text, {
+      OK: true,
+      Cancel: false
+    })
   }
 
   function addOneMessageListener (type, cb) {
