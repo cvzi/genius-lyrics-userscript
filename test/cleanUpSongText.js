@@ -2,8 +2,8 @@ const assert = require('assert')
 
 function cleanUpSongTitle (songTitle) {
   // Remove featuring artists and version info from song title
-  songTitle = songTitle.replace(/\((master|studio|stereo|mono|anniversary|digital|edition|naked|original|re|ed|no.*?\d+|mix|version|\d+th|\d{4}|\s|\.|-|\/)+\)/i, '').trim()
-  songTitle = songTitle.replace(/[-‧⋅·ᐧ•‐‒–—―﹘]\s*(master|studio|stereo|mono|anniversary|digital|edition|naked|original|re|ed|no.*?\d+|mix|version|\d+th|\d{4}|\s|\.|-|\/)+/i, '').trim()
+  songTitle = songTitle.replace(/\((single|master|studio|stereo|mono|anniversary|digital|edit|edition|naked|original|re|ed|no.*?\d+|mix|version|\d+th|\d{4}|\s|\.|-|\/)+\)/i, '').trim()
+  songTitle = songTitle.replace(/[-‧⋅·ᐧ•‐‒–—―﹘]\s*(single|master|studio|stereo|mono|anniversary|digital|edit|edition|naked|original|re|ed|no.*?\d+|mix|version|\d+th|\d{4}|\s|\.|-|\/)+/i, '').trim()
   songTitle = songTitle.replace(/fe?a?t\.?u?r?i?n?g?\s+[^)]+/i, '')
   songTitle = songTitle.replace(/\(\s*\)/, ' ').replace('"', ' ').replace('[', ' ').replace(']', ' ').replace('|', ' ')
   songTitle = songTitle.replace(/\s\s+/, ' ')
@@ -38,7 +38,8 @@ function testCleanUpSongTitle () {
     ['Fisherman\'s Blues - 2006 Remaster', 'Fisherman\'s Blues'],
     ['A test master', 'A test master'],
     ['The 2020 deluxe', 'The 2020 deluxe'],
-    ['Louie Louie - Remastered Studio', 'Louie Louie']
+    ['Louie Louie - Remastered Studio', 'Louie Louie'],
+    ['Move on Up - Single Edit', 'Move on Up']
   ]
 
   for (let i = 0; i < cases.length; i++) {
