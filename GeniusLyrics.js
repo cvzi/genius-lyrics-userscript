@@ -785,7 +785,9 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       responseType: 'json',
       error: function geniusSearchOnError (response) {
         console.error(response)
-        modalAlert(custom.scriptName + '\n\nError in geniusSearch(' + JSON.stringify(query) + ', ' + ('name' in cb ? cb.name : 'cb') + '):\n' + response)
+        modalAlert(custom.scriptName + '\n\nError in geniusSearch(' + JSON.stringify(query) + ', ' + ('name' in cb ? cb.name : 'cb') + '):' +
+          '\nRequest status:' + ('status' in response ? response.status : 'unknown') + ' ' + ('statusText' in response ? response.statusText : '') +
+          ('finalUrl' in response ? '\nUrl: ' + response.finalUrl : ''))
         invalidateRequestCache(requestObj)
         if (typeof cbError === 'function') cbError()
         requestObj = null
@@ -835,7 +837,9 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       theme: `${genius.option.themeKey}`, // different theme, differnt html cache
       error: function loadGeniusSongOnError (response) {
         console.error(response)
-        modalAlert(custom.scriptName + '\n\nError loadGeniusSong(' + JSON.stringify(song) + ', cb):\n' + response)
+        modalAlert(custom.scriptName + '\n\nError loadGeniusSong(' + JSON.stringify(song) + ', cb):\n' +
+          '\nRequest status:' + ('status' in response ? response.status : 'unknown') + ' ' + ('statusText' in response ? response.statusText : '') +
+          ('finalUrl' in response ? '\nUrl: ' + response.finalUrl : ''))
       },
       load: function loadGeniusSongOnLoad (response, cacheResult) {
         // cacheResult(response)
@@ -1091,7 +1095,9 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       responseType: 'json',
       error: function loadGeniusAnnotationsOnError (response) {
         console.error(response)
-        modalAlert(custom.scriptName + '\n\nError loadGeniusAnnotations(' + JSON.stringify(song) + ', cb):\n' + response)
+        modalAlert(custom.scriptName + '\n\nError loadGeniusAnnotations(' + JSON.stringify(song) + ', cb):\n' +
+          '\nRequest status:' + ('status' in response ? response.status : 'unknown') + ' ' + ('statusText' in response ? response.statusText : '') +
+          ('finalUrl' in response ? '\nUrl: ' + response.finalUrl : ''))
         cb(annotations)
       },
       preProcess: function loadGeniusAnnotationsPreProcess (response) {
