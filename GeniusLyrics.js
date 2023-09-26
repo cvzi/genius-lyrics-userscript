@@ -4139,6 +4139,11 @@ Link__StyledLink
       GM_openInTab('https://genius.com/', { active: true })
     }
 
+    // Background overlay
+    if (!document.getElementById('myoverlay7658438')) {
+      const bg = document.body.appendChild(document.createElement('div'))
+      bg.setAttribute('id', 'myoverlay7658438')
+    }
     // Blur background
     for (const e of document.querySelectorAll('body > *')) {
       e.style.filter = 'blur(4px)'
@@ -4173,7 +4178,8 @@ Link__StyledLink
     closeButton.textContent = "Don't show this hint again"
     closeButton.style = 'font-size:20px; background-color:#88aaff; color:white; padding:5px 10px; border-radius:10px; cursor:pointer;'
     closeButton.addEventListener('click', function () {
-      win.remove()
+      document.querySelectorAll('#mycaptchahint897454').forEach(d => d.remove())
+      document.querySelectorAll('#myoverlay7658438').forEach(d => d.remove())
       // Un-blur background
       for (const e of document.querySelectorAll('body > *, #lyricscontainer')) {
         e.style.filter = ''
@@ -4191,15 +4197,14 @@ Link__StyledLink
   function config () {
     if (document.querySelector('#myconfigwin39457845') !== null) return // avoid showing duplicating option window
 
-    loadCache()
-
-    const clearCacheFn = () => {
-      return Promise.all([custom.GM.setValue('selectioncache', '{}'), custom.GM.setValue('requestcache', '{}')]).then(function () {
-        selectionCache = cleanSelectionCache()
-        requestCache = {}
+    // Background overlay
+    if (!document.getElementById('myoverlay7658438')) {
+      const bg = document.body.appendChild(document.createElement('div'))
+      bg.setAttribute('id', 'myoverlay7658438')
+      bg.addEventListener('click', function () {
+        document.querySelectorAll('#myconfigwin39457845_close_button').forEach(b => b.focus())
       })
     }
-
     // Blur background
     for (const e of document.querySelectorAll('body > *')) {
       e.style.filter = 'blur(4px)'
@@ -4207,6 +4212,15 @@ Link__StyledLink
     const lyricscontainer = document.getElementById('lyricscontainer')
     if (lyricscontainer) {
       lyricscontainer.style.filter = 'blur(1px)'
+    }
+
+    loadCache()
+
+    const clearCacheFn = () => {
+      return Promise.all([custom.GM.setValue('selectioncache', '{}'), custom.GM.setValue('requestcache', '{}')]).then(function () {
+        selectionCache = cleanSelectionCache()
+        requestCache = {}
+      })
     }
 
     const win = document.body.appendChild(document.createElement('div'))
@@ -4374,8 +4388,10 @@ Link__StyledLink
 
     const closeButton = div.appendChild(document.createElement('button'))
     closeButton.textContent = 'Close'
+    closeButton.setAttribute('id', 'myconfigwin39457845_close_button')
     closeButton.addEventListener('click', function onCloseButtonClick () {
-      win.remove()
+      document.querySelectorAll('#myconfigwin39457845').forEach(d => d.remove())
+      document.querySelectorAll('#myoverlay7658438').forEach(d => d.remove())
       // Un-blur background
       for (const e of document.querySelectorAll('body > *, #lyricscontainer')) {
         e.style.filter = ''
@@ -4424,67 +4440,34 @@ Link__StyledLink
   }
 
   function closeModalUIs () {
-    document.querySelectorAll('.modal_ui_spotify_genius_lyrics').forEach(div => div.remove())
+    document.querySelectorAll('.modal_ui_genius_lyrics_overlay').forEach(div => div.remove())
   }
 
   function modalAlert (text, buttons = { OK: true }) {
     return new Promise(function (resolve) {
       const bg = document.body.appendChild(document.createElement('div'))
-      bg.style = `
-        display: block;
-        position: fixed;
-        background-color: rgba(0,0,0,0.5);
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 999`
-      bg.classList.add('modal_ui_spotify_genius_lyrics')
+      bg.classList.add('modal_ui_genius_lyrics_overlay')
+      bg.addEventListener('click', function () {
+        this.querySelector('button').focus()
+      })
       const div = bg.appendChild(document.createElement('div'))
-      div.style = `
-        display: block;
-        position: fixed;
-        background-color: #bbb;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 0 10px 0 rgba(0,0,0,0.5);
-        z-index: 1000;
-        width: 400px;
-        height: auto;
-        text-align: center;
-        font-size: 20px;
-        line-height: 1.5;
-        font-family: sans-serif;
-        color: black;
-        word-break: break-word;
-        overflow-wrap: break-word;
-        white-space: pre-wrap;
-        overflow: auto;
-        max-height: 80%;
-        max-width: 80%`
+      div.classList.add('modal_ui_genius_lyrics_dialog_box')
       div.innerHTML = text
       const buttonDiv = div.appendChild(document.createElement('div'))
-      buttonDiv.style.marginTop = '20px'
+      buttonDiv.classList.add('modal_ui_genius_lyrics_dialog_buttons_holder')
+      let firstButton = true
       Object.entries(buttons).forEach(function (pair) {
         const button = buttonDiv.appendChild(document.createElement('button'))
-        button.style = `
-          margin: 0 10px;
-          padding: 10px;
-          border-radius: 5px;
-          border: none;
-          background-color: #ddd;
-          color: black;
-          font-family: sans-serif;
-          font-size: 16px;
-          cursor: pointer`
+        button.classList.add('modal_ui_genius_lyrics_dialog_button')
         button.innerHTML = pair[0]
         button.addEventListener('click', function () {
           bg.remove()
           resolve(pair[1])
         })
+        if (firstButton) {
+          firstButton = false
+          button.focus()
+        }
       })
     })
   }
@@ -4609,11 +4592,24 @@ Link__StyledLink
       font-size:1.2em
     }
 
+    #myoverlay7658438 {
+      display: block;
+      position: fixed;
+      background-color: rgba(0,0,0,0.5);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 102;
+      user-select: none;
+      filter:blur(4px);
+    }
+
     #myconfigwin39457845 {
       position:fixed;
       top:120px;
       right:10px;
-      padding:15px;
+      padding:30px 10px;
       background:white;
       border-radius:10%;
       border:2px solid black;
@@ -4623,7 +4619,8 @@ Link__StyledLink
     }
     #myconfigwin39457845 h1 {
       font-size:1.9em;
-      padding:0.2em;
+      padding:0em 0.2em;
+      margin:0;
     }
     #myconfigwin39457845 a:link, #myconfigwin39457845 a:visited {
       font-size:1.2em;
@@ -4638,7 +4635,22 @@ Link__StyledLink
     }
     #myconfigwin39457845 button {
       color:black;
-      background:default;
+      font-family: sans-serif;
+      background-color: #e9e9ed;
+      border-radius: 5px;
+      border: 1px solid #8f8f9d;
+      font-size: 14px;
+      cursor: pointer;
+      padding: 1px 4px;
+      margin: auto 2px;
+    }
+    #myconfigwin39457845 button:focus {
+      border-color:#1a1dff;
+      background-color:#d0d0d7;
+    }
+    #myconfigwin39457845 button:hover {
+      border-color:black;
+      background-color:#d0d0d7;
     }
     #myconfigwin39457845 div {
       margin:2px 0;
@@ -4669,8 +4681,67 @@ Link__StyledLink
       100% {
         transform: rotate(360deg)
       }
-    }`
+    }
 
+    .modal_ui_genius_lyrics_overlay {
+      display: block;
+      position: fixed;
+      background-color: rgba(0,0,0,0.5);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 999;
+      user-select: none;
+    }
+
+    .modal_ui_genius_lyrics_dialog_box {
+      display: block;
+      position: fixed;
+      background-color: #bbb;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px 0 rgba(0,0,0,0.5);
+      z-index: 1000;
+      width: 400px;
+      height: auto;
+      text-align: center;
+      font-size: 20px;
+      line-height: 1.5;
+      font-family: sans-serif;
+      color: black;
+      word-break: break-word;
+      overflow-wrap: break-word;
+      white-space: pre-wrap;
+      overflow: auto;
+      max-height: 80%;
+      max-width: 80%;
+      user-select: text;
+    }
+    .modal_ui_genius_lyrics_dialog_buttons_holder {
+      margin-top :20px;
+    }
+   .modal_ui_genius_lyrics_dialog_button {
+      margin: 0 10px;
+      padding: 10px;
+      border-radius: 5px;
+      border: 2px solid #777;
+      background-color: #ddd;
+      color: black;
+      font-family: sans-serif;
+      font-size: 16px;
+      cursor: pointer
+    }
+    .modal_ui_genius_lyrics_dialog_button:focus {
+      border-color:#1a1dff;
+    }
+    .modal_ui_genius_lyrics_dialog_button:hover {
+      border-color:black;
+    }
+    `
     if ('addCss' in custom) {
       custom.addCss()
     }
