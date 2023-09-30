@@ -1419,6 +1419,9 @@ Genius:     ${originalUrl}
         }
       }
 
+      doc.querySelectorAll('[class*="LyricsFooter__Container"]').forEach(e => e.remove())
+      doc.querySelectorAll('[class*="LyricsEditdesktop__Container"]').forEach(e => e.remove())
+
       const bodyWidth = parseInt(document.getElementById('lyricsiframe').style.width || (document.getElementById('lyricsiframe').getBoundingClientRect().width + 'px'))
 
       // Change album links from anchor to real url
@@ -1430,10 +1433,7 @@ Genius:     ${originalUrl}
         })
       }
 
-      const parts = html.split('class="Lyrics__Container')[1].split('>')
-      parts.shift()
-
-      const lyricsHtml = '<div class="SongPage__Section"><div class="Lyrics__Container">' + parts.join('>').split('<div class="SidebarLyrics__Sidebar')[0] + '</div>'
+      const lyricsHtml = '<div class="SongPage__Section">' + doc.querySelector('[class*=Lyrics__Container]:not([class*=Sidebar])').outerHTML + '</div>'
 
       const h1 = doc.querySelector('div[class^=SongHeader] h1')
       const titleNode = h1.firstChild
@@ -3467,6 +3467,15 @@ pre{white-space:pre-wrap}
     [class*="SongHeaderdesktop__Information"], [class*="SongHeaderdesktop__SongDetails"] {
       row-gap: 0; /* remove unnecessary row gap */
     }
+
+    [class*="LyricsFooter__Container"] {
+      display:none;
+    }
+
+    [class*="SidebarLyrics__Sidebar"] {
+      display:none;
+    }
+
     `
 
     const contentStyleByDefault = `
