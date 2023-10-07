@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.11.0
+// @version      5.11.1
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2019, cuzi (cuzi@openmail.cc) and contributors
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -119,12 +119,11 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
           removeIframeFn = (setTimeout) => {
             const removeIframeOnDocumentReady = (e) => {
               e && win.removeEventListener('DOMContentLoaded', removeIframeOnDocumentReady, false)
-              win = null
-              const m = n
-              n = null
-              setTimeout(() => m.remove(), 200)
+              e = n
+              n = win = removeIframeFn = 0
+              setTimeout ? setTimeout(() => e.remove(), 200) : e.remove()
             }
-            if (document.readyState !== 'loading') {
+            if (!setTimeout || document.readyState !== 'loading') {
               removeIframeOnDocumentReady()
             } else {
               win.addEventListener('DOMContentLoaded', removeIframeOnDocumentReady, false)
@@ -135,11 +134,16 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
 
       const fc = frame ? frame.contentWindow : null
       if (fc) {
-        const { requestAnimationFrame, setTimeout, setInterval, clearTimeout, clearInterval } = fc
-        const res = { requestAnimationFrame, setTimeout, setInterval, clearTimeout, clearInterval }
-        for (const k in res) res[k] = res[k].bind(win) // necessary
-        if (removeIframeFn) Promise.resolve(res.setTimeout).then(removeIframeFn)
-        return res
+        try {
+          const { requestAnimationFrame, setTimeout, setInterval, clearTimeout, clearInterval } = fc
+          const res = { requestAnimationFrame, setTimeout, setInterval, clearTimeout, clearInterval }
+          for (const k in res) res[k] = res[k].bind(win) // necessary
+          if (removeIframeFn) Promise.resolve(res.setTimeout).then(removeIframeFn)
+          return res
+        } catch (e) {
+          if (removeIframeFn) removeIframeFn()
+          return null
+        }
       }
     } catch (e) {
       console.warn(e)
