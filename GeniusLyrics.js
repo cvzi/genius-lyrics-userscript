@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.11.2
+// @version      5.11.3
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2019, cuzi (cuzi@openmail.cc) and contributors
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -1436,7 +1436,8 @@ Genius:     ${originalUrl}
         })
       }
 
-      const lyricsHtml = '<div class="SongPage__Section">' + doc.querySelector('[class*=Lyrics__Container]:not([class*=Sidebar])').outerHTML + '</div>'
+      const lyricsContainers = Array.from(doc.querySelectorAll('[class*=Lyrics__Container]:not([class*=Sidebar])'))
+      const lyricsHtml = '<div class="SongPage__Section">' + lyricsContainers.map(e => e.outerHTML).join('\n') + '</div>'
 
       const h1 = doc.querySelector('div[class^=SongHeader] h1')
       const titleNode = h1.firstChild
