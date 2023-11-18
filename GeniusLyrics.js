@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.11.3
+// @version      5.12.0
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2019, cuzi (cuzi@openmail.cc) and contributors
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -47,7 +47,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   'use strict'
 
   const __SELECTION_CACHE_VERSION__ = 4
-  const __REQUEST_CACHE_VERSION__ = 3
+  const __REQUEST_CACHE_VERSION__ = 4
 
   /** @type {globalThis.PromiseConstructor} */
   const Promise = (async () => { })().constructor // YouTube polyfill to Promise in older browsers will make the feature being unstable.
@@ -182,6 +182,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       autoShow: true,
       themeKey: null,
       romajiPriority: 'low',
+      fontSize: 0, // == 0 : use default value, >= 1 : "px" value
       cacheHTMLRequest: true, // be careful of cache size if trimHTMLReponseText is false; around 50KB per lyrics including selection cache
       requestCallbackResponseTextOnly: true, // default true; just need the request text
       enableStyleSubstitution: false, // default false; some checking are provided but not guaranteed
@@ -216,7 +217,8 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     current: { // store the title and artists of the current lyrics [cached and able to reload]
       title: '', // these shall be replaced by CompoundTitle
       artists: '', // these shall be replaced by CompoundTitle
-      compoundTitle: ''
+      compoundTitle: '',
+      themeSettings: null // currently displayed theme + fontSize
     },
     iv: {
       main: null // unless setupMain is provided and the interval / looping is controlled externally
@@ -1371,6 +1373,17 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       })
     },
 
+    setCustomFontSize () {
+      if (genius.option.fontSize && genius.option.fontSize > 0) {
+        if (document.getElementById('lyrics_text_div')) {
+          document.getElementById('lyrics_text_div').style.fontSize = `${genius.option.fontSize}px`
+        }
+        for (const div of document.querySelectorAll('div[data-lyrics-container="true"]')) {
+          div.style.fontSize = `${genius.option.fontSize}px`
+        }
+      }
+    },
+
     themeError (themeName, errorMsg, originalUrl) {
       return `<div style="color:black;background:white;font-family:sans-serif">
       <br>
@@ -1415,10 +1428,13 @@ Genius:     ${originalUrl}
       const doc = new window.DOMParser().parseFromString(html, 'text/html')
 
       const originalUrl = doc.querySelector('meta[property="og:url"]') ? doc.querySelector('meta[property="og:url"]').content : null
-      if (html.indexOf('class="Lyrics__Container') === -1) {
+
+      const lyricsContainers = Array.from(doc.querySelectorAll('[class*=Lyrics__Container]:not([class*=Sidebar])'))
+      const lyricsPlaceHolder = doc.querySelector('[class*="LyricsPlaceholder__Container"]')
+      if (lyricsContainers.length === 0 && !lyricsPlaceHolder) {
         return {
           error: true,
-          errorHtml: themeCommon.themeError(theme.name, 'html.indexOf(\'class="Lyrics__Container\') === -1', originalUrl)
+          errorHtml: themeCommon.themeError(theme.name, 'Neither "Lyrics__Container" nor "LyricsPlaceholder__Container" found', originalUrl)
         }
       }
 
@@ -1436,8 +1452,12 @@ Genius:     ${originalUrl}
         })
       }
 
-      const lyricsContainers = Array.from(doc.querySelectorAll('[class*=Lyrics__Container]:not([class*=Sidebar])'))
-      const lyricsHtml = '<div class="SongPage__Section">' + lyricsContainers.map(e => e.outerHTML).join('\n') + '</div>'
+      let lyricsHtml
+      if (lyricsContainers.length > 0) {
+        lyricsHtml = '<div class="SongPage__Section" id="lyrics_text_div">' + lyricsContainers.map(e => e.outerHTML).join('\n') + '</div>'
+      } else if (lyricsPlaceHolder) {
+        lyricsHtml = '<div class="SongPage__Section">' + lyricsPlaceHolder.outerHTML + '</div>'
+      }
 
       const h1 = doc.querySelector('div[class^=SongHeader] h1')
       const titleNode = h1.firstChild
@@ -1599,6 +1619,10 @@ Genius:     ${originalUrl}
 
   [class*="StartSongBioButton"] {
     display: none;
+  }
+
+  [class*="LyricsPlaceholder__Icon"] {
+    max-width: 3em;
   }
 
   @keyframes appDomAppended {
@@ -1960,6 +1984,9 @@ Genius:     ${originalUrl}
           })
         })
 
+        // Set custom fontSize
+        onload.push(themeCommon.setCustomFontSize)
+
         // Goto lyrics
         onload.push(scrollToBegining)
 
@@ -2045,6 +2072,9 @@ Genius:     ${originalUrl}
             document.documentElement.classList.add('v')
           })
         })
+
+        // Set custom fontSize
+        onload.push(themeCommon.setCustomFontSize)
 
         // Goto lyrics
         onload.push(scrollToBegining)
@@ -2161,6 +2191,9 @@ Genius:     ${originalUrl}
             document.documentElement.classList.add('v')
           })
         })
+
+        // Set custom fontSize
+        onload.push(themeCommon.setCustomFontSize)
 
         // Goto lyrics
         onload.push(scrollToBegining)
@@ -2314,8 +2347,10 @@ Genius:     ${originalUrl}
       queryType = 2
       beLessSpecific = false
     }
-    if (force || beLessSpecific || (!document.hidden && musicIsPlaying && (genius.current.compoundTitle !== compoundTitle))) {
+    const themeSettings = `${genius.option.themeKey} ${genius.option.fontSize}`
+    if (force || beLessSpecific || (!document.hidden && musicIsPlaying && (genius.current.compoundTitle !== compoundTitle)) || genius.current.themeSettings !== themeSettings) {
       const mCTitle = genius.current.compoundTitle = compoundTitle
+      genius.current.themeSettings = themeSettings
 
       if ('onNewSongPlaying' in custom) {
         custom.onNewSongPlaying(songTitle, songArtistsArr)
@@ -3561,6 +3596,8 @@ pre{white-space:pre-wrap}
       '<svg><path fill-rule="evenodd" d="M3.214 11.671h.643a1.287 1.287 0 0 1 1.286 1.286v1.286a1.287 1.287 0 0 1-1.286 1.286h-.643V18.1H1.93v-2.57h-.643A1.287 1.287 0 0 1 0 14.243v-1.286a1.287 1.287 0 0 1 1.286-1.286h.643V.101h1.285v11.57Zm-1.928 2.572h2.571v-1.286H1.286v1.286Zm9-11.571h-.643V.1H8.357v2.572h-.643A1.287 1.287 0 0 0 6.43 3.957v1.286a1.287 1.287 0 0 0 1.285 1.286h.643V18.1h1.286V6.53h.643a1.287 1.287 0 0 0 1.285-1.286V3.957a1.287 1.287 0 0 0-1.285-1.285Zm0 2.571H7.714V3.957h2.572v1.286Zm6.428 2.571h-.643V.1h-1.285v7.714h-.643A1.287 1.287 0 0 0 12.857 9.1v1.286a1.287 1.287 0 0 0 1.286 1.286h.643V18.1h1.285v-6.429h.643A1.287 1.287 0 0 0 18 10.386V9.1a1.287 1.287 0 0 0-1.286-1.286Zm0 2.572h-2.571V9.1h2.571v1.286Z" clip-rule="evenodd"></path></svg>',
       '<svg><path d="M17.51 5.827c.654-.654.654-1.636 0-2.29L14.563.59c-.655-.655-1.637-.655-2.291 0L0 12.864V18.1h5.236L17.51 5.827Zm-4.092-4.09 2.946 2.945-2.455 2.454-2.945-2.945 2.454-2.455ZM1.636 16.463v-2.946l8.182-8.182 2.946 2.946-8.182 8.182H1.636Z"></path></svg>',
       '<svg><path fill-rule="evenodd" d="M2.948.1h10.97v1.371H2.948V.101ZM15.29 2.843H1.578v1.372H15.29V2.843Zm.567 15.257H2.144a1.373 1.373 0 0 1-1.371-1.37v-9.6a1.373 1.373 0 0 1 1.37-1.37h13.713a1.373 1.373 0 0 1 1.371 1.37v9.599a1.373 1.373 0 0 1-1.37 1.371ZM2.144 7.13v9.599h13.712V7.13H2.144Z" clip-rule="evenodd"></path></svg>',
+      '<svg><path d="M6.5 10.68.04.605h12.92L6.5 10.68z"></path></svg>',
+      '<svg><path d="M16.58 20.73H2V6.15h9.07l2-2H0v18.58h18.58V8.75l-2 2v9.98z"></path><path d="M18.65 0l-4.16 4.15-2 2L8 10.66l-1.59 5.25 5.19-1.6 5-5 2-2 3.71-3.71zm-2.07 7.38l-5.71 5.71-1.23.38-.82-.82.38-1.26 5.25-5.23 2-2L18.65 2l1.67 1.67-1.74 1.71z"></path></svg>',
     ]
   // note: the script can detect that the fetched svg might be missing in the defaultSVGBoxs,
   // but if those SVGs are no longer used in all lyrics / theme, there will be no warning or logging to alert the developer.
@@ -3760,6 +3797,7 @@ Link__StyledLink
       } else {
         om.add(n)
       }
+      return m
     })
     if (om.size > 0) {
       console.log('Genius Lyrics - new SVGs are found', om.size, [...om.keys()])
@@ -4066,7 +4104,14 @@ Link__StyledLink
           }
           spinnerUpdate('2', 'Rendering...', 301, 'pageRendering')
           if (iframe.contentWindow && iframe.contentWindow.postMessage) {
-            iframe.contentWindow.postMessage({ iAm: custom.scriptName, type: 'writehtml', html, contentStyle, themeKey: genius.option.themeKey }, '*')
+            iframe.contentWindow.postMessage({
+              iAm: custom.scriptName,
+              type: 'writehtml',
+              html,
+              contentStyle,
+              themeKey: genius.option.themeKey,
+              fontSize: genius.option.fontSize
+            }, '*')
           } else if (iframe.closest('html, body') === null) {
             // unlikely as interupter_lyricsDisplayState is checked
             unableToProcess('iframe#lyricsiframe was removed from the page. No contentWindow could be found.')
@@ -4161,10 +4206,6 @@ Link__StyledLink
     for (const e of document.querySelectorAll('body > *')) {
       e.style.filter = 'blur(4px)'
     }
-    const lyricscontainer = document.getElementById('lyricscontainer')
-    if (lyricscontainer) {
-      lyricscontainer.style.filter = 'blur(1px)'
-    }
 
     const win = document.body.appendChild(document.createElement('div'))
     win.setAttribute('id', 'mycaptchahint897454')
@@ -4194,7 +4235,7 @@ Link__StyledLink
       document.querySelectorAll('#mycaptchahint897454').forEach(d => d.remove())
       document.querySelectorAll('#myoverlay7658438').forEach(d => d.remove())
       // Un-blur background
-      for (const e of document.querySelectorAll('body > *, #lyricscontainer')) {
+      for (const e of document.querySelectorAll('body > *')) {
         e.style.filter = ''
       }
       custom.GM.setValue('noMoreCaptchaHint', true)
@@ -4220,11 +4261,7 @@ Link__StyledLink
     }
     // Blur background
     for (const e of document.querySelectorAll('body > *')) {
-      e.style.filter = 'blur(4px)'
-    }
-    const lyricscontainer = document.getElementById('lyricscontainer')
-    if (lyricscontainer) {
-      lyricscontainer.style.filter = 'blur(1px)'
+      e.style.filter = 'blur(1px)'
     }
 
     loadCache()
@@ -4300,11 +4337,38 @@ Link__StyledLink
               f()
             }
           }
-          custom.addLyrics(true)
+          custom.addLyrics()
         })
       }
     }
     selectTheme.addEventListener('change', onSelectTheme)
+
+    // Font size
+    div = win.appendChild(document.createElement('div'))
+
+    label = div.appendChild(document.createElement('label'))
+    label.setAttribute('for', 'inputFontSize748')
+    label.textContent = 'Font size: '
+
+    const inputFontSize = div.appendChild(document.createElement('input'))
+    inputFontSize.type = 'number'
+    inputFontSize.value = genius.option.fontSize
+    inputFontSize.min = 0
+    inputFontSize.max = 99
+    inputFontSize.id = 'inputFontSize748'
+    inputFontSize.style.maxWidth = '5em'
+    const onFontSizeChanged = function onFontSizeChangeListener (evt) {
+      genius.option.fontSize = Math.max(0, parseInt(inputFontSize.value) || 0)
+      custom.GM.setValue('fontsize', genius.option.fontSize).then(() => {
+        if (genius.onThemeChanged) {
+          for (const f of genius.onThemeChanged) {
+            f()
+          }
+        }
+        custom.addLyrics()
+      })
+    }
+    inputFontSize.addEventListener('change', onFontSizeChanged)
 
     // Switch: Show annotations
     div = win.appendChild(document.createElement('div'))
@@ -4406,7 +4470,7 @@ Link__StyledLink
       document.querySelectorAll('#myconfigwin39457845').forEach(d => d.remove())
       document.querySelectorAll('#myoverlay7658438').forEach(d => d.remove())
       // Un-blur background
-      for (const e of document.querySelectorAll('body > *, #lyricscontainer')) {
+      for (const e of document.querySelectorAll('body > *')) {
         e.style.filter = ''
       }
     })
@@ -4615,13 +4679,13 @@ Link__StyledLink
       height: 100%;
       z-index: 102;
       user-select: none;
-      filter:blur(4px);
+      filter:blur(1px);
     }
 
     #myconfigwin39457845 {
       position:fixed;
       top:120px;
-      right:10px;
+      left:50px;
       padding:30px 10px;
       background:white;
       border-radius:10%;
@@ -4645,6 +4709,10 @@ Link__StyledLink
       font-size:1.2em;
       text-decoration:underline;
       color:#dd65ff;
+    }
+    #myconfigwin39457845 input[type=text], #myconfigwin39457845 input[type=number] {
+      color:black;
+      background-color: white;
     }
     #myconfigwin39457845 button {
       color:black;
@@ -4767,7 +4835,8 @@ Link__StyledLink
       custom.GM.getValue('theme', genius.option.themeKey),
       custom.GM.getValue('annotationsenabled', annotationsEnabled),
       custom.GM.getValue('autoscrollenabled', autoScrollEnabled),
-      custom.GM.getValue('romajipriority', genius.option.romajiPriority)
+      custom.GM.getValue('romajipriority', genius.option.romajiPriority),
+      custom.GM.getValue('fontsize', genius.option.fontSize)
     ])
 
     // set up variables
@@ -4783,6 +4852,7 @@ Link__StyledLink
     annotationsEnabled = !!values[2]
     autoScrollEnabled = !!values[3]
     genius.option.romajiPriority = values[4] || 'low'
+    genius.option.fontSize = Math.max(0, parseInt(values[5]) || 0)
 
     if (genius.onThemeChanged) {
       for (const f of genius.onThemeChanged) {
