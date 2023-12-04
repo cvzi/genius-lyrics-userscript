@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.12.1
+// @version      5.12.2
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2019, cuzi (cuzi@openmail.cc) and contributors
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -4121,8 +4121,10 @@ Link__StyledLink
           }
           spinnerUpdate('2', 'Rendering...', 301, 'pageRendering')
           if (document.visibilityState === 'visible') await getRafPromise().then()
-          if (iframe.contentWindow && iframe.contentWindow.postMessage) {
-            iframe.contentWindow.postMessage({
+          const iframeContentWin = iframe.contentWindow || 0
+          if ((iframeContentWin.location || 0).hash && iframeContentWin.postMessage) {
+            // (iframeContentWin.location||0).hash === '#html:post'
+            iframeContentWin.postMessage({
               iAm: custom.scriptName,
               type: 'writehtml',
               html,
