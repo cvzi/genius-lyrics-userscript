@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.12.0
+// @version      5.12.1
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2019, cuzi (cuzi@openmail.cc) and contributors
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -37,7 +37,7 @@
       * connect genius.com
 */
 
-/* global Blob, Reflect, top, HTMLElement, GM_openInTab */
+/* global Blob, top, HTMLElement, GM_openInTab */
 
 if (typeof module !== 'undefined') {
   module.exports = geniusLyrics
@@ -3859,6 +3859,16 @@ Link__StyledLink
     return spinnerDOM
   }
 
+  let rafPromise = null
+  const rafFn = (typeof webkitRequestAnimationFrame ? webkitRequestAnimationFrame : requestAnimationFrame).bind(window) // eslint-disable-line no-undef, no-constant-condition
+
+  const getRafPromise = () => rafPromise || (rafPromise = new Promise(resolve => {
+    rafFn(hRes => {
+      rafPromise = null
+      resolve(hRes)
+    })
+  }))
+
   function showLyrics (songInfo, searchresultsLengths) {
     // showLyrics
     const currentFunctionClosureIdentifier = ((window.showLyricsIdentifier || 0) + 1) % 100000000
@@ -3940,7 +3950,13 @@ Link__StyledLink
 
     spinnerUpdate('5', 'Downloading lyrics...', 0, 'start')
     unScroll()
-    window.postMessage({ iAm: custom.scriptName, type: 'lyricsDisplayState', visibility: 'loading', song: songInfo, searchresultsLengths }, '*')
+
+    async function updateLyricsDisplayState () {
+      if (document.visibilityState === 'visible') await getRafPromise().then()
+      window.postMessage({ iAm: custom.scriptName, type: 'lyricsDisplayState', visibility: 'loading', song: songInfo, searchresultsLengths }, '*')
+      if (document.visibilityState === 'visible') await getRafPromise().then()
+    }
+    updateLyricsDisplayState()
 
     function interuptedByExternal () {
       window.removeEventListener('message', interuptMessageHandler, false)
@@ -4011,21 +4027,22 @@ Link__StyledLink
         }
 
         // event listeners
-        addOneMessageListener('genius-iframe-waiting', function () {
+        addOneMessageListener('genius-iframe-waiting', async function () {
           if (isShowLyricsIsCancelledByUser || window.showLyricsIdentifier !== currentFunctionClosureIdentifier) return
           if (iv === 0) {
             return
           }
-          ivf() // this is much faster than 1500ms
+          await ivf() // this is much faster than 1500ms
           clearInterval(iv)
           iv = 0
         })
-        addOneMessageListener('htmlwritten', function () {
+        addOneMessageListener('htmlwritten', async function () {
           if (isShowLyricsIsCancelledByUser || window.showLyricsIdentifier !== currentFunctionClosureIdentifier) return
           if (iv > 0) {
             clearInterval(iv)
             iv = 0
           }
+          if (document.visibilityState === 'visible') await getRafPromise().then()
           spinnerUpdate('1', 'Calculating...', 302, 'htmlwritten')
         })
         addOneMessageListener('pageready', function (ev) {
@@ -4093,7 +4110,7 @@ Link__StyledLink
           }
         }
 
-        const ivf = () => {
+        const ivf = async () => {
           if (window.showLyricsIdentifier !== currentFunctionClosureIdentifier) return
           if (iv === 0) {
             return
@@ -4103,6 +4120,7 @@ Link__StyledLink
             unableToProcess('Genius Lyrics - showLyrics() was interrupted')
           }
           spinnerUpdate('2', 'Rendering...', 301, 'pageRendering')
+          if (document.visibilityState === 'visible') await getRafPromise().then()
           if (iframe.contentWindow && iframe.contentWindow.postMessage) {
             iframe.contentWindow.postMessage({
               iAm: custom.scriptName,
@@ -4844,7 +4862,7 @@ Link__StyledLink
     if (Object.prototype.hasOwnProperty.call(themes, values[1])) {
       genius.option.themeKey = values[1]
     } else {
-      genius.option.themeKey = Reflect.ownKeys(themes)[0] // might consider to be replaced by `Object.getOwnPropertyNames(themes)[0]`
+      genius.option.themeKey = Object.getOwnPropertyNames(themes)[0]
       custom.GM.setValue('theme', genius.option.themeKey)
       console.error(`Invalid value for theme key: custom.GM.getValue("theme") = '${values[1]}', using default theme key: '${genius.option.themeKey}'`)
     }
@@ -4908,6 +4926,7 @@ Link__StyledLink
         // in case top is not accessible from iframe
       }
     })
+    if (document.visibilityState === 'visible') await getRafPromise().then()
 
     if ('themeKey' in e.data && Object.prototype.hasOwnProperty.call(themes, e.data.themeKey)) {
       genius.option.themeKey = e.data.themeKey
@@ -4925,7 +4944,9 @@ Link__StyledLink
     document.documentElement.innerHTML = html
 
     const communicationWindow = e.source // top
+    if (document.visibilityState === 'visible') await getRafPromise().then()
     communicationWindow.postMessage({ iAm: custom.scriptName, type: 'htmlwritten' }, '*')
+    if (document.visibilityState === 'visible') await getRafPromise().then()
 
     // clean up
     e = null
@@ -5052,7 +5073,10 @@ Link__StyledLink
       addKeyboardShortcutInFrame(custom.toggleLyricsKey)
     }
     // this page is generated by code; pageready does not mean the page is fully rendered
+
+    if (document.visibilityState === 'visible') await getRafPromise().then()
     communicationWindow.postMessage({ iAm: custom.scriptName, type: 'pageready'/* , html: document.documentElement.innerHTML */ }, '*')
+    if (document.visibilityState === 'visible') await getRafPromise().then()
     if ('iframeLoadedCallback2' in custom) {
       // after all onload functions
       custom.iframeLoadedCallback2({ document, theme, onload })
