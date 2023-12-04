@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.12.2
+// @version      5.12.3
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2019, cuzi (cuzi@openmail.cc) and contributors
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -3860,7 +3860,7 @@ Link__StyledLink
   }
 
   let rafPromise = null
-  const rafFn = (typeof webkitRequestAnimationFrame ? webkitRequestAnimationFrame : requestAnimationFrame).bind(window) // eslint-disable-line no-undef, no-constant-condition
+  const rafFn = (typeof webkitRequestAnimationFrame !== 'undefined' ? webkitRequestAnimationFrame : requestAnimationFrame).bind(window) // eslint-disable-line no-undef, no-constant-condition
 
   const getRafPromise = () => rafPromise || (rafPromise = new Promise(resolve => {
     rafFn(hRes => {
