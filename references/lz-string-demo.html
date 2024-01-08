@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LZ-String Example</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+        }
+        h1, h2, h3 {
+            text-align: center;
+        }
+        textarea, select, button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #0084ff;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0066cc;
+        }
+        @media (max-width: 600px) {
+            .container {
+                width: 90%;
+                margin: 10px auto;
+            }
+            h1, h2, h3 {
+                font-size: 1.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>LZ-String Compression Example</h1>
+        
+        <h2>Enter Your Text</h2>
+        <textarea id="inputText" placeholder="Enter text to compress"></textarea>
+
+        <h2>Compression Method</h2>
+        <select id="compressionMethod">
+            <option value="compress">Compress</option>
+            <option value="compressToUTF16">Compress to UTF16</option>
+            <option value="compressToBase64">Compress to Base64</option>
+            <option value="compressToEncodedURIComponent">Compress to Encoded URI Component</option>
+            <option value="compressToUint8Array">Compress to Uint8Array</option>
+        </select>
+        <button onclick="compressText()">Compress</button>
+        <h3>Compressed Text:</h3>
+        <textarea id="compressedText" readonly></textarea>
+
+        <h2>Decompression</h2>
+        <textarea id="compressedInput" placeholder="Enter compressed text"></textarea>
+        <button onclick="decompressText()">Decompress</button>
+        <h3>Decompressed Text:</h3>
+        <textarea id="decompressedText" readonly></textarea>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
+    <script>
+        function compressText() {
+            const inputText = document.getElementById('inputText').value;
+            const method = document.getElementById('compressionMethod').value;
+            let compressedText = '';
+            try {
+                switch(method) {
+                    case 'compressToUTF16':
+                        compressedText = LZString.compressToUTF16(inputText);
+                        break;
+                    case 'compressToBase64':
+                        compressedText = LZString.compressToBase64(inputText);
+                        break;
+                    case 'compressToEncodedURIComponent':
+                        compressedText = LZString.compressToEncodedURIComponent(inputText);
+                        break;
+                    case 'compressToUint8Array':
+                        compressedText = JSON.stringify(LZString.compressToUint8Array(inputText));
+                        break;
+                    default:
+                        compressedText = LZString.compress(inputText);
+                }
+            } catch (e) {
+                compressedText = 'Error during compression: ' + e.message;
+            }
+            document.getElementById('compressedText').value = compressedText;
+        }
+
+        function decompressText() {
+            const compressedInput = document.getElementById('compressedInput').value;
+            const method = document.getElementById('compressionMethod').value;
+            let decompressedText = '';
+            try {
+                switch(method) {
+                    case 'compressToUTF16':
+                        decompressedText = LZString.decompressFromUTF16(compressedInput);
+                        break;
+                    case 'compressToBase64':
+                        decompressedText = LZString.decompressFromBase64(compressedInput);
+                        break;
+                    case 'compressToEncodedURIComponent':
+                        decompressedText = LZString.decompressFromEncodedURIComponent(compressedInput);
+                        break;
+                    case 'compressToUint8Array':
+                        decompressedText = LZString.decompressFromUint8Array(JSON.parse(compressedInput));
+                        break;
+                    default:
+                        decompressedText = LZString.decompress(compressedInput);
+                }
+            } catch (e) {
+                decompressedText = 'Error during decompression: ' + e.message;
+            }
+            document.getElementById('decompressedText').value = decompressedText;
+        }
+        !('ontouchstart' in document.documentElement) && document.addEventListener('click', function (evt) {
+            if (evt.target instanceof HTMLTextAreaElement) {
+                if (!(getSelection() + "")) evt.target.select();
+            }
+        }, true);
+    </script>
+</body>
+</html>
