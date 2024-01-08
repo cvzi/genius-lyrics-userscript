@@ -98,7 +98,8 @@
                         compressedText = LZString.compressToEncodedURIComponent(inputText);
                         break;
                     case 'compressToUint8Array':
-                        compressedText = JSON.stringify(LZString.compressToUint8Array(inputText));
+                        const uint8Array = Array.from(LZString.compressToUint8Array(inputText));
+                        compressedText = uint8Array.map(byte => byte.toString(16).padStart(2, '0').toUpperCase()).join(' ');
                         break;
                     default:
                         compressedText = LZString.compress(inputText);
@@ -125,7 +126,8 @@
                         decompressedText = LZString.decompressFromEncodedURIComponent(compressedInput);
                         break;
                     case 'compressToUint8Array':
-                        decompressedText = LZString.decompressFromUint8Array(JSON.parse(compressedInput));
+                        const bytes = compressedInput.split(' ').map(hex => parseInt(hex, 16));
+                        decompressedText = LZString.decompressFromUint8Array(new Uint8Array(bytes));
                         break;
                     default:
                         decompressedText = LZString.decompress(compressedInput);
