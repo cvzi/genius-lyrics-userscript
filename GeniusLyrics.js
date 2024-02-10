@@ -1384,7 +1384,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       }
     },
 
-    themeError (themeName, errorMsg, originalUrl) {
+    themeError (themeName, errorMsg, originalUrl, song) {
       return `<div style="color:black;background:white;font-family:sans-serif">
       <br>
       <h1>&#128561; Oops!</h1>
@@ -1397,6 +1397,8 @@ themeName:  ${themeName}
 Error:      ${errorMsg}
 URL:        ${document.location.href}
 Genius:     ${originalUrl}
+Song:       ${'result' in song && 'full_title' in song.result ? song.result.full_title : JSON.stringify(song)}
+Browser:    ${navigator.userAgent}
 
 </pre><br>
       You can simply post the information on github:<br>
@@ -1420,7 +1422,7 @@ Genius:     ${originalUrl}
         }
       }
     },
-    extractLyrics (html) {
+    extractLyrics (html, song) {
       /*
       Extract the lyrics and title/album header from genius page html
       */
@@ -1434,7 +1436,12 @@ Genius:     ${originalUrl}
       if (lyricsContainers.length === 0 && !lyricsPlaceHolder) {
         return {
           error: true,
-          errorHtml: themeCommon.themeError(theme.name, 'Neither "Lyrics__Container" nor "LyricsPlaceholder__Container" found', originalUrl)
+          errorHtml: themeCommon.themeError(
+            theme.name,
+            'Neither "Lyrics__Container" nor "LyricsPlaceholder__Container" found',
+            originalUrl,
+            song
+          )
         }
       }
 
@@ -2083,7 +2090,7 @@ Genius:     ${originalUrl}
       },
 
       combine: function themeCleanWhiteCombineGeniusResources (song, html, annotations, onCombine) {
-        const result = themeCommon.extractLyrics(html)
+        const result = themeCommon.extractLyrics(html, song)
         if (result.error) {
           return onCombine(result.errorHtml)
         }
@@ -2201,7 +2208,7 @@ Genius:     ${originalUrl}
         return onload
       },
       combine: function themeSpotifyCombineGeniusResources (song, html, annotations, onCombine) {
-        const result = themeCommon.extractLyrics(html)
+        const result = themeCommon.extractLyrics(html, song)
         if (result.error) {
           return onCombine(result.errorHtml)
         }
