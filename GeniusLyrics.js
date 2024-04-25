@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.12.3
+// @version      5.13.0
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2019, cuzi (cuzi@openmail.cc) and contributors
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -46,8 +46,8 @@ if (typeof module !== 'undefined') {
 function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   'use strict'
 
-  const __SELECTION_CACHE_VERSION__ = 4
-  const __REQUEST_CACHE_VERSION__ = 4
+  const __SELECTION_CACHE_VERSION__ = 5
+  const __REQUEST_CACHE_VERSION__ = 5
 
   /** @type {globalThis.PromiseConstructor} */
   const Promise = (async () => { })().constructor // YouTube polyfill to Promise in older browsers will make the feature being unstable.
@@ -264,6 +264,41 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   let autoScrollEnabled = false
   const onMessage = {}
 
+
+
+  const isLZStringAvailable = typeof LZString !== 'undefined' && typeof (LZString || 0).compressToUTF16 === 'function'
+  if (!isLZStringAvailable) throw new Error('LZString is not available. Please update your script.')
+
+  async function setJV (key, text) {
+    if (typeof text === 'object') text = JSON.stringify(text)
+    if (typeof text !== 'string') return null
+    const z = LZString.compressToUTF16(text)
+    return await custom.GM.setValue(key, z)
+  }
+
+  async function getJVstr (key, d) {
+    const z = await custom.GM.getValue(key, null)
+    if (z === null) return d
+    if (z === '{}') return z
+    const t = LZString.decompressFromUTF16(z)
+    return t
+  }
+
+  /*
+  async function getJVobj (key, d) {
+    const z = await custom.GM.getValue(key, null)
+    if (z === null) return d
+    if (z === '{}') return {}
+    const t = LZString.decompressFromUTF16(z)
+    return JSON.parse(t)
+  }
+  */
+
+  function measureJVLength (obj) {
+    const z = LZString.compressToUTF16(JSON.stringify(obj))
+    return (new TextEncoder().encode(z)).length
+  }
+
   function getHostname (url) {
     // absolute path
     if (typeof url === 'string' && url.startsWith('http')) {
@@ -408,7 +443,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     }
     if (requestCache.__VERSION__ !== __REQUEST_CACHE_VERSION__) {
       requestCache = cleanRequestCache()
-      custom.GM.setValue('requestcache', JSON.stringify(requestCache))
+      setJV('requestcache', requestCache)
     }
   }
 
@@ -434,14 +469,14 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       } else {
         selectionCache = cleanSelectionCache()
       }
-      custom.GM.setValue('selectioncache', JSON.stringify(selectionCache))
+      setJV('selectioncache', selectionCache)
     }
   }
 
   function loadCache () {
     Promise.all([
-      custom.GM.getValue('selectioncache', '{}'),
-      custom.GM.getValue('requestcache', '{}'),
+      getJVstr('selectioncache', '{}'),
+      getJVstr('requestcache', '{}'),
       custom.GM.getValue('optionautoshow', true)
     ]).then(function (values) {
       loadSelectionCache(values[0])
@@ -543,7 +578,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         function cacheResult (cacheObject) {
           if (cacheObject !== null) {
             requestCache[cachekey] = time + '\n' + JSON.stringify(cacheObject)
-            custom.GM.setValue('requestcache', JSON.stringify(requestCache))
+            setJV('requestcache', requestCache)
           }
         }
         obj.load(cacheObject, cacheResult)
@@ -574,14 +609,14 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       return
     }
     selectionCache[compoundTitleKey] = jsonHit
-    custom.GM.setValue('selectioncache', JSON.stringify(selectionCache))
+    setJV('selectioncache', selectionCache)
   }
 
   function forgetLyricsSelection (title, artists) {
     const compoundTitleKey = artists === null ? title : generateCompoundTitle(title, artists)
     if (compoundTitleKey in selectionCache) {
       delete selectionCache[compoundTitleKey]
-      custom.GM.setValue('selectioncache', JSON.stringify(selectionCache))
+      setJV('selectioncache', selectionCache)
     }
   }
 
@@ -4505,7 +4540,7 @@ Link__StyledLink
     // console.dir(selectionCache)
     // console.dir(requestCache)
 
-    const bytes = metricPrefix(JSON.stringify(selectionCache).length + JSON.stringify(requestCache).length, 2, 1024) + 'Bytes'
+    const bytes = metricPrefix(measureJVLength(selectionCache) + measureJVLength(requestCache), 2, 1024) + 'Bytes'
     const clearCacheButton = div.appendChild(document.createElement('button'))
     clearCacheButton.textContent = `Clear cache (${bytes})`
     clearCacheButton.addEventListener('click', function onClearCacheButtonClick (evt) {
