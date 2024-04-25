@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.12.3
+// @version      5.12.4
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2019, cuzi (cuzi@openmail.cc) and contributors
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -149,9 +149,9 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     }
 
     // since the mechanism does not utilize async/await, use the old method as fallback.
-    function isFakeWindow () {
+    function isFakeWindow (win) {
       // window is not window in Spotify Web App
-      return (window instanceof window.constructor) === false
+      return (win instanceof win.constructor) === false
     }
     /**
      * getTrueWindow
@@ -167,7 +167,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       }
     }
 
-    let trueWindow = isFakeWindow() ? getTrueWindow() : win
+    let trueWindow = isFakeWindow(win) ? getTrueWindow() : win
     const { requestAnimationFrame, setTimeout, setInterval, clearTimeout, clearInterval } = trueWindow
     const res = { requestAnimationFrame, setTimeout, setInterval, clearTimeout, clearInterval }
     for (const k in res) res[k] = res[k].bind(trueWindow) // necessary
@@ -859,7 +859,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     const ct = Date.now()
     do {
       p1 = p2
-      await new Promise(r => requestAnimationFrame(r)) // eslint-disable-line promise/param-names
+      await getRafPromise().then() // eslint-disable-line promise/param-names
       p2 = document.scrollingElement.scrollTop
       if (Date.now() - ct > 2800) break
     } while (`${p1}` !== `${p2}`)
@@ -1832,7 +1832,7 @@ Browser:    ${navigator.userAgent}
   }
 
   function scrollUpdateLocationHandler () {
-    requestAnimationFrame(() => {
+    getRafPromise(() => {
       let c = document.querySelector('#annotationcontainer958[style*="display: block;"]')
       if (c !== null) {
         let a = document.querySelector('.annotated.highlighted')
@@ -3867,10 +3867,9 @@ Link__StyledLink
   }
 
   let rafPromise = null
-  const rafFn = (typeof webkitRequestAnimationFrame !== 'undefined' ? webkitRequestAnimationFrame : requestAnimationFrame).bind(window) // eslint-disable-line no-undef, no-constant-condition
 
   const getRafPromise = () => rafPromise || (rafPromise = new Promise(resolve => {
-    rafFn(hRes => {
+    requestAnimationFrame(hRes => {
       rafPromise = null
       resolve(hRes)
     })
