@@ -3,7 +3,11 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.12.3
+<<<<<<< HEAD
+// @version      5.12.4
+=======
+// @version      5.13.0
+>>>>>>> f779329 (use LZString)
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2019, cuzi (cuzi@openmail.cc) and contributors
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -46,8 +50,8 @@ if (typeof module !== 'undefined') {
 function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   'use strict'
 
-  const __SELECTION_CACHE_VERSION__ = 4
-  const __REQUEST_CACHE_VERSION__ = 4
+  const __SELECTION_CACHE_VERSION__ = 5
+  const __REQUEST_CACHE_VERSION__ = 5
 
   /** @type {globalThis.PromiseConstructor} */
   const Promise = (async () => { })().constructor // YouTube polyfill to Promise in older browsers will make the feature being unstable.
@@ -149,9 +153,9 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     }
 
     // since the mechanism does not utilize async/await, use the old method as fallback.
-    function isFakeWindow () {
+    function isFakeWindow (win) {
       // window is not window in Spotify Web App
-      return (window instanceof window.constructor) === false
+      return (win instanceof win.constructor) === false
     }
     /**
      * getTrueWindow
@@ -167,7 +171,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       }
     }
 
-    let trueWindow = isFakeWindow() ? getTrueWindow() : win
+    let trueWindow = isFakeWindow(win) ? getTrueWindow() : win
     const { requestAnimationFrame, setTimeout, setInterval, clearTimeout, clearInterval } = trueWindow
     const res = { requestAnimationFrame, setTimeout, setInterval, clearTimeout, clearInterval }
     for (const k in res) res[k] = res[k].bind(trueWindow) // necessary
@@ -263,6 +267,39 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   let annotationsEnabled = true
   let autoScrollEnabled = false
   const onMessage = {}
+
+  const isLZStringAvailable = typeof LZString !== 'undefined' && typeof (LZString || 0).compressToUTF16 === 'function' // eslint-disable-line no-undef
+  if (!isLZStringAvailable) throw new Error('LZString is not available. Please update your script.')
+
+  async function setJV (key, text) {
+    if (typeof text === 'object') text = JSON.stringify(text)
+    if (typeof text !== 'string') return null
+    const z = LZString.compressToUTF16(text) // eslint-disable-line no-undef
+    return await custom.GM.setValue(key, z)
+  }
+
+  async function getJVstr (key, d) {
+    const z = await custom.GM.getValue(key, null)
+    if (z === null) return d
+    if (z === '{}') return z
+    const t = LZString.decompressFromUTF16(z) // eslint-disable-line no-undef
+    return t
+  }
+
+  /*
+  async function getJVobj (key, d) {
+    const z = await custom.GM.getValue(key, null)
+    if (z === null) return d
+    if (z === '{}') return {}
+    const t = LZString.decompressFromUTF16(z)
+    return JSON.parse(t)
+  }
+  */
+
+  function measureJVLength (obj) {
+    const z = LZString.compressToUTF16(JSON.stringify(obj)) // eslint-disable-line no-undef
+    return (new TextEncoder().encode(z)).length
+  }
 
   function getHostname (url) {
     // absolute path
@@ -408,7 +445,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     }
     if (requestCache.__VERSION__ !== __REQUEST_CACHE_VERSION__) {
       requestCache = cleanRequestCache()
-      custom.GM.setValue('requestcache', JSON.stringify(requestCache))
+      setJV('requestcache', requestCache)
     }
   }
 
@@ -434,14 +471,14 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       } else {
         selectionCache = cleanSelectionCache()
       }
-      custom.GM.setValue('selectioncache', JSON.stringify(selectionCache))
+      setJV('selectioncache', selectionCache)
     }
   }
 
   function loadCache () {
     Promise.all([
-      custom.GM.getValue('selectioncache', '{}'),
-      custom.GM.getValue('requestcache', '{}'),
+      getJVstr('selectioncache', '{}'),
+      getJVstr('requestcache', '{}'),
       custom.GM.getValue('optionautoshow', true)
     ]).then(function (values) {
       loadSelectionCache(values[0])
@@ -543,7 +580,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         function cacheResult (cacheObject) {
           if (cacheObject !== null) {
             requestCache[cachekey] = time + '\n' + JSON.stringify(cacheObject)
-            custom.GM.setValue('requestcache', JSON.stringify(requestCache))
+            setJV('requestcache', requestCache)
           }
         }
         obj.load(cacheObject, cacheResult)
@@ -574,14 +611,14 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       return
     }
     selectionCache[compoundTitleKey] = jsonHit
-    custom.GM.setValue('selectioncache', JSON.stringify(selectionCache))
+    setJV('selectioncache', selectionCache)
   }
 
   function forgetLyricsSelection (title, artists) {
     const compoundTitleKey = artists === null ? title : generateCompoundTitle(title, artists)
     if (compoundTitleKey in selectionCache) {
       delete selectionCache[compoundTitleKey]
-      custom.GM.setValue('selectioncache', JSON.stringify(selectionCache))
+      setJV('selectioncache', selectionCache)
     }
   }
 
@@ -859,7 +896,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     const ct = Date.now()
     do {
       p1 = p2
-      await new Promise(r => requestAnimationFrame(r)) // eslint-disable-line promise/param-names
+      await getRafPromise().then() // eslint-disable-line promise/param-names
       p2 = document.scrollingElement.scrollTop
       if (Date.now() - ct > 2800) break
     } while (`${p1}` !== `${p2}`)
@@ -1832,7 +1869,7 @@ Browser:    ${navigator.userAgent}
   }
 
   function scrollUpdateLocationHandler () {
-    requestAnimationFrame(() => {
+    getRafPromise(() => {
       let c = document.querySelector('#annotationcontainer958[style*="display: block;"]')
       if (c !== null) {
         let a = document.querySelector('.annotated.highlighted')
@@ -3867,10 +3904,9 @@ Link__StyledLink
   }
 
   let rafPromise = null
-  const rafFn = (typeof webkitRequestAnimationFrame !== 'undefined' ? webkitRequestAnimationFrame : requestAnimationFrame).bind(window) // eslint-disable-line no-undef, no-constant-condition
 
   const getRafPromise = () => rafPromise || (rafPromise = new Promise(resolve => {
-    rafFn(hRes => {
+    requestAnimationFrame(hRes => {
       rafPromise = null
       resolve(hRes)
     })
@@ -4505,7 +4541,7 @@ Link__StyledLink
     // console.dir(selectionCache)
     // console.dir(requestCache)
 
-    const bytes = metricPrefix(JSON.stringify(selectionCache).length + JSON.stringify(requestCache).length, 2, 1024) + 'Bytes'
+    const bytes = metricPrefix(measureJVLength(selectionCache) + measureJVLength(requestCache), 2, 1024) + 'Bytes'
     const clearCacheButton = div.appendChild(document.createElement('button'))
     clearCacheButton.textContent = `Clear cache (${bytes})`
     clearCacheButton.addEventListener('click', function onClearCacheButtonClick (evt) {
