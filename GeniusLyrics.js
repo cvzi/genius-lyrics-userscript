@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.13.1
+// @version      5.13.2
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2019, cuzi (cuzi@openmail.cc) and contributors
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -3835,7 +3835,7 @@ Link__StyledLink
     // add normalized classname to adapt both desktop_react and desktop_react_atf
     htmlText = normalizeClassNames(htmlText)
 
-    console.log(`Genius Lyrics - HTML text size reduced from ${metricPrefix(measurePlainTextLength(originalHtmlText), 2, 1024)} to ${metricPrefix(measurePlainTextLength(originalHtmlText), 2, 1024)}`)
+    console.log(`Genius Lyrics - HTML text size reduced from ${metricPrefix(measurePlainTextLength(originalHtmlText), 2, 1024)} to ${metricPrefix(measurePlainTextLength(htmlText), 2, 1024)}`)
     // console.log([htmlText])
     // htmlText = response.responseText
     // structurize(htmlText)
