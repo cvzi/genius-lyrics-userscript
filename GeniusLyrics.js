@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.13.0
+// @version      5.13.1
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2019, cuzi (cuzi@openmail.cc) and contributors
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -98,13 +98,16 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     window.postMessage({ iAm: custom.scriptName, type: 'cancelLoading' }, '*')
   }
 
-  const { requestAnimationFrame, setTimeout, setInterval, clearTimeout, clearInterval } = (() => {
-    let win = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window // eslint-disable-line no-undef
+  function getUnmodifiedWindowMethods (win) {
+    if (!(win instanceof win.constructor)) { // window in isolated context
+      return win
+    }
+
     let removeIframeFn = null
+    let fc = win
     try {
       const frameId = 'vanillajs-iframe-v1'
       let frame = document.getElementById(frameId)
-
       if (!frame) {
         frame = document.createElement('iframe')
         frame.id = frameId
@@ -131,51 +134,24 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
           }
         }
       }
-
-      const fc = frame ? frame.contentWindow : null
-      if (fc) {
-        try {
-          const { requestAnimationFrame, setTimeout, setInterval, clearTimeout, clearInterval } = fc
-          const res = { requestAnimationFrame, setTimeout, setInterval, clearTimeout, clearInterval }
-          for (const k in res) res[k] = res[k].bind(win) // necessary
-          if (removeIframeFn) Promise.resolve(res.setTimeout).then(removeIframeFn)
-          return res
-        } catch (e) {
-          if (removeIframeFn) removeIframeFn()
-        }
-      }
+      fc = (frame ? frame.contentWindow : null) || win
     } catch (e) {
       console.warn(e)
     }
 
-    // since the mechanism does not utilize async/await, use the old method as fallback.
-    function isFakeWindow (win) {
-      // window is not window in Spotify Web App
-      return (win instanceof win.constructor) === false
+    try {
+      const { requestAnimationFrame, setTimeout, setInterval, clearTimeout, clearInterval } = fc
+      const res = { requestAnimationFrame, setTimeout, setInterval, clearTimeout, clearInterval }
+      for (const k in res) res[k] = res[k].bind(win) // necessary
+      if (removeIframeFn) Promise.resolve(res.setTimeout).then(removeIframeFn)
+      return res
+    } catch (e) {
+      if (removeIframeFn) removeIframeFn()
+      throw e
     }
-    /**
-     * getTrueWindow
-     * @returns {Window}
-     */
-    function getTrueWindow () {
-      // this can bypass Spotify's window Proxy Object and obtain the original window object
-      try {
-        return new Function('return window')() // eslint-disable-line no-new-func
-      } catch (e) {
-        console.warn('the actual window object cannot be obtained.', e) // e.g. YouTube Music
-        return window // fallback
-      }
-    }
+  }
 
-    let trueWindow = isFakeWindow(win) ? getTrueWindow() : win
-    const { requestAnimationFrame, setTimeout, setInterval, clearTimeout, clearInterval } = trueWindow
-    const res = { requestAnimationFrame, setTimeout, setInterval, clearTimeout, clearInterval }
-    for (const k in res) res[k] = res[k].bind(trueWindow) // necessary
-    trueWindow = null
-
-    if (removeIframeFn) Promise.resolve(res.setTimeout).then(removeIframeFn)
-    return res
-  })()
+  const { requestAnimationFrame, setTimeout, setInterval, clearTimeout, clearInterval } = getUnmodifiedWindowMethods(window)
 
   const genius = {
     option: {
@@ -292,9 +268,17 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   }
   */
 
+  function measurePlainTextLength (text) {
+    try {
+      return (new TextEncoder().encode(text)).length
+    } catch (e) {
+      return text.length
+    }
+  }
+
   function measureJVLength (obj) {
     const z = LZString.compressToUTF16(JSON.stringify(obj)) // eslint-disable-line no-undef
-    return (new TextEncoder().encode(z)).length
+    return measurePlainTextLength(z)
   }
 
   function getHostname (url) {
@@ -3851,7 +3835,7 @@ Link__StyledLink
     // add normalized classname to adapt both desktop_react and desktop_react_atf
     htmlText = normalizeClassNames(htmlText)
 
-    console.log(`Genius Lyrics - HTML text size reduced from ${metricPrefix(originalHtmlText.length, 2, 1024)} to ${metricPrefix(htmlText.length, 2, 1024)}`)
+    console.log(`Genius Lyrics - HTML text size reduced from ${metricPrefix(measurePlainTextLength(originalHtmlText), 2, 1024)} to ${metricPrefix(measurePlainTextLength(originalHtmlText), 2, 1024)}`)
     // console.log([htmlText])
     // htmlText = response.responseText
     // structurize(htmlText)
