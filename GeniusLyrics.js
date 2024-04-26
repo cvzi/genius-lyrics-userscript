@@ -268,9 +268,17 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   }
   */
 
+  function measurePlainTextLength (text) {
+    try {
+      return (new TextEncoder().encode(text)).length
+    } catch (e) {
+      return text.length
+    }
+  }
+
   function measureJVLength (obj) {
     const z = LZString.compressToUTF16(JSON.stringify(obj)) // eslint-disable-line no-undef
-    return (new TextEncoder().encode(z)).length
+    return measurePlainTextLength(z)
   }
 
   function getHostname (url) {
@@ -3827,7 +3835,7 @@ Link__StyledLink
     // add normalized classname to adapt both desktop_react and desktop_react_atf
     htmlText = normalizeClassNames(htmlText)
 
-    console.log(`Genius Lyrics - HTML text size reduced from ${metricPrefix(originalHtmlText.length, 2, 1024)} to ${metricPrefix(htmlText.length, 2, 1024)}`)
+    console.log(`Genius Lyrics - HTML text size reduced from ${metricPrefix(measurePlainTextLength(originalHtmlText), 2, 1024)} to ${metricPrefix(measurePlainTextLength(originalHtmlText), 2, 1024)}`)
     // console.log([htmlText])
     // htmlText = response.responseText
     // structurize(htmlText)
