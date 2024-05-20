@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.13.3
+// @version      5.13.4
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2019, cuzi (cuzi@openmail.cc) and contributors
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -46,8 +46,8 @@ if (typeof module !== 'undefined') {
 function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   'use strict'
 
-  const __SELECTION_CACHE_VERSION__ = 5
-  const __REQUEST_CACHE_VERSION__ = 5
+  const __SELECTION_CACHE_VERSION__ = 6
+  const __REQUEST_CACHE_VERSION__ = 6
 
   /** @type {globalThis.PromiseConstructor} */
   const Promise = (async () => { })().constructor // YouTube polyfill to Promise in older browsers will make the feature being unstable.
@@ -246,7 +246,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   async function setJV (key, text) {
     if (typeof text === 'object') text = JSON.stringify(text)
     if (typeof text !== 'string') return null
-    const z = LZString.compressToUTF16(text) // eslint-disable-line no-undef
+    const z = LZString.compress(text) // eslint-disable-line no-undef
     return await custom.GM.setValue(key, z)
   }
 
@@ -254,7 +254,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     const z = await custom.GM.getValue(key, null)
     if (z === null) return d
     if (z === '{}') return z
-    const t = LZString.decompressFromUTF16(z) // eslint-disable-line no-undef
+    const t = LZString.decompress(z) // eslint-disable-line no-undef
     return t
   }
 
@@ -277,7 +277,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   }
 
   function measureJVLength (obj) {
-    const z = LZString.compressToUTF16(JSON.stringify(obj)) // eslint-disable-line no-undef
+    const z = LZString.compress(JSON.stringify(obj)) // eslint-disable-line no-undef
     return measurePlainTextLength(z)
   }
 
@@ -418,7 +418,11 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     if (storedValue === '{}') {
       requestCache = cleanRequestCache()
     } else {
-      requestCache = JSON.parse(storedValue)
+      try {
+        requestCache = JSON.parse(storedValue)
+      } catch (e) {
+        requestCache = cleanRequestCache()
+      }
       if (!requestCache.__VERSION__) {
         requestCache.__VERSION__ = 0
       }
@@ -434,7 +438,11 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     if (storedValue === '{}') {
       selectionCache = cleanSelectionCache()
     } else {
-      selectionCache = JSON.parse(storedValue)
+      try {
+        selectionCache = JSON.parse(storedValue)
+      } catch (e) {
+        selectionCache = cleanSelectionCache()
+      }
       if (!selectionCache.__VERSION__) {
         selectionCache.__VERSION__ = 0
       }
