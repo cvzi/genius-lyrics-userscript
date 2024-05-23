@@ -46,8 +46,8 @@ if (typeof module !== 'undefined') {
 function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   'use strict'
 
-  const __SELECTION_CACHE_VERSION__ = 5
-  const __REQUEST_CACHE_VERSION__ = 5
+  const __SELECTION_CACHE_VERSION__ = 7
+  const __REQUEST_CACHE_VERSION__ = 7
 
   /** @type {globalThis.PromiseConstructor} */
   const Promise = (async () => { })().constructor // YouTube polyfill to Promise in older browsers will make the feature being unstable.
@@ -55,6 +55,37 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   if (typeof custom !== 'object') {
     if (typeof window !== 'undefined') window.alert('geniusLyrics requires options argument')
     throw new Error('geniusLyrics requires options argument')
+  }
+
+  let _shouldUseLZStringCompression = null
+  const testUseLZStringCompression = async () => {
+    if (typeof _shouldUseLZStringCompression === 'boolean') return _shouldUseLZStringCompression
+    let res = false
+    const isLZStringAvailable = typeof LZString !== 'undefined' && typeof (LZString || 0).compressToUTF16 === 'function' // eslint-disable-line no-undef
+    if (isLZStringAvailable && typeof AbortSignal !== 'undefined' && typeof AbortSignal.timeout === 'function') {
+      try {
+        // Browser 2022+
+        let isEdge = false
+        if (typeof webkitCancelAnimationFrame === 'function' && typeof navigator?.userAgentData === 'object') {
+          // Brave, Chrome, Edge (Browser 2022+)
+          isEdge = (navigator.userAgentData?.brands?.find(e => e.brand.includes('Edge')) || false)
+        } else {
+          // Safari, Firefox
+        }
+        if (!isEdge) {
+          const testFn = async () => {
+            await Promise.resolve()
+            const t = crypto.randomUUID()
+            const r = LZString.decompressFromUTF16(LZString.compressToUTF16(t)) === t // eslint-disable-line no-undef
+            await Promise.resolve()
+            return r
+          }
+          const r = await Promise.race([testFn().catch(() => { }), new Promise(resolve => (AbortSignal.timeout(9).onabort = resolve))])
+          res = (r === true)
+        }
+      } catch (e) { }
+    }
+    return (_shouldUseLZStringCompression = res)
   }
 
   Array.prototype.forEach.call([
@@ -159,6 +190,8 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       themeKey: null,
       romajiPriority: 'low',
       fontSize: 0, // == 0 : use default value, >= 1 : "px" value
+      useLZCompression: true,
+      shouldUseLZStringCompression: null,
       cacheHTMLRequest: true, // be careful of cache size if trimHTMLReponseText is false; around 50KB per lyrics including selection cache
       requestCallbackResponseTextOnly: true, // default true; just need the request text
       enableStyleSubstitution: false, // default false; some checking are provided but not guaranteed
@@ -241,20 +274,33 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   const onMessage = {}
 
   const isLZStringAvailable = typeof LZString !== 'undefined' && typeof (LZString || 0).compressToUTF16 === 'function' // eslint-disable-line no-undef
-  if (!isLZStringAvailable) throw new Error('LZString is not available. Please update your script.')
+  // if (!isLZStringAvailable) throw new Error('LZString is not available. Please update your script.')
 
   async function setJV (key, text) {
-    if (typeof text === 'object') text = JSON.stringify(text)
-    if (typeof text !== 'string') return null
-    const z = LZString.compressToUTF16(text) // eslint-disable-line no-undef
-    return await custom.GM.setValue(key, z)
+    if (isLZStringAvailable && genius.option.useLZCompression && genius.option.shouldUseLZStringCompression) {
+      if (typeof text === 'object') text = JSON.stringify(text)
+      if (typeof text !== 'string') return null
+      const z = 'b\n' + LZString.compressToUTF16(text) // eslint-disable-line no-undef
+      return await custom.GM.setValue(key, z)
+    } else {
+      if (typeof text === 'object') text = JSON.stringify(text)
+      if (typeof text !== 'string') return null
+      const z = 'a\n' + text
+      return await custom.GM.setValue(key, z)
+    }
   }
 
   async function getJVstr (key, d) {
     const z = await custom.GM.getValue(key, null)
     if (z === null) return d
     if (z === '{}') return z
-    const t = LZString.decompressFromUTF16(z) // eslint-disable-line no-undef
+    if (typeof z !== 'string') return z
+    const j = z.indexOf('\n')
+    if (j <= 0) return z
+    const w = z.substring(0, j)
+    const t = z.substring(j + 1)
+    if (w === 'b') return LZString.decompressFromUTF16(t) // eslint-disable-line no-undef
+    if (w === 'a') return t
     return t
   }
 
@@ -277,7 +323,12 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   }
 
   function measureJVLength (obj) {
-    const z = LZString.compressToUTF16(JSON.stringify(obj)) // eslint-disable-line no-undef
+    let z
+    if (isLZStringAvailable && genius.option.useLZCompression && genius.option.shouldUseLZStringCompression) {
+      z = LZString.compressToUTF16(JSON.stringify(obj)) // eslint-disable-line no-undef
+    } else {
+      z = JSON.stringify(obj)
+    }
     return measurePlainTextLength(z)
   }
 
@@ -418,9 +469,13 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     if (storedValue === '{}') {
       requestCache = cleanRequestCache()
     } else {
-      requestCache = JSON.parse(storedValue)
-      if (!requestCache.__VERSION__) {
-        requestCache.__VERSION__ = 0
+      try {
+        requestCache = JSON.parse(storedValue)
+        if (!requestCache.__VERSION__) {
+          requestCache.__VERSION__ = 0
+        }
+      } catch (e) {
+        requestCache = cleanRequestCache()
       }
     }
     if (requestCache.__VERSION__ !== __REQUEST_CACHE_VERSION__) {
@@ -434,9 +489,13 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     if (storedValue === '{}') {
       selectionCache = cleanSelectionCache()
     } else {
-      selectionCache = JSON.parse(storedValue)
-      if (!selectionCache.__VERSION__) {
-        selectionCache.__VERSION__ = 0
+      try {
+        selectionCache = JSON.parse(storedValue)
+        if (!selectionCache.__VERSION__) {
+          selectionCache.__VERSION__ = 0
+        }
+      } catch (e) {
+        selectionCache = cleanSelectionCache()
       }
     }
     if (selectionCache.__VERSION__ !== __SELECTION_CACHE_VERSION__) {
@@ -4482,17 +4541,18 @@ Link__StyledLink
     ]
     for (const o of romajiPriorities) {
       const option = selectRomajiPriority.appendChild(document.createElement('option'))
-      option.value = o.value
-      if (genius.option.romajiPriority === o.value) {
+      option.value = `${o.value}`
+      if (`${genius.option.romajiPriority}` === `${o.value}`) {
         option.selected = true
       }
       option.textContent = o.text
     }
     const onSelectRomajiPriority = function onSelectRomajiListener (evt) {
       const selectRomajiPriority = evt.target
-      const hasChanged = genius.option.romajiPriority !== selectRomajiPriority.selectedOptions[0].value
+      const val = selectRomajiPriority.selectedOptions[0].value
+      const hasChanged = genius.option.romajiPriority !== val
       if (hasChanged) {
-        genius.option.romajiPriority = selectRomajiPriority.selectedOptions[0].value
+        genius.option.romajiPriority = val
         custom.GM.setValue('romajipriority', genius.option.romajiPriority).then(() => {
           // cache is required to clear for the reselection
           clearCacheFn().then(() => {
@@ -4502,6 +4562,43 @@ Link__StyledLink
       }
     }
     selectRomajiPriority.addEventListener('change', onSelectRomajiPriority)
+
+    // Select: RomajiPriority
+    div = win.appendChild(document.createElement('div'))
+    div.textContent = 'LZCompression: '
+    const selectLZCompression = div.appendChild(document.createElement('select'))
+    const lzCompressionOptions = [
+      {
+        text: 'Enabled',
+        value: 'true'
+      },
+      {
+        text: 'Disabled',
+        value: 'false'
+      }
+    ]
+    for (const o of lzCompressionOptions) {
+      const option = selectLZCompression.appendChild(document.createElement('option'))
+      option.value = `${o.value}`
+      if (`${genius.option.useLZCompression}` === `${o.value}`) {
+        option.selected = true
+      }
+      option.textContent = o.text
+    }
+    const onSelectLZCompression = function onSelectLZCompressionListener (evt) {
+      const selectLZCompression = evt.target
+      const val = (selectLZCompression.selectedOptions[0].value === 'true')
+      const hasChanged = genius.option.useLZCompression !== val
+      if (hasChanged) {
+        genius.option.useLZCompression = val
+        custom.GM.setValue('useLZCompression', genius.option.useLZCompression).then(() => {
+          // Nil
+        })
+      }
+    }
+    selectLZCompression.addEventListener('change', onSelectLZCompression)
+    selectLZCompression.disabled = true
+    testUseLZStringCompression().then((r) => (selectLZCompression.disabled = !r))
 
     // Buttons
     div = win.appendChild(document.createElement('div'))
@@ -4871,31 +4968,47 @@ Link__StyledLink
     }
   }
 
+  async function getGMValues (o) {
+    // GM.getValues will be soon avaible in TM & VM due to MV3 (TM issue #2045), tally with chrome.storage
+    const entries = Object.entries(o)
+    const values = await Promise.all(entries.map(entry => custom.GM.getValue(entry[0], entry[1])))
+    return Object.fromEntries(values.map((val, idx) => [entries[idx][0], val]))
+  }
+
   async function mainRunner () {
     // get values from GM
-    const values = await Promise.all([
-      custom.GM.getValue('debug', genius.debug),
-      custom.GM.getValue('theme', genius.option.themeKey),
-      custom.GM.getValue('annotationsenabled', annotationsEnabled),
-      custom.GM.getValue('autoscrollenabled', autoScrollEnabled),
-      custom.GM.getValue('romajipriority', genius.option.romajiPriority),
-      custom.GM.getValue('fontsize', genius.option.fontSize)
-    ])
+    const values = await getGMValues({
+      debug: genius.debug,
+      theme: genius.option.themeKey,
+      annotationsenabled: annotationsEnabled,
+      autoscrollenabled: autoScrollEnabled,
+      romajipriority: genius.option.romajiPriority,
+      fontsize: genius.option.fontSize,
+      useLZCompression: genius.option.useLZCompression
+    })
+
+    // disable useLZCompression if the browser could not perform LZString in a good condition
+    const shouldUseLZStringCompression = await testUseLZStringCompression()
+    if (shouldUseLZStringCompression === false) {
+      values.useLZCompression = false
+    }
+    genius.option.shouldUseLZStringCompression = shouldUseLZStringCompression
 
     // set up variables
-    genius.debug = !!values[0]
-    if (Object.prototype.hasOwnProperty.call(themes, values[1])) {
-      genius.option.themeKey = values[1]
+    genius.debug = !!values.debug
+    if (Object.prototype.hasOwnProperty.call(themes, values.theme)) {
+      genius.option.themeKey = values.theme
     } else {
       genius.option.themeKey = Object.getOwnPropertyNames(themes)[0]
       custom.GM.setValue('theme', genius.option.themeKey)
-      console.error(`Invalid value for theme key: custom.GM.getValue("theme") = '${values[1]}', using default theme key: '${genius.option.themeKey}'`)
+      console.error(`Invalid value for theme key: custom.GM.getValue("theme") = '${values.theme}', using default theme key: '${genius.option.themeKey}'`)
     }
     theme = themes[genius.option.themeKey]
-    annotationsEnabled = !!values[2]
-    autoScrollEnabled = !!values[3]
-    genius.option.romajiPriority = values[4] || 'low'
-    genius.option.fontSize = Math.max(0, parseInt(values[5]) || 0)
+    annotationsEnabled = !!values.annotationsenabled
+    autoScrollEnabled = !!values.autoscrollenabled
+    genius.option.romajiPriority = values.romajipriority
+    genius.option.fontSize = Math.max(0, parseInt(values.fontsize) || 0)
+    genius.option.useLZCompression = values.useLZCompression
 
     if (genius.onThemeChanged) {
       for (const f of genius.onThemeChanged) {
