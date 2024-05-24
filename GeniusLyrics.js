@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.13.3
+// @version      5.13.4
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2019, cuzi (cuzi@openmail.cc) and contributors
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -190,7 +190,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       themeKey: null,
       romajiPriority: 'low',
       fontSize: 0, // == 0 : use default value, >= 1 : "px" value
-      useLZCompression: true,
+      useLZCompression: false,
       shouldUseLZStringCompression: null,
       cacheHTMLRequest: true, // be careful of cache size if trimHTMLReponseText is false; around 50KB per lyrics including selection cache
       requestCallbackResponseTextOnly: true, // default true; just need the request text
