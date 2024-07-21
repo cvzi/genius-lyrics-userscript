@@ -38,6 +38,7 @@
 */
 
 /* global Blob, top, HTMLElement, GM_openInTab */
+/* jshint asi: true, esversion: 8 */
 
 if (typeof module !== 'undefined') {
   module.exports = geniusLyrics
