@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.13.4
+// @version      5.13.5
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2019, cuzi (cuzi@openmail.cc) and contributors
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -588,11 +588,17 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       headers = Object.assign(headers, obj.headers)
     }
 
+    const cookiePartition = {}
+    if (obj.url.startsWith('https://genius.com/')) {
+      cookiePartition.topLevelSite = 'https://genius.com'
+    }
+
     const req = {
       url: obj.url,
       method,
       data: obj.data,
       headers,
+      cookiePartition,
       onerror: obj.error ? obj.error : function xmlHttpRequestGenericOnError (response) { console.error('xmlHttpRequestGenericOnError: ' + response) },
       onload: function xmlHttpRequestOnLoad (response) {
         const time = (new Date()).toJSON()
@@ -4322,10 +4328,13 @@ Link__StyledLink
     div.appendChild(document.createElement('br'))
 
     const reloadButton = div.appendChild(document.createElement('span'))
-    reloadButton.textContent = 'Reload'
+    reloadButton.textContent = 'Reload page'
     reloadButton.style = 'font-size:20px; background-color:#0066ff; color:white; padding:5px 10px; border-radius:10px; cursor:pointer;'
     reloadButton.addEventListener('click', function () {
-      window.location.reload()
+      requestCache = cleanRequestCache()
+      setJV('requestcache', requestCache).then(() => {
+        window.location.reload()
+      })
     })
 
     div.appendChild(document.createElement('br'))
