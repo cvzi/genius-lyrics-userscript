@@ -743,7 +743,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       if (hit.result.lyrics_state === 'unreleased') return false
       if (genius.minimizeHit.onlyCompleteLyrics === true && hit.result.lyrics_state !== 'complete') return false
       const primary_artist = (hit.result.primary_artist || 0).name || 0
-      if (primary_artist === 'Deleted Artist') return false
+      if (primary_artist.startsWith('Deleted') && primary_artist.endsWith('Artist')) return false
       return true
     })
 
