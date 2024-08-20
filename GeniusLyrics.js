@@ -698,6 +698,40 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     return s.replace(/[\s\p{P}$+<=>^`|~]/gu, '')
   }
 
+  function getHitResultType (result) {
+    const primaryArtist = result.primary_artist || 0
+    if (typeof (result.language || 0) === 'string') {
+      if (result.language === 'romanization') return 'romanization'
+      if (result.language === 'romanisation') return 'romanization'
+      if (result.language === 'translation') return 'translation'
+    }
+    if (primaryArtist) {
+      if (typeof primaryArtist.slug === 'string' && (primaryArtist.slug || '').startsWith('Genius-')) {
+        if (/Genius-[Rr]omani[zs]ations?/.test(primaryArtist.slug)) {
+          return 'romanization'
+        }
+        if (/Genius-[Tt]ranslations?/.test(primaryArtist.slug)) {
+           return 'translation'
+        }
+      }
+      if   ( typeof primaryArtist.name === 'string' && (primaryArtist.name || '').startsWith('Genius')) {
+        if (/Genius\s+[Rr]omani[zs]ations?/.test(primaryArtist.name)) {
+          return 'romanization'
+        }
+        if (/Genius\s+[Tt]ranslations?/.test(primaryArtist.name)) {
+          return 'translation'
+        }
+      }
+      
+    }
+    const path = result.path || 0;
+    if (typeof path === 'string') {
+      if (/\b[Gg]enius\b\S+\bromani[zs]ations?\b/.test(path)) return 'romanization'
+      if (/\b[Gg]enius\b\S+\btranslations?\b/.test(path)) return 'translation'
+    }
+    return ''
+  }
+
   function modifyHits (hits, query) {
     // the original hits store too much and not in a proper ordering
     // only song.result.url is neccessary
@@ -708,6 +742,8 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       if (hit.result.instrumental === true) return false
       if (hit.result.lyrics_state === 'unreleased') return false
       if (genius.minimizeHit.onlyCompleteLyrics === true && hit.result.lyrics_state !== 'complete') return false
+      const primary_artist = (hit.result.primary_artist || 0).name || 0
+      if (primary_artist === 'Deleted Artist') return false
       return true
     })
 
@@ -728,7 +764,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       if (!result) return
       const primaryArtist = result.primary_artist || 0
       const minimizeHit = genius.minimizeHit
-      const isGeniusTranslationLike = (primaryArtist && (primaryArtist.slug || '').startsWith('Genius-') && hit.result.language !== 'romanization') || (/\b[Gg]enius\b\S+\btranslations?\b/.test(hit.result.path || ''))
+      const hitResultType = getHitResultType(hit.result)
       delete hit.highlights // always []
       delete result.annotation_count // always 0
       delete result.pyongs_count // always null
@@ -783,7 +819,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       }
 
       if (minimizeHit.fixArtistName) {
-        if (result.language === 'romanization' && result.title === result.title_with_featured && result.artist_names === primaryArtist.name) {
+        if (hitResultType === 'romanization' && result.title === result.title_with_featured && result.artist_names === primaryArtist.name) {
           // Example: "なとり (Natori) - Overdose (Romanized)"
           const split = result.title.split(' - ')
           if (split.length === 2) {
@@ -808,7 +844,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         } else {
           hit._order = 1300
         }
-        if (hit.result.language === 'romanization') {
+        if (hitResultType === 'romanization') {
           if (genius.option.romajiPriority === 'low') {
             hit._order -= 50
           } else if (genius.option.romajiPriority === 'high') {
@@ -818,7 +854,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         if (hit.result.updated_by_human_at) {
           hit._order += 400
         }
-        if (isGeniusTranslationLike) {
+        if (hitResultType === 'translation') {
           // possible translation for non-english songs
           // if all results are en, no different for hit._order reduction
           hit._order -= 1000
