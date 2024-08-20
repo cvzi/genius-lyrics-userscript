@@ -89,6 +89,27 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     return (_shouldUseLZStringCompression = res)
   }
 
+  const elmBuild = (tag, ...contents) => {
+    /** @type {HTMLElement} */
+    const elm = typeof tag === 'string' ? document.createElement(tag) : tag;
+    for (const content of contents) {
+      if (!content || typeof content !== 'object' || (content instanceof Node)) {
+        elm.append(content)
+      } else if (content.length > 0) {
+        elm.appendChild(elmBuild(...content))
+      } else if (content.style) {
+        Object.assign(elm.style, content.style);
+      } else if (content.classList) {
+        elm.classList.add(...content.classList)
+      } else if (content.attr) {
+        for (const [attr, val] of Object.entries(content.attr)) elm.setAttribute(attr, val);
+      } else {
+        Object.assign(elm, content)
+      }
+    }
+    return elm;
+  }
+  
   Array.prototype.forEach.call([
     'GM',
     'scriptName',
@@ -699,12 +720,12 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   }
 
   function getHitResultType (result) {
-    const primaryArtist = result.primary_artist || 0
     if (typeof (result.language || 0) === 'string') {
       if (result.language === 'romanization') return 'romanization'
       if (result.language === 'romanisation') return 'romanization'
       if (result.language === 'translation') return 'translation'
     }
+    const primaryArtist = result.primary_artist || 0
     if (primaryArtist) {
       if (typeof primaryArtist.slug === 'string' && (primaryArtist.slug || '').startsWith('Genius-')) {
         if (/Genius-[Rr]omani[zs]ations?/.test(primaryArtist.slug)) {
@@ -1167,7 +1188,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         indicator.style.zIndex = 1000
       }
       indicator.style.top = `${offset.top + window.staticOffsetTop + div.scrollHeight * position}px`
-      indicator.innerHTML = `${parseInt(position * 100)}%  -> ${parseInt(newScrollTop)}px`
+      indicator.textContent = `${parseInt(position * 100)}%  -> ${parseInt(newScrollTop)}px`
     }
 
     let bool2 = true
@@ -1296,7 +1317,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         c.setAttribute('id', 'annotationcontainer958')
         themeCommon.setScrollUpdateLocation(c)
       }
-      c.innerHTML = ''
+      c.textContent = ''
 
       c.style.display = 'block'
       c.style.opacity = 1.0
@@ -1310,7 +1331,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         annotationTabBar = c.appendChild(document.createElement('div'))
         annotationTabBar.classList.add('annotationtabbar')
       }
-      annotationTabBar.innerHTML = ''
+      annotationTabBar.textContent = ''
       annotationTabBar.style.display = 'block'
 
       let annotationContent = c.querySelector('.annotationcontent')
@@ -1319,7 +1340,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         annotationContent.classList.add('annotationcontent')
       }
       annotationContent.style.display = 'block'
-      annotationContent.innerHTML = ''
+      annotationContent.textContent = ''
       return [annotationTabBar, annotationContent]
     },
     annotationSwitchTab (ev) {
@@ -3785,21 +3806,21 @@ pre{white-space:pre-wrap}
 
         /*
 
-      desktop_react_atf
+        desktop_react_atf
 
-SongHeaderWithPrimis__Bottom
-HeaderBio__Wrapper
-SongHeaderWithPrimis__HeaderBio
-HeaderBio__ViewBio
+        SongHeaderWithPrimis__Bottom
+        HeaderBio__Wrapper
+        SongHeaderWithPrimis__HeaderBio
+        HeaderBio__ViewBio
 
-desktop_react
+        desktop_react
 
-HeaderMetadata__Section
-HeaderMetadata__Label
-HeaderMetadata__ReleaseDate
-HeaderMetadata__Section
-HeaderMetadata__ViewCredits
-Link__StyledLink
+        HeaderMetadata__Section
+        HeaderMetadata__Label
+        HeaderMetadata__ReleaseDate
+        HeaderMetadata__Section
+        HeaderMetadata__ViewCredits
+        Link__StyledLink
 
       */
 
@@ -4670,7 +4691,7 @@ Link__StyledLink
     clearCacheButton.addEventListener('click', function onClearCacheButtonClick (evt) {
       const clearCacheButton = evt.target
       clearCacheFn().then(function () {
-        clearCacheButton.innerHTML = 'Cleared'
+        clearCacheButton.textContent = 'Cleared'
       })
     })
 
@@ -4679,10 +4700,10 @@ Link__StyledLink
     debugButton.style.float = 'right'
     const updateDebugButton = function (debugButton) {
       if (genius.debug) {
-        debugButton.innerHTML = 'Debug is on'
+        debugButton.textContent = 'Debug is on'
         debugButton.style.opacity = '1.0'
       } else {
-        debugButton.innerHTML = 'Debug is off'
+        debugButton.textContent = 'Debug is off'
         debugButton.style.opacity = '0.2'
       }
     }
@@ -4696,10 +4717,22 @@ Link__StyledLink
     })
 
     // Footer
-    div = win.appendChild(document.createElement('div'))
-    div.innerHTML = `<p style="font-size:15px;">
-      Powered by <a style="font-size:15px;" target="_blank" href="https://github.com/cvzi/genius-lyrics-userscript/">GeniusLyrics.js</a>, Copyright © 2019 <a style="font-size:15px;" href="mailto:cuzi@openmail.cc">cuzi</a> and contributors.
-      <br>Licensed under the GNU General Public License v3.0</p>`
+    div = elmBuild('div', ['p', {
+      style: {
+        'font-size': '15px',
+      }
+    },
+      'Powered by ',
+      ['a', { style: { "font-size": '15px' } }, { 'attr': { 'target': "_blank", 'href': "https://github.com/cvzi/genius-lyrics-userscript/" } }, 'GeniusLyrics.js'
+      ],
+      'Copyright © 2019 ',
+      ['a', { style: { "font-size": '15px' } }, { 'attr': { 'href': "mailto:cuzi@openmail.cc" } }, 'cuzi'
+      ],
+      ' and contributors.'
+      , ['br'],
+      'Licensed under the GNU General Public License v3.0'
+    ])
+    div = win.appendChild(div)
   }
 
   function closeModalUIs () {
@@ -4841,7 +4874,7 @@ Link__StyledLink
   }
 
   function addCss () {
-    document.head.appendChild(document.createElement('style')).innerHTML = `
+    document.head.appendChild(document.createElement('style')).textContent = `
     #mycaptchahint897454 {
       position:fixed;
       top:120px;
