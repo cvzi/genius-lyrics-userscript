@@ -1566,9 +1566,11 @@ Browser:    ${navigator.userAgent}
       Extract the lyrics and title/album header from genius page html
       */
 
-      const doc = 'trustedTypes' in window ? Document.parseHTMLUnsafe(window.trustedTypes.createPolicy('ignorePolicy', {
-        createHTML: (x) => x
-      }).createHTML(html)) : Document.parseHTMLUnsafe(html)
+      const doc = 'trustedTypes' in window
+        ? Document.parseHTMLUnsafe(window.trustedTypes.createPolicy('ignorePolicy', {
+          createHTML: (x) => x
+        }).createHTML(html))
+        : Document.parseHTMLUnsafe(html)
 
       const originalUrl = doc.querySelector('meta[property="og:url"]') ? doc.querySelector('meta[property="og:url"]').content : null
 
