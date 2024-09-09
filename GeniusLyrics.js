@@ -37,7 +37,7 @@
       * connect genius.com
 */
 
-/* global Blob, top, HTMLElement, GM_openInTab */
+/* global Blob, top, HTMLElement, GM_openInTab, crypto, Document */
 /* jshint asi: true, esversion: 8 */
 
 if (typeof module !== 'undefined') {
@@ -1566,7 +1566,9 @@ Browser:    ${navigator.userAgent}
       Extract the lyrics and title/album header from genius page html
       */
 
-      const doc = new window.DOMParser().parseFromString(html, 'text/html')
+      const doc = Document.parseHTMLUnsafe(window.trustedTypes.createPolicy('ignorePolicy', {
+        createHTML: (x) => x
+      }).createHTML(html))
 
       const originalUrl = doc.querySelector('meta[property="og:url"]') ? doc.querySelector('meta[property="og:url"]').content : null
 
