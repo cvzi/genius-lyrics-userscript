@@ -91,25 +91,25 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
 
   const elmBuild = (tag, ...contents) => {
     /** @type {HTMLElement} */
-    const elm = typeof tag === 'string' ? document.createElement(tag) : tag;
+    const elm = typeof tag === 'string' ? document.createElement(tag) : tag
     for (const content of contents) {
-      if (!content || typeof content !== 'object' || (content instanceof Node)) {
+      if (!content || typeof content !== 'object' || (content instanceof Node)) { // eslint-disable-line no-undef
         elm.append(content)
       } else if (content.length > 0) {
         elm.appendChild(elmBuild(...content))
       } else if (content.style) {
-        Object.assign(elm.style, content.style);
+        Object.assign(elm.style, content.style)
       } else if (content.classList) {
         elm.classList.add(...content.classList)
       } else if (content.attr) {
-        for (const [attr, val] of Object.entries(content.attr)) elm.setAttribute(attr, val);
+        for (const [attr, val] of Object.entries(content.attr)) elm.setAttribute(attr, val)
       } else {
         Object.assign(elm, content)
       }
     }
-    return elm;
+    return elm
   }
-  
+
   Array.prototype.forEach.call([
     'GM',
     'scriptName',
@@ -732,10 +732,10 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
           return 'romanization'
         }
         if (/Genius-[Tt]ranslations?/.test(primaryArtist.slug)) {
-           return 'translation'
+          return 'translation'
         }
       }
-      if   ( typeof primaryArtist.name === 'string' && (primaryArtist.name || '').startsWith('Genius')) {
+      if (typeof primaryArtist.name === 'string' && (primaryArtist.name || '').startsWith('Genius')) {
         if (/Genius\s+[Rr]omani[zs]ations?/.test(primaryArtist.name)) {
           return 'romanization'
         }
@@ -743,9 +743,8 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
           return 'translation'
         }
       }
-      
     }
-    const path = result.path || 0;
+    const path = result.path || 0
     if (typeof path === 'string') {
       if (/\b[Gg]enius\b\S+\bromani[zs]ations?\b/.test(path)) return 'romanization'
       if (/\b[Gg]enius\b\S+\btranslations?\b/.test(path)) return 'translation'
@@ -763,8 +762,8 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       if (hit.result.instrumental === true) return false
       if (hit.result.lyrics_state === 'unreleased') return false
       if (genius.minimizeHit.onlyCompleteLyrics === true && hit.result.lyrics_state !== 'complete') return false
-      const primary_artist = (hit.result.primary_artist || 0).name || 0
-      if (primary_artist.startsWith('Deleted') && primary_artist.endsWith('Artist')) return false
+      const primary_artist = (hit.result.primary_artist || 0).name || 0 // eslint-disable-line camelcase
+      if (primary_artist.startsWith('Deleted') && primary_artist.endsWith('Artist')) return false // eslint-disable-line camelcase
       return true
     })
 
@@ -4719,18 +4718,18 @@ pre{white-space:pre-wrap}
     // Footer
     div = elmBuild('div', ['p', {
       style: {
-        'font-size': '15px',
+        'font-size': '15px'
       }
     },
-      'Powered by ',
-      ['a', { style: { "font-size": '15px' } }, { 'attr': { 'target': "_blank", 'href': "https://github.com/cvzi/genius-lyrics-userscript/" } }, 'GeniusLyrics.js'
-      ],
-      'Copyright © 2019 ',
-      ['a', { style: { "font-size": '15px' } }, { 'attr': { 'href': "mailto:cuzi@openmail.cc" } }, 'cuzi'
-      ],
-      ' and contributors.'
-      , ['br'],
-      'Licensed under the GNU General Public License v3.0'
+    'Powered by ',
+    ['a', { style: { 'font-size': '15px' } }, { attr: { target: '_blank', href: 'https://github.com/cvzi/genius-lyrics-userscript/' } }, 'GeniusLyrics.js'
+    ],
+    'Copyright © 2019 ',
+    ['a', { style: { 'font-size': '15px' } }, { attr: { href: 'mailto:cuzi@openmail.cc' } }, 'cuzi'
+    ],
+    ' and contributors.',
+    ['br'],
+    'Licensed under the GNU General Public License v3.0'
     ])
     div = win.appendChild(div)
   }
