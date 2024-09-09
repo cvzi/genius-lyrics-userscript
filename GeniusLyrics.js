@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.14.0
+// @version      5.14.1
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2019, cuzi (cuzi@openmail.cc) and contributors
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -1566,9 +1566,9 @@ Browser:    ${navigator.userAgent}
       Extract the lyrics and title/album header from genius page html
       */
 
-      const doc = Document.parseHTMLUnsafe(window.trustedTypes.createPolicy('ignorePolicy', {
+      const doc = 'trustedTypes' in window ? Document.parseHTMLUnsafe(window.trustedTypes.createPolicy('ignorePolicy', {
         createHTML: (x) => x
-      }).createHTML(html))
+      }).createHTML(html)) : Document.parseHTMLUnsafe(html)
 
       const originalUrl = doc.querySelector('meta[property="og:url"]') ? doc.querySelector('meta[property="og:url"]').content : null
 
