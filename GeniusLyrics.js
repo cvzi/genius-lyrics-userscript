@@ -89,6 +89,27 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     return (_shouldUseLZStringCompression = res)
   }
 
+  const elmBuild = (tag, ...contents) => {
+    /** @type {HTMLElement} */
+    const elm = typeof tag === 'string' ? document.createElement(tag) : tag
+    for (const content of contents) {
+      if (!content || typeof content !== 'object' || (content instanceof Node)) { // eslint-disable-line no-undef
+        elm.append(content)
+      } else if (content.length > 0) {
+        elm.appendChild(elmBuild(...content))
+      } else if (content.style) {
+        Object.assign(elm.style, content.style)
+      } else if (content.classList) {
+        elm.classList.add(...content.classList)
+      } else if (content.attr) {
+        for (const [attr, val] of Object.entries(content.attr)) elm.setAttribute(attr, val)
+      } else {
+        Object.assign(elm, content)
+      }
+    }
+    return elm
+  }
+
   Array.prototype.forEach.call([
     'GM',
     'scriptName',
@@ -698,6 +719,39 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     return s.replace(/[\s\p{P}$+<=>^`|~]/gu, '')
   }
 
+  function getHitResultType (result) {
+    if (typeof (result.language || 0) === 'string') {
+      if (result.language === 'romanization') return 'romanization'
+      if (result.language === 'romanisation') return 'romanization'
+      if (result.language === 'translation') return 'translation'
+    }
+    const primaryArtist = result.primary_artist || 0
+    if (primaryArtist) {
+      if (typeof primaryArtist.slug === 'string' && (primaryArtist.slug || '').startsWith('Genius-')) {
+        if (/Genius-[Rr]omani[zs]ations?/.test(primaryArtist.slug)) {
+          return 'romanization'
+        }
+        if (/Genius-[Tt]ranslations?/.test(primaryArtist.slug)) {
+          return 'translation'
+        }
+      }
+      if (typeof primaryArtist.name === 'string' && (primaryArtist.name || '').startsWith('Genius')) {
+        if (/Genius\s+[Rr]omani[zs]ations?/.test(primaryArtist.name)) {
+          return 'romanization'
+        }
+        if (/Genius\s+[Tt]ranslations?/.test(primaryArtist.name)) {
+          return 'translation'
+        }
+      }
+    }
+    const path = result.path || 0
+    if (typeof path === 'string') {
+      if (/\b[Gg]enius\b\S+\bromani[zs]ations?\b/.test(path)) return 'romanization'
+      if (/\b[Gg]enius\b\S+\btranslations?\b/.test(path)) return 'translation'
+    }
+    return ''
+  }
+
   function modifyHits (hits, query) {
     // the original hits store too much and not in a proper ordering
     // only song.result.url is neccessary
@@ -708,6 +762,8 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       if (hit.result.instrumental === true) return false
       if (hit.result.lyrics_state === 'unreleased') return false
       if (genius.minimizeHit.onlyCompleteLyrics === true && hit.result.lyrics_state !== 'complete') return false
+      const primary_artist = (hit.result.primary_artist || 0).name || 0 // eslint-disable-line camelcase
+      if (primary_artist.startsWith('Deleted') && primary_artist.endsWith('Artist')) return false // eslint-disable-line camelcase
       return true
     })
 
@@ -728,7 +784,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       if (!result) return
       const primaryArtist = result.primary_artist || 0
       const minimizeHit = genius.minimizeHit
-      const isGeniusTranslationLike = (primaryArtist && (primaryArtist.slug || '').startsWith('Genius-') && hit.result.language !== 'romanization') || (/\b[Gg]enius\b\S+\btranslations?\b/.test(hit.result.path || ''))
+      const hitResultType = getHitResultType(hit.result)
       delete hit.highlights // always []
       delete result.annotation_count // always 0
       delete result.pyongs_count // always null
@@ -783,7 +839,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       }
 
       if (minimizeHit.fixArtistName) {
-        if (result.language === 'romanization' && result.title === result.title_with_featured && result.artist_names === primaryArtist.name) {
+        if (hitResultType === 'romanization' && result.title === result.title_with_featured && result.artist_names === primaryArtist.name) {
           // Example: "なとり (Natori) - Overdose (Romanized)"
           const split = result.title.split(' - ')
           if (split.length === 2) {
@@ -808,7 +864,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         } else {
           hit._order = 1300
         }
-        if (hit.result.language === 'romanization') {
+        if (hitResultType === 'romanization') {
           if (genius.option.romajiPriority === 'low') {
             hit._order -= 50
           } else if (genius.option.romajiPriority === 'high') {
@@ -818,7 +874,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         if (hit.result.updated_by_human_at) {
           hit._order += 400
         }
-        if (isGeniusTranslationLike) {
+        if (hitResultType === 'translation') {
           // possible translation for non-english songs
           // if all results are en, no different for hit._order reduction
           hit._order -= 1000
@@ -1131,7 +1187,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         indicator.style.zIndex = 1000
       }
       indicator.style.top = `${offset.top + window.staticOffsetTop + div.scrollHeight * position}px`
-      indicator.innerHTML = `${parseInt(position * 100)}%  -> ${parseInt(newScrollTop)}px`
+      indicator.textContent = `${parseInt(position * 100)}%  -> ${parseInt(newScrollTop)}px`
     }
 
     let bool2 = true
@@ -1260,7 +1316,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         c.setAttribute('id', 'annotationcontainer958')
         themeCommon.setScrollUpdateLocation(c)
       }
-      c.innerHTML = ''
+      c.textContent = ''
 
       c.style.display = 'block'
       c.style.opacity = 1.0
@@ -1274,7 +1330,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         annotationTabBar = c.appendChild(document.createElement('div'))
         annotationTabBar.classList.add('annotationtabbar')
       }
-      annotationTabBar.innerHTML = ''
+      annotationTabBar.textContent = ''
       annotationTabBar.style.display = 'block'
 
       let annotationContent = c.querySelector('.annotationcontent')
@@ -1283,7 +1339,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         annotationContent.classList.add('annotationcontent')
       }
       annotationContent.style.display = 'block'
-      annotationContent.innerHTML = ''
+      annotationContent.textContent = ''
       return [annotationTabBar, annotationContent]
     },
     annotationSwitchTab (ev) {
@@ -3749,21 +3805,21 @@ pre{white-space:pre-wrap}
 
         /*
 
-      desktop_react_atf
+        desktop_react_atf
 
-SongHeaderWithPrimis__Bottom
-HeaderBio__Wrapper
-SongHeaderWithPrimis__HeaderBio
-HeaderBio__ViewBio
+        SongHeaderWithPrimis__Bottom
+        HeaderBio__Wrapper
+        SongHeaderWithPrimis__HeaderBio
+        HeaderBio__ViewBio
 
-desktop_react
+        desktop_react
 
-HeaderMetadata__Section
-HeaderMetadata__Label
-HeaderMetadata__ReleaseDate
-HeaderMetadata__Section
-HeaderMetadata__ViewCredits
-Link__StyledLink
+        HeaderMetadata__Section
+        HeaderMetadata__Label
+        HeaderMetadata__ReleaseDate
+        HeaderMetadata__Section
+        HeaderMetadata__ViewCredits
+        Link__StyledLink
 
       */
 
@@ -4634,7 +4690,7 @@ Link__StyledLink
     clearCacheButton.addEventListener('click', function onClearCacheButtonClick (evt) {
       const clearCacheButton = evt.target
       clearCacheFn().then(function () {
-        clearCacheButton.innerHTML = 'Cleared'
+        clearCacheButton.textContent = 'Cleared'
       })
     })
 
@@ -4643,10 +4699,10 @@ Link__StyledLink
     debugButton.style.float = 'right'
     const updateDebugButton = function (debugButton) {
       if (genius.debug) {
-        debugButton.innerHTML = 'Debug is on'
+        debugButton.textContent = 'Debug is on'
         debugButton.style.opacity = '1.0'
       } else {
-        debugButton.innerHTML = 'Debug is off'
+        debugButton.textContent = 'Debug is off'
         debugButton.style.opacity = '0.2'
       }
     }
@@ -4660,10 +4716,22 @@ Link__StyledLink
     })
 
     // Footer
-    div = win.appendChild(document.createElement('div'))
-    div.innerHTML = `<p style="font-size:15px;">
-      Powered by <a style="font-size:15px;" target="_blank" href="https://github.com/cvzi/genius-lyrics-userscript/">GeniusLyrics.js</a>, Copyright © 2019 <a style="font-size:15px;" href="mailto:cuzi@openmail.cc">cuzi</a> and contributors.
-      <br>Licensed under the GNU General Public License v3.0</p>`
+    div = elmBuild('div', ['p', {
+      style: {
+        'font-size': '15px'
+      }
+    },
+    'Powered by ',
+    ['a', { style: { 'font-size': '15px' } }, { attr: { target: '_blank', href: 'https://github.com/cvzi/genius-lyrics-userscript/' } }, 'GeniusLyrics.js'
+    ],
+    'Copyright © 2019 ',
+    ['a', { style: { 'font-size': '15px' } }, { attr: { href: 'mailto:cuzi@openmail.cc' } }, 'cuzi'
+    ],
+    ' and contributors.',
+    ['br'],
+    'Licensed under the GNU General Public License v3.0'
+    ])
+    div = win.appendChild(div)
   }
 
   function closeModalUIs () {
@@ -4805,7 +4873,7 @@ Link__StyledLink
   }
 
   function addCss () {
-    document.head.appendChild(document.createElement('style')).innerHTML = `
+    document.head.appendChild(document.createElement('style')).textContent = `
     #mycaptchahint897454 {
       position:fixed;
       top:120px;
