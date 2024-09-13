@@ -103,6 +103,8 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         elm.classList.add(...content.classList)
       } else if (content.attr) {
         for (const [attr, val] of Object.entries(content.attr)) elm.setAttribute(attr, val)
+      } else if (content.listener) {
+        for (const [attr, val] of Object.entries(content.listener)) elm.addEventListener(attr, val)
       } else {
         Object.assign(elm, content)
       }
@@ -4744,30 +4746,53 @@ pre{white-space:pre-wrap}
 
   function modalAlert (text, buttons = { OK: true }) {
     return new Promise(function (resolve) {
-      const bg = document.body.appendChild(document.createElement('div'))
-      bg.classList.add('modal_ui_genius_lyrics_overlay')
-      bg.addEventListener('click', function () {
-        this.querySelector('button').focus()
-      })
-      const div = bg.appendChild(document.createElement('div'))
-      div.classList.add('modal_ui_genius_lyrics_dialog_box')
-      div.innerHTML = text
-      const buttonDiv = div.appendChild(document.createElement('div'))
-      buttonDiv.classList.add('modal_ui_genius_lyrics_dialog_buttons_holder')
-      let firstButton = true
-      Object.entries(buttons).forEach(function (pair) {
-        const button = buttonDiv.appendChild(document.createElement('button'))
-        button.classList.add('modal_ui_genius_lyrics_dialog_button')
-        button.innerHTML = pair[0]
-        button.addEventListener('click', function () {
-          bg.remove()
-          resolve(pair[1])
-        })
-        if (firstButton) {
-          firstButton = false
-          button.focus()
+      const buttonMap = (obj, mapFn) => {
+        const arr = []
+        let i = 0
+        if (obj) {
+          for (const key in obj) {
+            arr.push(mapFn(key, obj[key], i++))
+          }
         }
-      })
+        return arr
+      }
+
+      const bg = elmBuild('div', {
+        classList: ['modal_ui_genius_lyrics_overlay'],
+        listener: {
+          click: function () {
+            this.querySelector('button').focus()
+          }
+        }
+      },
+      ['div',
+        {
+          classList: ['modal_ui_genius_lyrics_dialog_box']
+        },
+        text,
+        ['div',
+          {
+            classList: ['modal_ui_genius_lyrics_dialog_buttons_holder']
+          },
+          ...buttonMap(buttons, (key, value, i) => {
+            return ['button',
+              { classList: ['modal_ui_genius_lyrics_dialog_button'] },
+              {
+                listener: {
+                  click: () => {
+                    bg.remove()
+                    resolve(value)
+                  }
+                }
+              },
+              { attr: { tabindex: i } },
+              key]
+          })
+        ]
+      ]
+      )
+      document.body.appendChild(bg)
+      bg.querySelector('button[tabindex="0"]').focus()
     })
   }
 
