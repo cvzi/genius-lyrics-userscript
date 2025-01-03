@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.16.0
+// @version      5.16.1
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2019, cuzi (cuzi@openmail.cc) and contributors
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -47,8 +47,8 @@ if (typeof module !== 'undefined') {
 function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   'use strict'
 
-  const __SELECTION_CACHE_VERSION__ = 7
-  const __REQUEST_CACHE_VERSION__ = 7
+  const __SELECTION_CACHE_VERSION__ = 8
+  const __REQUEST_CACHE_VERSION__ = 8
 
   /** @type {globalThis.PromiseConstructor} */
   const Promise = (async () => { })().constructor // YouTube polyfill to Promise in older browsers will make the feature being unstable.
@@ -1577,13 +1577,13 @@ Browser:    ${navigator.userAgent}
       const originalUrl = doc.querySelector('meta[property="og:url"]') ? doc.querySelector('meta[property="og:url"]').content : null
 
       const lyricsContainers = Array.from(doc.querySelectorAll('#lyrics-root [class*=Lyrics-]:not([class*=Sidebar])'))
-      const lyricsPlaceHolder = doc.querySelector('[class*="LyricsPlaceholder__Container"]')
+      const lyricsPlaceHolder = doc.querySelector('[class*="LyricsPlaceholder-"]')
       if (lyricsContainers.length === 0 && !lyricsPlaceHolder) {
         return {
           error: true,
           errorHtml: themeCommon.themeError(
             theme.name,
-            'Neither "Lyrics-" nor "LyricsPlaceholder__Container" found',
+            'Neither "Lyrics-" nor "LyricsPlaceholder-" found',
             originalUrl,
             song
           )
@@ -1592,6 +1592,7 @@ Browser:    ${navigator.userAgent}
 
       doc.querySelectorAll('[class*="LyricsFooter__Container"]').forEach(e => e.remove())
       doc.querySelectorAll('[class*="LyricsEditdesktop__Container"]').forEach(e => e.remove())
+      doc.querySelectorAll('[class*="LyricsPlaceholder-"] svg').forEach(e => e.remove())
 
       const bodyWidth = parseInt(document.getElementById('lyricsiframe').style.width || (document.getElementById('lyricsiframe').getBoundingClientRect().width + 'px'))
 
@@ -1761,8 +1762,10 @@ Browser:    ${navigator.userAgent}
   div[class*="InreadContainer-"],
   div[class*="LyricsHeader-"],
   div[class*="PageFooter-"],
+  footer[class*="PageFooter-"],
   div[class*="ExpandableContent__ButtonContainer"],
   div[class*="About-"],
+  div[class*="HeaderCredits-sc-"],
   div[class*="QuestionList-"],
   #questions,
   div[class*=SongComments-],
@@ -1771,6 +1774,8 @@ Browser:    ${navigator.userAgent}
   div[class*="ShareButtons"],
   div[class*="StickyContributorToolbar"],
   div[class*="StickyNavSentinel"],
+  div[class*="StickyNav-"],
+  #sticky-nav,
   button[class*="SmallButton-"],
   div[class*="UnreviewedAnnotation__Container"] {
     display: none;
@@ -2047,6 +2052,8 @@ Browser:    ${navigator.userAgent}
           pushIfAny(removals, document.querySelector('div[class^="Leaderboard"]'))
           pushIfAny(removals, document.querySelector('div[class^="StickyNav"]'))
           pushIfAny(removals, document.querySelector('div[class^="StickyNavSentinel"]'))
+          pushIfAny(removals, document.querySelector('#sticky-nav'))
+          pushIfAny(removals, document.querySelector('footer'))
           pushIfAny(removals, document.querySelector('div[class^="Pyong"]'))
           pushIfAny(removals, document.querySelector('div[class^="Button-"]'))
           pushIfAny(removals, document.querySelector('div[class^="QuestionList-"]'))
@@ -2060,14 +2067,6 @@ Browser:    ${navigator.userAgent}
           removals.push(...document.querySelectorAll('button[class^="SmallButton-"]'))
           pushIfAny(removals, document.querySelector('div[class^="SongDescription-"] div[class^="SongDescription-"]'))
 
-          // Footer except copyright hint
-          let divs
-          divs = document.querySelectorAll('div[class^="PageGriddesktop"] div[class^="PageFooterdesktop"]')
-          for (const div of divs) {
-            if (div.innerHTML.indexOf('©') === -1) {
-              removals.push(div)
-            }
-          }
           divs = document.querySelectorAll('div[class^="PageGriddesktop"]')
           for (const div of divs) {
             div.className = ''
@@ -3385,6 +3384,7 @@ Browser:    ${navigator.userAgent}
     div[class*="InreadContainer-"],
     div[class*="LyricsHeader-"],
     div[class*="PageFooter-"],
+    footer[class*="PageFooter-"],
     div[class*="ExpandableContent__ButtonContainer"],
     div[class*="About-"],
     div[class*="QuestionList-"],
@@ -3395,6 +3395,8 @@ Browser:    ${navigator.userAgent}
     div[class*="ShareButtons"],
     div[class*="StickyContributorToolbar"],
     div[class*="StickyNavSentinel"],
+    div[class*="StickyNav-"],
+    #sticky-nav,
     button[class*="SmallButton-"],
     div[class*="UnreviewedAnnotation__Container"] {
       display: none;
