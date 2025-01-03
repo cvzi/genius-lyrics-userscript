@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.16.2
+// @version      5.16.3
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2019, cuzi (cuzi@openmail.cc) and contributors
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -5031,8 +5031,6 @@ Browser:    ${navigator.userAgent}
     // communicationWindow.postMessage({ iAm: custom.scriptName, type: 'lyricsAppInit', html: document.documentElement.innerHTML }, '*')
 
     const onload = theme.scripts()
-    if (genius.option.removeEmptyBlocks === true) removeEmptyBlocks()
-
     if ('iframeLoadedCallback1' in custom) {
       // before all onload functions and allow modification of theme and onload from external
       custom.iframeLoadedCallback1({ document, theme, onload })
@@ -5044,6 +5042,7 @@ Browser:    ${navigator.userAgent}
         console.error(`Error in iframe onload ${func.name || func}: ${e}`)
       }
     }
+    if (genius.option.removeEmptyBlocks === true) removeEmptyBlocks()
     // Scroll lyrics event
     window.addEventListener('message', function (e) {
       if (typeof e.data !== 'object' || !('iAm' in e.data) || e.data.iAm !== custom.scriptName || e.data.type !== 'scrollLyrics') {
