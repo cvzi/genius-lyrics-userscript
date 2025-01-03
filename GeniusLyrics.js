@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.16.1
+// @version      5.16.2
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2019, cuzi (cuzi@openmail.cc) and contributors
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -219,6 +219,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       cacheHTMLRequest: true, // be careful of cache size if trimHTMLReponseText is false; around 50KB per lyrics including selection cache
       requestCallbackResponseTextOnly: true, // default true; just need the request text
       enableStyleSubstitution: false, // default false; some checking are provided but not guaranteed
+      removeEmptyBlocks: true, // remove elements without content (empty elements with min-height would cause a empty block on the page)
       trimHTMLReponseText: true, // make html request to be smaller for caching and window messaging; safe to enable
       defaultPlaceholder: 'Search genius.com...' // placeholder for input field
     },
@@ -4793,6 +4794,26 @@ Browser:    ${navigator.userAgent}
     return Object.fromEntries(values.map((val, idx) => [entries[idx][0], val]))
   }
 
+  function removeEmptyBlocks () {
+    const cssSelector = 'div[class]:not([id]):empty, span[class]:not([id]):empty'
+    const parentsForChecking = new Set()
+    const emptyElements = document.querySelectorAll(cssSelector)
+    for (const emptyElement of emptyElements) {
+      parentsForChecking.add(emptyElement.parentElement)
+      emptyElement.remove()
+    }
+    while (parentsForChecking.size > 0) {
+      const parents = [...parentsForChecking]
+      parentsForChecking.clear()
+      for (const parent of parents) {
+        if (parent instanceof HTMLElement && parent.matches(cssSelector)) {
+          parentsForChecking.add(parent.parentElement)
+          parent.remove()
+        }
+      }
+    }
+  }
+
   async function mainRunner () {
     // get values from GM
     const values = await getGMValues({
@@ -4898,6 +4919,9 @@ Browser:    ${navigator.userAgent}
     }
     contentStyle = null
     document.documentElement.innerHTML = html
+    html = ''
+
+    if (genius.option.removeEmptyBlocks === true) removeEmptyBlocks()
 
     const communicationWindow = e.source // top
     if (document.visibilityState === 'visible') await getRafPromise().then()
@@ -5007,6 +5031,8 @@ Browser:    ${navigator.userAgent}
     // communicationWindow.postMessage({ iAm: custom.scriptName, type: 'lyricsAppInit', html: document.documentElement.innerHTML }, '*')
 
     const onload = theme.scripts()
+    if (genius.option.removeEmptyBlocks === true) removeEmptyBlocks()
+
     if ('iframeLoadedCallback1' in custom) {
       // before all onload functions and allow modification of theme and onload from external
       custom.iframeLoadedCallback1({ document, theme, onload })
