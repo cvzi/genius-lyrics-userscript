@@ -2067,7 +2067,7 @@ Browser:    ${navigator.userAgent}
           removals.push(...document.querySelectorAll('button[class^="SmallButton-"]'))
           pushIfAny(removals, document.querySelector('div[class^="SongDescription-"] div[class^="SongDescription-"]'))
 
-          divs = document.querySelectorAll('div[class^="PageGriddesktop"]')
+          let divs = document.querySelectorAll('div[class^="PageGriddesktop"]')
           for (const div of divs) {
             div.className = ''
           }
