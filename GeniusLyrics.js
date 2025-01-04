@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.16.5
+// @version      5.16.6
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2019, cuzi (cuzi@openmail.cc) and contributors
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -916,8 +916,12 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       hits.sort((a, b) => {
         let t = b._order - a._order
         if (t) return t
-        t = (b.result.stats || 0).pageviews - (a.result.stats || 0).pageviews
+        const pv1 = (a.result.stats || 0).pageviews
+        const pv2 = (b.result.stats || 0).pageviews
+        t = pv2 - pv1
         if (Number.isFinite(t)) return t
+        if (pv1 > 0) return -1
+        if (pv2 > 0) return 1
         // if order is the same, compare the entry id (greater is more recent)
         return (b.result.id - a.result.id) || 0
       })
