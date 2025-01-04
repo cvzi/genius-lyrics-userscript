@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.16.6
+// @version      5.16.7
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2019, cuzi (cuzi@openmail.cc) and contributors
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -3451,6 +3451,9 @@ Browser:    ${navigator.userAgent}
     const contentStyleByDefault = `
     html{
       --egl-link-color: hsl(206,100%,40%);
+    }
+    body a{
+      color: var(--egl-link-color);
     }
     `
 
