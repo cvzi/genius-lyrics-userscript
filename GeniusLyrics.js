@@ -4799,6 +4799,9 @@ Browser:    ${navigator.userAgent}
   }
 
   function removeEmptyBlocks () {
+    for (const s of document.querySelectorAll('[id*="-ad-"]:empty')) {
+      s.remove()
+    }
     const cssSelector = 'div[class]:not([id]):empty, span[class]:not([id]):empty'
     const parentsForChecking = new Set()
     const emptyElements = document.querySelectorAll(cssSelector)
