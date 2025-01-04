@@ -913,8 +913,12 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
 
     if (hits.length > 1) {
       hits.sort((a, b) => {
+        let t = b._order - a._order
+        if (t) return t
+        t = (b.result.stats || 0).pageviews - (a.result.stats || 0).pageviews
+        if (Number.isFinite(t)) return t
         // if order is the same, compare the entry id (greater is more recent)
-        return (b._order - a._order) || (b.result.id - a.result.id) || 0
+        return (b.result.id - a.result.id) || 0
       })
     }
     // console.log(hits)
