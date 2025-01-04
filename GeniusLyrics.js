@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.16.4
+// @version      5.16.5
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2019, cuzi (cuzi@openmail.cc) and contributors
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -3108,11 +3108,6 @@ Browser:    ${navigator.userAgent}
       /* look better */
     }
 
-    div[class*="Header"] {
-      max-width: unset;
-      /* default just 50%; want full width */
-    }
-
     div[class*="SongHeader"] h1 {
       font-size: 200%; /* by default */
       white-space: break-spaces;
@@ -3443,6 +3438,9 @@ Browser:    ${navigator.userAgent}
     }
     .ncLabelWithIconQ[class] svg {
       fill: currentColor;
+    }
+    .ncSongHeaderQ-inner[class] {
+      width: auto;
     }
     `
 
