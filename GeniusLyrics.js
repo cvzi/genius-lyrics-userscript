@@ -47,8 +47,8 @@ if (typeof module !== 'undefined') {
 function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   'use strict'
 
-  const __SELECTION_CACHE_VERSION__ = 9
-  const __REQUEST_CACHE_VERSION__ = 9
+  const __SELECTION_CACHE_VERSION__ = 10
+  const __REQUEST_CACHE_VERSION__ = 10
 
   /** @type {globalThis.PromiseConstructor} */
   const Promise = (async () => { })().constructor // YouTube polyfill to Promise in older browsers will make the feature being unstable.
@@ -1600,8 +1600,8 @@ Browser:    ${navigator.userAgent}
         }
       }
 
-      doc.querySelectorAll('[class*="LyricsFooter__Container"]').forEach(e => e.remove())
-      doc.querySelectorAll('[class*="LyricsEditdesktop__Container"]').forEach(e => e.remove())
+      // doc.querySelectorAll('[class*="LyricsFooter__Container"]').forEach(e => e.remove())
+      // doc.querySelectorAll('[class*="LyricsEditdesktop__Container"]').forEach(e => e.remove())
       doc.querySelectorAll('[class*="LyricsPlaceholder-"] svg').forEach(e => e.remove())
 
       const bodyWidth = parseInt(document.getElementById('lyricsiframe').style.width || (document.getElementById('lyricsiframe').getBoundingClientRect().width + 'px'))
@@ -1629,9 +1629,9 @@ Browser:    ${navigator.userAgent}
 
       let lyricsHtml
       if (lyricsContainers.length > 0) {
-        lyricsHtml = '<div class="SongPage__Section" id="lyrics_text_div">' + lyricsContainers.map(e => e.outerHTML).join('\n') + '</div>'
+        lyricsHtml = '<div class="genius-lyrics-text-container" id="lyrics_text_div">' + lyricsContainers.map(e => e.outerHTML).join('\n') + '</div>'
       } else if (lyricsPlaceHolder) {
-        lyricsHtml = '<div class="SongPage__Section">' + lyricsPlaceHolder.outerHTML + '</div>'
+        lyricsHtml = '<div class="genius-lyrics-text-container">' + lyricsPlaceHolder.outerHTML + '</div>'
       }
 
       const h1 = doc.querySelector('div[class^=SongHeader] h1')
@@ -1644,7 +1644,7 @@ Browser:    ${navigator.userAgent}
 
       h1.parentNode.querySelectorAll('a[href^=https]').forEach(a => (a.target = '_blank'))
       doc.querySelectorAll('div[class^=SongHeader] [class*="InlineSvg-"]').forEach(e => e.remove())
-      h1.parentNode.querySelectorAll('[class*="HeaderCredits__"]').forEach(e => e.remove())
+      // h1.parentNode.querySelectorAll('[class*="HeaderCredits__"]').forEach(e => e.remove())
       removeIfExists(h1.parentNode.querySelector('div[class^="HeaderTracklist"]'))
 
       const headerHtml = '<div class="myheader">' + h1.parentNode.outerHTML + '</div>'
@@ -1746,23 +1746,6 @@ Browser:    ${navigator.userAgent}
     border-left: calc(1.732*var(--egl-btn-half-border-size)) solid var(--egl-btn-color);
   }
 
-  body div[class*="__Container"] iframe,
-  body div[class*="__Container"] div[class*="_preview"] iframe,
-  body div[class*="__Container"] div[class*="embed"] iframe {
-    /* override .hPdMCA .embedly_preview iframe {display: block;} */
-    display: none;
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 0;
-    height: 0;
-  }
-  div[class*="ExpandableContent__Content"] {
-    mask: none !important;
-    max-height: none !important;
-    overflow:auto !important;
-  }
-
   #lyrics-root div[class*="Lyrics-"] {
     grid-column: 1 / -1;
   }
@@ -1773,7 +1756,6 @@ Browser:    ${navigator.userAgent}
   div[class*="LyricsHeader-"],
   div[class*="PageFooter-"],
   footer[class*="PageFooter-"],
-  div[class*="ExpandableContent__ButtonContainer"],
   div[class*="About-"],
   div[class*="HeaderCredits-sc-"],
   div[class*="QuestionList-"],
@@ -1786,8 +1768,7 @@ Browser:    ${navigator.userAgent}
   div[class*="StickyNavSentinel"],
   div[class*="StickyNav-"],
   #sticky-nav,
-  button[class*="SmallButton-"],
-  div[class*="UnreviewedAnnotation__Container"] {
+  button[class*="SmallButton-"] {
     display: none;
   }
   div[class*="InnerSectionDivider"] {
@@ -1823,31 +1804,12 @@ Browser:    ${navigator.userAgent}
       background-position-x: 2px;
     }
   }
-  @keyframes headerArtistAndTracklistDOMAppended {
-    0% {
-      background-position-x: 1px;
-    }
-
-    100% {
-      background-position-x: 2px;
-    }
-  }
-  @keyframes headerSongTitleDOMAppended {
-    0% {
-      background-position-x: 1px;
-    }
-
-    100% {
-      background-position-x: 2px;
-    }
-  }
   #application {
     animation: appDomAppended 1ms linear 0s 1 normal forwards;
   }
   #application.app11 {
     animation: appDomAppended2 1ms linear 0s 1 normal forwards;
   }
-  #application.app11 div.LSongHeader__Container:not(.genius-lyrics-header-container) div.LSongHeader__CenterInfo,
   #application.app11 span#lyrics_rendered {
     animation: songHeaderDomAppended 1ms linear 0s 1 normal forwards;
   }
@@ -1857,15 +1819,6 @@ Browser:    ${navigator.userAgent}
     left:-10px;
     height:1px;
     width:1px;
-  }
-
-  #application.app11 div.LUNDETERMINED__Container .LHeaderArtistAndTracklist__Artist {
-    animation: headerArtistAndTracklistDOMAppended 1ms linear 0s 1 normal forwards;
-    /* animation removed once the class is determined */
-  }
-
-  #application.app11 .LSongHeader__Title {
-    animation: headerSongTitleDOMAppended 1ms linear 0s 1 normal forwards;
   }
 
   /* CSS for annotation container */
@@ -2023,7 +1976,7 @@ Browser:    ${navigator.userAgent}
     } else if (scrollable) {
       const innerTopElement = isContentStylesIsAdded
         // ? scrollable.querySelector('.genius-lyrics-header-content')
-        ? scrollable.querySelector('.LSongHeader__Outer_Container')
+        ? scrollable // to be reviewed
         : scrollable.firstElementChild
       scrollable = (innerTopElement || scrollable)
       // scrollable.scrollIntoView(true)
@@ -2077,19 +2030,19 @@ Browser:    ${navigator.userAgent}
           removals.push(...document.querySelectorAll('button[class^="SmallButton-"]'))
           pushIfAny(removals, document.querySelector('div[class^="SongDescription-"] div[class^="SongDescription-"]'))
 
-          let divs = document.querySelectorAll('div[class^="PageGriddesktop"]')
+          const divs = document.querySelectorAll('div[class^="PageGriddesktop"]')
           for (const div of divs) {
             div.className = ''
           }
           // Ads
-          divs = document.querySelectorAll('div[class^="InreadAd__Container"],div[class^="InreadAddesktop__Container"]')
-          for (const div of divs) {
-            removals.push(div)
-          }
-          divs = document.querySelectorAll('div[class^="SidebarAd__Container"]')
-          for (const div of divs) {
-            removals.push(div.parentNode)
-          }
+          // divs = document.querySelectorAll('div[class^="InreadAd__Container"],div[class^="InreadAddesktop__Container"]')
+          // for (const div of divs) {
+          //   removals.push(div)
+          // }
+          // divs = document.querySelectorAll('div[class^="SidebarAd__Container"]')
+          // for (const div of divs) {
+          //   removals.push(div.parentNode)
+          // }
           if (removals.length > 0) {
             removeElements(removals)
           }
@@ -2146,25 +2099,25 @@ Browser:    ${navigator.userAgent}
         onload.push(themeCommon.fixInstrumentalBridge)
 
         // Make expandable content buttons work
-        function expandContent () {
-          const button = this
-          const content = button.parentNode.querySelector('div[class*="__Content"]') || button.parentNode.parentNode.querySelector('div[class*="__Expandable"]')
-          for (const className of content.classList) {
-            if (className.indexOf('__Content') === -1 && className.indexOf('__Expandable') === -1) {
-              content.classList.remove(className)
-            }
-          }
-          button.remove()
-        }
-        onload.push(function makeExpandablesWork () {
-          const divs = document.querySelectorAll('div[class*="__Container"]')
-          for (const div of divs) {
-            const button = div.querySelector('button[class^="Button"]')
-            if (button) {
-              button.addEventListener('click', expandContent)
-            }
-          }
-        })
+        // function expandContent () {
+        //   const button = this
+        //   const content = button.parentNode.querySelector('div[class*="__Content"]') || button.parentNode.parentNode.querySelector('div[class*="__Expandable"]')
+        //   for (const className of content.classList) {
+        //     if (className.indexOf('__Content') === -1 && className.indexOf('__Expandable') === -1) {
+        //       content.classList.remove(className)
+        //     }
+        //   }
+        //   button.remove()
+        // }
+        // onload.push(function makeExpandablesWork () {
+        //   const divs = document.querySelectorAll('div[class*="__Container"]')
+        //   for (const div of divs) {
+        //     const button = div.querySelector('button[class^="Button"]')
+        //     if (button) {
+        //       button.addEventListener('click', expandContent)
+        //     }
+        //   }
+        // })
 
         onload.push(themeCommon.targetBlankLinks)
         onload.push(() => setTimeout(themeCommon.targetBlankLinks, 1000))
@@ -2232,10 +2185,6 @@ Browser:    ${navigator.userAgent}
           }
           a[href].annotated {
             padding: 5px 0px !important; /* make the whole <a> clickable; including gap between lines*/
-          }
-          html div[class*="SongPage__LyricsWrapper"] {
-            padding-top: var(--egl-page-pt);
-            padding-bottom: var(--egl-page-pb);
           }
           ${iframeCSSCommon}
         </style>`
@@ -2324,9 +2273,6 @@ Browser:    ${navigator.userAgent}
             }
 
             div[class*="HeaderArtistAndTracklistPrimis"] /* desktop_react_atf */ {
-              display:none;
-            }
-            div.LHeaderMetaCredits__Container {
               display:none;
             }
             html .lyrics_body_pad{
@@ -2443,9 +2389,6 @@ Browser:    ${navigator.userAgent}
             .annotationbox .annotation_rich_text_formatting a {color: black)}
 
             div[class*="HeaderArtistAndTracklistPrimis"] {
-              display:none;
-            }
-            div.LHeaderMetaCredits__Container {
               display:none;
             }
             h1,h2,h3,h4,h5,h6 {
@@ -2847,41 +2790,6 @@ Browser:    ${navigator.userAgent}
       font-size: 140%;
     }
 
-    [class*="LabelWithIcon__Container"],
-    [class*="MetadataStats__LabelWithIcon"]
-    {
-      font-size: inherit;
-    }
-    [class*="LabelWithIcon__Container"] svg,
-    [class*="MetadataStats__LabelWithIcon"] svg,
-    svg[class*="MetadataTooltip__InfoIcon"] {
-      height: 1.2em;
-      width: 1.2em;
-      font-size: inherit;
-    }
-
-    .LHeaderMetaCredits__Selection {
-      white-space: nowrap;
-      word-break: normal;
-      /* .grjXi, .glevmK */
-      font-weight: 100;
-      font-size: .75rem;
-      line-height: 1.33;
-    }
-    .LDESKTOPONLY__Grid{
-      display: grid;
-      grid-template-columns: repeat(2,1fr);
-      -webkit-column-gap: 0.75rem;
-    }
-    [class].LDESKTOPONLY__Grid{
-      column-gap: 28px;
-    }
-
-    a[href^="#"][class="HeaderBio__Wrapper"]{
-      /* .eFqCnd */
-      line-height: 1.33;
-    }
-
     body #annotationcontainer958 {
       ${contentStyle.includes('--egl-font-size') ? 'font-size: var(--egl-font-size);' : ''}
     }
@@ -2902,25 +2810,6 @@ Browser:    ${navigator.userAgent}
       /* looks better to give some space away from the iframe */
     }
 
-    [class*="LabelWithIcon__Container"] [class*="LabelWithIcon__Label"] {
-      font-size:inherit; /* general */
-    }
-
-    div[class].LSongHeader__CenterInfo {
-      color: inherit; /* for dekstop_react */
-    }
-
-    div#lyrics-root[class*="Lyrics__Root"] {
-        font-size: inherit; /* for lyrics text */
-    }
-
-    body .LHeaderMetaCredits__List, body .HeaderTracklist__Container {
-      font-size: inherit; /* revert 1rem */
-    }
-    body .LHeaderMetaCredits__Selection{
-      margin-bottom:0; /* revert mb */
-    }
-
     #application:not(:hover) [data-lyrics-container="true"]::selection {
       /* no selection when the cursor moved out */
       color: inherit;
@@ -2933,8 +2822,7 @@ Browser:    ${navigator.userAgent}
       padding: 0;
     }
 
-    div[class*="SongPageGrid"],
-    div[class].LSongHeader__Container {
+    div[class*="SongPageGrid"] {
       background-image: none;
       /* no header background image */
     }
@@ -2943,40 +2831,15 @@ Browser:    ${navigator.userAgent}
       display: none;
     }
 
-    main[class*="Container"] h1[font-size][class*="SongHeaderWithPrimis__Title"] {
-      margin-bottom: 8px;
-    }
-
-    div[class].LSongHeader__Left {
-      display: none;
-      /* just empty space */
-    }
-
-    div[class].LSongHeader__Bottom {
-      margin-bottom:1em;
-    }
-
     div[class*="SongPageGriddesktop"] {
       display: block;
     }
 
     span[class*="LabelWithIcon"]>svg,
     button[class*="LabelWithIcon"]>svg,
-    div[class*="Tooltip__Container"] svg,
     span[class*="InlineSvg-"]>svg {
       fill: currentColor;
       /* dynamic color instead of black */
-    }
-
-    p[class*="__Label"],
-    span[class*="__Label"],
-    div[class*="__Section"],
-    button[class*="__Container"] {
-      color: inherit;
-      /* follow parent styles */
-      text-decoration: none;
-      cursor: inherit;
-      /* follow parent styles */
     }
 
     div[class*="MetadataStats"] {
@@ -2987,30 +2850,6 @@ Browser:    ${navigator.userAgent}
       cursor: inherit;
     }
 
-    div[class*="MetadataStats__Container"] {
-      font-size: 0.75rem;
-    }
-
-    div[class].LSongHeader__CenterInfo {
-      margin: 0;
-      padding: 0;
-      max-width: 100%;
-      white-space: normal;
-      display: flex;
-      flex-direction: column;
-    }
-
-    div[class].LSongHeader__CenterInfo .LHeaderMetaCredits__Container{
-      /* using flexbox with wrapping */
-      display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-      gap: 0px;
-      align-items: center;
-      justify-items: center;
-    }
-
-    div[data-lyrics-container][class*="Lyrics__Container"],
     #lyrics-root div[class=*="Lyrics-"] {
       padding: 0;
     }
@@ -3038,59 +2877,9 @@ Browser:    ${navigator.userAgent}
     }
 
     a[href][class],
-    span[class*="PortalTooltip"],
-    div[class*="HeaderCreditsPrimis"]  /* desktop_react_atf */,
-    div[class*="HeaderArtistAndTracklistPrimis"] /* desktop_react_atf */,
-    div[class*="HeaderTracklist__Container"]  /* desktop_react */
+    span[class*="PortalTooltip"]
      {
       font-size: inherit;
-    }
-
-    div[class].LSongHeader__CenterInfo h1+div[class*="HeaderArtistAndTracklistPrimis"]   /* desktop_react_atf */
-    {
-      font-size: 80%;
-      margin-top: 10px;
-      margin-bottom: 3px;
-    }
-
-    .LSongHeader__CenterInfo .LSongHeader__Title + span[class*="PortalTooltip__Container"]   /* desktop_react */
-    {
-      font-size: 80%;
-      display:inline-flex;
-      margin-top: 10px;
-      margin-bottom: 3px;
-    }
-    .LSongHeader__CenterInfo .LSongHeader__Title + span[class*="PortalTooltip__Container"] + div[class*="HeaderTracklist__Container"]   /* desktop_react */
-    {
-      font-size: 80%;
-      display:inline-flex;
-      margin-top: 10px;
-      margin-bottom: 3px;
-    }
-
-    .LSongHeader__CenterInfo .LSongHeader__Title + span[class*="PortalTooltip__Container"] + div[class*="HeaderTracklist__Container"]::before   /* desktop_react */
-    {
-      content: "•";
-      margin: 0 .5em;
-      display: inline-block;
-      float: left;
-    }
-
-    .LSongHeader__CenterInfo .LSongHeader__Title + span[class*="PortalTooltip__Container"] + div[class*="HeaderTracklist__Container"] [class*="HeaderTracklist__AlbumWrapper"]   /* desktop_react */
-    {
-      display: inline-flex;
-      flex-direction: row;
-      flex-wrap: nowrap;
-    }
-
-
-    .LSongHeader__CenterInfo [class], div[class].LSongHeader__Container {
-      color: inherit;
-    }
-
-    .LSongHeader__CenterInfo {
-      --egl-container-display: '-NULL-';
-      /* all under info would not hide */
     }
 
     div[class*="Footer"],
@@ -3099,15 +2888,15 @@ Browser:    ${navigator.userAgent}
       /* unnessary info */
     }
 
-    div[class*="SongPage__Section"] #about,
-    div[class*="SongPage__Section"] #about~*,
-    div[class*="SongPage__Section"] #comments,
-    div[class*="SongPage__Section"] #comments~* {
+    div.genius-lyrics-text-container #about,
+    div.genius-lyrics-text-container #about~*,
+    div.genius-lyrics-text-container #comments,
+    div.genius-lyrics-text-container #comments~* {
       display: none;
       /* unnessary info */
     }
 
-    div[class*="SongPage__Section"] #lyrics-root-pin-spacer {
+    div.genius-lyrics-text-container #lyrics-root-pin-spacer {
       padding-top: 12px;
       /* look better */
     }
@@ -3172,216 +2961,17 @@ Browser:    ${navigator.userAgent}
       /* not only a single lyrics character get wrapped. the whole lyrics word will be wrapped */
     }
 
-    .LHeaderMetaCredits__Selection {
-      /* flexbox for header info */
-      display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-      column-gap: 18px;
-      row-gap: 2px;
-      width: 100%;
-      justify-content: start;
-      padding: 4px 0px;
-    }
-
-    div[class*="LyricsEditdesktop__"] {
-      display: none;
-    }
-
-    div[class*="HeaderArtistAndTracklistPrimis__Container"] div[class*="HeaderArtistAndTracklistPrimis__Tracklist"]>a[href], /* desktop_react_atf */
-    div[class*="HeaderTracklist__Container"] div[class*="HeaderTracklist__Album"] a[href], /* desktop_react */
-    div[class*="HeaderArtistAndTracklistdesktop__Container"] div[class*="HeaderArtistAndTracklistdesktop__Tracklist"] a[href] /* new desktop */
-     {
-      margin: 6px;
-    }
-
     body button {
       color: inherit;
     }
 
-    .LSongHeader__CenterInfo a[href][class]{
-      padding: 0;
-      margin: 0;
-    }
-
-    .LSongHeader__CenterInfo a[href="#about"]
-    {
-      font-weight: 300;
-      font-size: 85%;
-      opacity: 0.65;
-      /* coloring only */
-    }
-
-    h1,
-    div[class*="SongPage__LyricsWrapper"] {
+    h1 {
       white-space: normal;
     }
 
-    disabled.genius-lyrics-header-content div[class*="MetadataStats__Stats"] {
-      /* using flexbox with wrapping */
-      display: flex;
-      flex-wrap: wrap;
-      /* element blocks with wrapping */
-      white-space: nowrap;
-      /* text itself no wrapping */
-      row-gap: 4px;
-      column-gap: 16px;
-      margin-top: 6px;
-      width: 100%;
-      /* force the div to be full width */
-      font-size: 85%;
-    }
-    [class*="Tooltip__Children"], [class*="Tooltip__Container"] {
-      display: inline-flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: center;
-      justify-items: center;
-      align-content: center;
-      align-self: center;
-      justify-self: center;
-    }
-
-    disabled.genius-lyrics-header-content div[class*="MetadataStats__Stats"] > [class] {
-      margin-right: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      column-gap: 2px;
-    }
-
-    disabled.genius-lyrics-header-content div[class*="MetadataStats__Stats"] button[class*="LabelWithIcon__Container"] {
-      display: flex;
-      justify-content: center;
-      cursor: default;
-    }
-
-    disabled.genius-lyrics-header-content div[class*="MetadataStats__Stats"] span[class*="LabelWithIcon__Container"] {
-      display: flex;
-      flex-direction: row;
-      flex-wrap: nowrap;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .LHeaderMetaCredits__Label[class] {
-      font-size: 0.92em; /* instead of 0.75rem */
-      align-self: center;
-    }
-
-    #lyrics-root [class*="Lyrics__Title"]{
-      font-size: 0.7rem; /* looks better */
-      margin: 12px 4px; /* looks better */
-      color: inherit;
-      opacity: 0.89; /* lighter in color */
-    }
-
-    .LSongHeader__Title a[href][style*="color"] {
-      color: inherit !important; /* important color set by inherit instead */
-    }
-    .LSongHeader__Title a[href][class] {
-      color: inherit; /* if not forced color, inherit color */
-    }
-
-
-    disabled.genius-lyrics-header-content div[class].LHeaderMetaCredits__List{
-      font-size: 92%;
-    }
-    disabled.genius-lyrics-header-content div[class].LHeaderMetaCredits__List span,
-    disabled.genius-lyrics-header-content div[class].LHeaderMetaCredits__List button{
-      font-size: inherit;
-    }
-    button[class*="List__More"] {
-      cursor: inherit;
-      color: inherit;
-      text-decoration: inherit;
-      font-size: inherit;
-    }
 
     [data-lyrics-container="true"] a[class], [data-lyrics-container="true"] span[class] {
       color: inherit;
-    }
-
-    /* desktop_react_atf */
-
-
-
-    .LSongHeader__CenterInfo ~ div[class*="SongHeaderWithPrimis__PrimisContainer"] /* desktop_react_atf */ {
-      display: none;
-    }
-
-
-    div[class*="HeaderArtistAndTracklistPrimis__Container"]  /* desktop_react_atf */
-    {
-      flex-wrap: wrap;
-      column-gap: 6px;
-      row-gap: 2px;
-    }
-
-    .LSongHeader__CenterInfo div[class*="SongHeaderWithPrimis__Bottom"] /* desktop_react_atf */ {
-      display: flex;
-      flex-direction: column;
-    }
-
-    disabled.genius-lyrics-header-content a[href][class*="Link__"] {
-      color: var(--egl-link-color);
-      font-weight: 100;
-      text-decoration: none;
-    }
-
-    div[class*="HeaderMetadata__ReleaseDate"] {
-      font-size: inherit;
-    }
-
-    /* anchor links like #about, #primary-album */
-    disabled.genius-lyrics-header-content a[href^="#"][class*="Link_"]
-    {
-      --egl-link-color: '--NULL--';
-      pointer-events: none;
-      text-decoration: inherit;
-    }
-
-    disabled.genius-lyrics-header-content a[href^="#"][class*="Link_"] *
-    {
-      pointer-events: all; /* text can be selected */
-      text-decoration: inherit;
-    }
-
-    disabled.genius-lyrics-header-content a[href^="#"][class*="Link_"] > span[class*="InlineSvg"]:last-child,
-    disabled.genius-lyrics-header-content a[href^="#"][class*="Link_"] > span[class*="InlineSvg"]:last-child > svg
-    {
-      display: none;
-    }
-
-    /* only for #about Read More */
-    disabled.genius-lyrics-header-content a[href^="#"][class*="Link_"] > span[class*="HeaderBio__ViewBio"]:last-child,
-    disabled.genius-lyrics-header-content a[href^="#"][class*="Link_"] > span[class*="HeaderBio__ViewBio"]:last-child svg
-    {
-      display: none;
-    }
-
-    [class].LHeaderMetaCredits__List /* desktop_react_atf */ {
-      justify-content: center;
-      align-items: center;
-      display: inline-flex;
-      flex-direction: row;
-      column-gap: 6px;
-    }
-
-    [class].fTHPLE, [class].LSongHeader__Title{
-      color: inherit;
-    }
-
-    [class*="SongHeaderdesktop__PrimisContainer"] {
-      height: auto; /* override fixed height */
-    }
-
-    [class*="SongHeaderdesktop__Information"], [class*="SongHeaderdesktop__SongDetails"] {
-      row-gap: 0; /* remove unnecessary row gap */
-    }
-
-    [class*="LyricsFooter__Container"] {
-      display:none;
     }
 
     div[class*="SidebarLyrics-"],
@@ -3390,7 +2980,6 @@ Browser:    ${navigator.userAgent}
     div[class*="LyricsHeader-"],
     div[class*="PageFooter-"],
     footer[class*="PageFooter-"],
-    div[class*="ExpandableContent__ButtonContainer"],
     div[class*="About-"],
     div[class*="QuestionList-"],
     #questions,
@@ -3402,8 +2991,7 @@ Browser:    ${navigator.userAgent}
     div[class*="StickyNavSentinel"],
     div[class*="StickyNav-"],
     #sticky-nav,
-    button[class*="SmallButton-"],
-    div[class*="UnreviewedAnnotation__Container"] {
+    button[class*="SmallButton-"] {
       display: none;
     }
 
@@ -3615,102 +3203,6 @@ Browser:    ${navigator.userAgent}
     }
   }
 
-  function normalizeClassNameInner (d, k1, k2) {
-    // in normal version and WithPrimis version, they share some similarity of the Layout Design.
-    // This is a case by case study to make the generalized class names for the content and styling control in GeniusLyrics.js
-    switch (d) {
-      case 'SongHeaderdesktop__Column':
-        return 'LDESKTOPONLY__Column'
-      case 'SongHeaderdesktop__Container':
-      case 'SongHeaderWithPrimis__Container':
-        return 'LSongHeader__Container'
-      case 'SongHeaderdesktop__Sentinel':
-      case 'SongHeaderWithPrimis__Sentinel':
-        return 'LSongHeader__Sentinel'
-      case 'SongHeaderdesktop__Left':
-      case 'SongHeaderWithPrimis__Left':
-        return 'LSongHeader__Left'
-      case 'SongHeaderdesktop__Right':
-      case 'SongHeaderWithPrimis__Right':
-        return 'LSongHeader__Right'
-      case 'SongHeaderdesktop__Bottom':
-      case 'SongHeaderWithPrimis__Bottom':
-        return 'LSongHeader__Bottom'
-      case 'SongHeaderdesktop__Center':
-      case 'SongHeaderWithPrimis__Information':
-        return 'LSongHeader__CenterInfo'
-      case 'SongHeaderdesktop__Title':
-      case 'SongHeaderWithPrimis__Title':
-        return 'LSongHeader__Title'
-      case 'SongHeaderdesktop__HiddenMask':
-      case 'SongHeaderWithPrimis__HiddenMask':
-        return 'LSongHeader__Title'
-      case 'HeaderArtistAndTracklistPrimis__Container':
-      case 'PortalTooltip__Container':
-        return 'LUNDETERMINED__Container' // set to LHeaderArtistAndTracklist__Container after DOM loaded
-      case 'SongHeaderdesktop__Artist':
-      case 'HeaderArtistAndTracklistPrimis__Artist':
-        return 'LHeaderArtistAndTracklist__Artist'
-      case 'HeaderMetadata__Container':
-      case 'HeaderCreditsPrimis__Container':
-        return 'LHeaderMetaCredits__Container'
-      case 'HeaderMetadata__Grid':
-        return 'LDESKTOPONLY__Grid'
-      case 'HeaderMetadata__Section':
-      case 'HeaderCreditsPrimis__Section':
-        return 'LHeaderMetaCredits__Selection'
-      case 'HeaderMetadata__Label':
-      case 'HeaderCreditsPrimis__Label':
-        return 'LHeaderMetaCredits__Label'
-      case 'HeaderMetadata__List':
-      case 'HeaderCreditsPrimis__List':
-        return 'LHeaderMetaCredits__List'
-
-        /*
-
-        desktop_react_atf
-
-        SongHeaderWithPrimis__Bottom
-        HeaderBio__Wrapper
-        SongHeaderWithPrimis__HeaderBio
-        HeaderBio__ViewBio
-
-        desktop_react
-
-        HeaderMetadata__Section
-        HeaderMetadata__Label
-        HeaderMetadata__ReleaseDate
-        HeaderMetadata__Section
-        HeaderMetadata__ViewCredits
-        Link__StyledLink
-
-      */
-
-      default:
-      // if (k1 === 'SongHeaderdesktop' || k1 === 'SongHeaderWithPrimis') {
-      //   return `LSongHeader__${k2}`
-      // }
-      // return null // ignore all not recognized
-    }
-    return null
-  }
-
-  function normalizeClassNames (htmlText) {
-    htmlText = htmlText.replace(/\s+class="([a-zA-Z0-9\-_\s]+)"/g, (m, a) => {
-      if (!a.includes('__')) return m // ignore without __
-      const arr = []
-      a.replace(/([A-Za-z]+)__([A-Za-z]+)/g, (d, k1, k2) => {
-        const newClassName = normalizeClassNameInner(d, k1, k2)
-        if (newClassName) {
-          arr.push(newClassName)
-        }
-      })
-      if (arr.length === 0) return m
-      return ` class="${a} ${arr.join(' ')}"`
-    })
-    return htmlText
-  }
-
   /* eslint-enable quote-props */
   async function trimHTMLReponseTextFn (htmlText) {
     /*
@@ -3796,9 +3288,6 @@ Browser:    ${navigator.userAgent}
       if (m.startsWith('<div style="display: none;">')) return ''
       return m
     })
-
-    // add normalized classname to adapt both desktop_react and desktop_react_atf
-    htmlText = normalizeClassNames(htmlText)
 
     console.log(`Genius Lyrics - HTML text size reduced from ${metricPrefix(measurePlainTextLength(originalHtmlText), 2, 1024)} to ${metricPrefix(measurePlainTextLength(htmlText), 2, 1024)}`)
     // console.log([htmlText])
@@ -5071,62 +4560,6 @@ Browser:    ${navigator.userAgent}
     // clean up
     e = null
 
-    function addClassNameToInfoHeader (evTarget) {
-      /** @type {HTMLElement | null} */
-      const elm = (evTarget || 0)
-      if (elm && elm.matches('div.LSongHeader__CenterInfo')) {
-        const elmSongHeaderContainer = elm.closest('.LSongHeader__Right').parentNode
-        if (!elmSongHeaderContainer || elmSongHeaderContainer.classList.contains('genius-lyrics-header-container')) {
-          return
-        }
-        let p = elm
-        while (p) {
-          const t = p.parentNode
-          if (t === elmSongHeaderContainer) break
-          p = t
-        }
-        if (p !== null) {
-          let children = [...elmSongHeaderContainer.children]
-          let wrapper = elmSongHeaderContainer.appendChild(document.createElement('div'))
-          appendElements(wrapper, children)
-          elmSongHeaderContainer.classList.add('genius-lyrics-header-container')
-          wrapper.classList.add('genius-lyrics-header-content') // for flexbox
-          children = null
-          wrapper = null
-        }
-      }
-    }
-
-    function addClassNameToHeaderArtistAndTracklist (evTarget) {
-      /** @type {HTMLElement | null} */
-      const elm = (evTarget || 0)
-      if (elm && elm.matches('.LHeaderArtistAndTracklist__Artist')) {
-        const container = elm.closest('div.LUNDETERMINED__Container')
-        if (container) {
-          container.classList.remove('LUNDETERMINED__Container')
-          container.classList.add('LHeaderArtistAndTracklist__Container')
-        }
-      }
-    }
-
-    function addClassNameHeaderOuter (evTarget) {
-      /** @type {HTMLElement | null} */
-      const elm = (evTarget || 0)
-      if (elm && elm.matches('.LSongHeader__Title')) {
-        let lastMatchParent = null
-        for (let parent = elm.parentNode; parent instanceof HTMLElement; parent = parent.parentNode) {
-          if (parent.querySelector('#lyrics-root')) {
-            break
-          }
-          lastMatchParent = parent
-        }
-        if (lastMatchParent !== null && lastMatchParent.nodeName === 'DIV') {
-          lastMatchParent.classList.add('LSongHeader__Outer')
-          lastMatchParent.parentNode.classList.add('LSongHeader__Outer_Container')
-        }
-      }
-    }
-
     function cssTriggeringHook (resolve) {
       document.addEventListener('animationstart', (ev) => {
         const evTarget = ev.target
@@ -5143,13 +4576,6 @@ Browser:    ${navigator.userAgent}
           Promise.resolve(0).then(() => {
             communicationWindow.postMessage({ iAm: custom.scriptName, type: 'iframeContentRendered' }, '*') // iframeWin -> mainWin
           })
-          Promise.resolve(evTarget).then(addClassNameToInfoHeader)
-        }
-        if (ev.animationName === 'headerArtistAndTracklistDOMAppended') {
-          Promise.resolve(evTarget).then(addClassNameToHeaderArtistAndTracklist)
-        }
-        if (ev.animationName === 'headerSongTitleDOMAppended') {
-          Promise.resolve(evTarget).then(addClassNameHeaderOuter)
         }
       }, true)
     }
