@@ -3486,7 +3486,8 @@ Browser:    ${navigator.userAgent}
       '<svg><path d="M17.51 5.827c.654-.654.654-1.636 0-2.29L14.563.59c-.655-.655-1.637-.655-2.291 0L0 12.864V18.1h5.236L17.51 5.827Zm-4.092-4.09 2.946 2.945-2.455 2.454-2.945-2.945 2.454-2.455ZM1.636 16.463v-2.946l8.182-8.182 2.946 2.946-8.182 8.182H1.636Z"></path></svg>',
       '<svg><path fill-rule="evenodd" d="M2.948.1h10.97v1.371H2.948V.101ZM15.29 2.843H1.578v1.372H15.29V2.843Zm.567 15.257H2.144a1.373 1.373 0 0 1-1.371-1.37v-9.6a1.373 1.373 0 0 1 1.37-1.37h13.713a1.373 1.373 0 0 1 1.371 1.37v9.599a1.373 1.373 0 0 1-1.37 1.371ZM2.144 7.13v9.599h13.712V7.13H2.144Z" clip-rule="evenodd"></path></svg>',
       '<svg><path d="M6.5 10.68.04.605h12.92L6.5 10.68z"></path></svg>',
-      '<svg><path d="M16.58 20.73H2V6.15h9.07l2-2H0v18.58h18.58V8.75l-2 2v9.98z"></path><path d="M18.65 0l-4.16 4.15-2 2L8 10.66l-1.59 5.25 5.19-1.6 5-5 2-2 3.71-3.71zm-2.07 7.38l-5.71 5.71-1.23.38-.82-.82.38-1.26 5.25-5.23 2-2L18.65 2l1.67 1.67-1.74 1.71z"></path></svg>'
+      '<svg><path d="M16.58 20.73H2V6.15h9.07l2-2H0v18.58h18.58V8.75l-2 2v9.98z"></path><path d="M18.65 0l-4.16 4.15-2 2L8 10.66l-1.59 5.25 5.19-1.6 5-5 2-2 3.71-3.71zm-2.07 7.38l-5.71 5.71-1.23.38-.82-.82.38-1.26 5.25-5.23 2-2L18.65 2l1.67 1.67-1.74 1.71z"></path></svg>',
+      '<svg><circle cx="5" cy="5" r="5"></circle><path stroke-width="0.25" fill="#000" d="M4.43 7 2.25 4.968l.509-.546 1.634 1.524L7.136 3l.546.509L4.43 7Z"></path></svg>'
     ]
   // note: the script can detect that the fetched svg might be missing in the defaultSVGBoxs,
   // but if those SVGs are no longer used in all lyrics / theme, there will be no warning or logging to alert the developer.
