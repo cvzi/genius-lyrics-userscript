@@ -2215,11 +2215,11 @@ Browser:    ${navigator.userAgent}
             scrollbar-width: auto;
           }
           .annotated span {
-            background-color: #c0c0c060 !important;
+            background-color: var(--egl-annotated-span-bgcolor, #c0c0c060) !important;
             text-decoration: none !important;
           }
           .annotated:hover span, .annotated.highlighted span {
-            background-color: #ddd !important;
+            background-color: var(--egl-annotated-span-bgcolor-active, #ddd) !important;
             text-decoration: none !important;
           }
          .annotated.highlighted span {
