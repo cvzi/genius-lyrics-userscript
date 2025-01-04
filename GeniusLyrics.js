@@ -4815,6 +4815,13 @@ Browser:    ${navigator.userAgent}
   }
 
   async function mainRunner () {
+    // obtain the default options prepared by the userscript in the top frame
+    const defaultOptions = custom.defaultOptions
+    if (defaultOptions && typeof defaultOptions === 'object') {
+      for (const [key, value] of Object.entries(defaultOptions)) {
+        genius.option[key] = value
+      }
+    }
     // get values from GM
     const values = await getGMValues({
       debug: genius.debug,
@@ -5064,7 +5071,11 @@ Browser:    ${navigator.userAgent}
     }
   }
 
-  mainRunner()
+  try {
+    mainRunner()
+  } catch (e) {
+    console.warn(e)
+  }
 
   return genius
 }
