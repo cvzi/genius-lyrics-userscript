@@ -219,6 +219,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       cacheHTMLRequest: true, // be careful of cache size if trimHTMLReponseText is false; around 50KB per lyrics including selection cache
       requestCallbackResponseTextOnly: true, // default true; just need the request text
       enableStyleSubstitution: false, // default false; some checking are provided but not guaranteed
+      normalizeClassV2: false, // default false; true to add normalized class names (v2)
       removeEmptyBlocks: true, // remove elements without content (empty elements with min-height would cause a empty block on the page)
       trimHTMLReponseText: true, // make html request to be smaller for caching and window messaging; safe to enable
       defaultPlaceholder: 'Search genius.com...' // placeholder for input field
@@ -3407,6 +3408,42 @@ Browser:    ${navigator.userAgent}
       display: none;
     }
 
+    /* normalizeClassV2 */
+    .ncSongHeaderQ-outer.ncPageGridQ-outer.ncSongPageGridQ-outer.ncSongHeaderQ-outer-only[class] {
+      display: flex;
+      flex-direction: row
+    }
+    .ncSongHeaderQ-outer.ncPageGridQ-outer.ncSongPageGridQ-outer.ncSongHeaderQ-outer-only[class] .ncHeaderArtistAndTracklistQ-outer-only[class] {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+    }
+    .ncSongHeaderQ-outer.ncPageGridQ-outer.ncSongPageGridQ-outer.ncSongHeaderQ-outer-only[class] .ncMetadataStatsQ-outer-only {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap
+    }
+    .ncSongHeaderQ-outer.ncPageGridQ-outer.ncSongPageGridQ-outer.ncSongHeaderQ-outer-only[class] .ncMetadataStatsQ-outer-only .ncLabelWithIconQ-inner[class] {
+      white-space: nowrap;
+    }
+    .ncSongHeaderQ[class], .ncHeaderBioQ[class] {
+      color: inherit;
+    }
+    .ncHeaderBioQ a[href][class] {
+      color: inherit;
+    }
+    .ncSongHeaderQ img[src]{
+     min-width: 75px;
+    }
+    .ncHeaderArtistAndTracklistQ-inner[class] {
+      white-space: normal;
+    }
+    .ncLabelWithIconQ[class] {
+      color: inherit;
+    }
+    .ncLabelWithIconQ[class] svg {
+      fill: currentColor;
+    }
     `
 
     const contentStyleByDefault = `
@@ -3495,6 +3532,83 @@ Browser:    ${navigator.userAgent}
   // ( the icon usages are highly dependent on the lyrics and themes )
 
   /* eslint-enable quotes, comma-dangle, indent */
+  /* eslint-disable quote-props */
+
+  const normalizeClassMap = new Map(Object.entries({
+    'SongHeader': 'ncSongHeaderQ',
+    'HeaderBio': 'ncHeaderBioQ',
+    'StyledLink': 'ncStyledLinkQ',
+    'PageGrid': 'ncPageGridQ',
+    'SongPageGrid': 'ncSongPageGridQ',
+    'HeaderArtistAndTracklist': 'ncHeaderArtistAndTracklistQ',
+    'MetadataStats': 'ncMetadataStatsQ',
+    'LabelWithIcon': 'ncLabelWithIconQ',
+
+    'SectionScrollSentinel': 'ncSectionScrollSentinelQ',
+    'SectionLeaderboard': 'ncSectionLeaderboardQ',
+
+    'SongPage': 'ncSongPageQ',
+    'ContributorsCreditSong': 'ncContributorsCreditSongQ',
+    'LyricsHeader': 'ncLyricsHeaderQ',
+    'Lyrics': 'ncLyricsQ',
+    'ReferentFragment': 'ncReferentFragmentQ',
+
+    'About': 'ncAboutQ'
+  }))
+  function normalizeClassNamesV2OnHTMLCode (htmlText) {
+    let cacheMap = new Map()
+    htmlText = htmlText.replace(/\s+class="([a-zA-Z0-9\-_\s]+)"/g, (m, a) => {
+      const r = cacheMap.get(a)
+      if (r) return r
+      const classSplit = a.split(/([\s\-_]+)/g)
+      if (classSplit.length > 1) {
+        let appendedClass = ''
+        for (let i = 0, n = classSplit.length; i < n; i += 2) {
+          const u = classSplit[i]
+          const v = normalizeClassMap.get(u)
+          if (v) {
+            appendedClass += ` ${v}`
+          }
+        }
+        if (appendedClass) {
+          m = ` class="${a}${appendedClass}"`
+        }
+      }
+      cacheMap.set(a, m)
+      return m
+    })
+    cacheMap.clear()
+    cacheMap = null
+    return htmlText
+  }
+
+  function normalizeClassNamesV2OnPageDOM () {
+    for (const className of normalizeClassMap.values()) {
+      const elements = document.querySelectorAll(`.${className}`)
+      const n = elements.length
+      if (n === 0) continue
+      if (n === 1) {
+        elements[0].classList.add(`${className}-${'outer'}`)
+        continue
+      }
+      const setElements = new Set(elements)
+      for (const element of elements) {
+        let isChild = false
+        for (let node = element.parentElement; node instanceof HTMLElement; node = node.parentElement) {
+          if (setElements.has(node)) {
+            isChild = true
+            break
+          }
+        }
+        element.classList.add(`${className}-${isChild ? 'inner' : 'outer'}`)
+      }
+      setElements.clear()
+      const elementsOuter = document.querySelectorAll(`.${className}-outer`)
+      if (elementsOuter.length === 1) {
+        elementsOuter[0].classList.add(`${className}-outer-only`)
+      }
+    }
+  }
 
   function normalizeClassNameInner (d, k1, k2) {
     // in normal version and WithPrimis version, they share some similarity of the Layout Design.
@@ -3592,6 +3706,7 @@ Browser:    ${navigator.userAgent}
     return htmlText
   }
 
+  /* eslint-enable quote-props */
   async function trimHTMLReponseTextFn (htmlText) {
     /*
 
@@ -3862,6 +3977,10 @@ Browser:    ${navigator.userAgent}
           // note: 1 page consume 2XX KB
           // if trimHTMLReponseText is used, trim to 25KB ~ 50KB
           if (genius.option.cacheHTMLRequest === true) cacheReqResult({ responseText: html })
+        }
+
+        if (genius.option.normalizeClassV2 === true) {
+          html = normalizeClassNamesV2OnHTMLCode(html)
         }
         const contentStyle = contentStyling() || '' // obtained from the main window, to be passed to iframe
 
@@ -4937,6 +5056,7 @@ Browser:    ${navigator.userAgent}
     html = ''
 
     if (genius.option.removeEmptyBlocks === true) removeEmptyBlocks()
+    if (genius.option.normalizeClassV2 === true) normalizeClassNamesV2OnPageDOM()
 
     const communicationWindow = e.source // top
     if (document.visibilityState === 'visible') await getRafPromise().then()
