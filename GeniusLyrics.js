@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.16.8
+// @version      5.16.9
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2019, cuzi (cuzi@openmail.cc) and contributors
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -48,7 +48,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   'use strict'
 
   const __SELECTION_CACHE_VERSION__ = 10
-  const __REQUEST_CACHE_VERSION__ = 10
+  const __REQUEST_CACHE_VERSION__ = 11
 
   /** @type {globalThis.PromiseConstructor} */
   const Promise = (async () => { })().constructor // YouTube polyfill to Promise in older browsers will make the feature being unstable.
@@ -1586,14 +1586,14 @@ Browser:    ${navigator.userAgent}
 
       const originalUrl = doc.querySelector('meta[property="og:url"]') ? doc.querySelector('meta[property="og:url"]').content : null
 
-      const lyricsContainers = Array.from(doc.querySelectorAll('#lyrics-root [class*=Lyrics-]:not([class*=Sidebar])'))
-      const lyricsPlaceHolder = doc.querySelector('[class*="LyricsPlaceholder-"]')
+      const lyricsContainers = Array.from(doc.querySelectorAll('#lyrics-root [class*="Lyrics__Container"'))
+      const lyricsPlaceHolder = doc.querySelector('[class*="LyricsPlaceholder"]')
       if (lyricsContainers.length === 0 && !lyricsPlaceHolder) {
         return {
           error: true,
           errorHtml: themeCommon.themeError(
             theme.name,
-            'Neither "Lyrics-" nor "LyricsPlaceholder-" found',
+            'Neither "Lyrics__Container" nor "LyricsPlaceholder" found',
             originalUrl,
             song
           )
@@ -1602,12 +1602,12 @@ Browser:    ${navigator.userAgent}
 
       // doc.querySelectorAll('[class*="LyricsFooter__Container"]').forEach(e => e.remove())
       // doc.querySelectorAll('[class*="LyricsEditdesktop__Container"]').forEach(e => e.remove())
-      doc.querySelectorAll('[class*="LyricsPlaceholder-"] svg').forEach(e => e.remove())
+      doc.querySelectorAll('[class*="LyricsPlaceholder"] svg').forEach(e => e.remove())
 
       const bodyWidth = parseInt(document.getElementById('lyricsiframe').style.width || (document.getElementById('lyricsiframe').getBoundingClientRect().width + 'px'))
 
       // Change album links from anchor to real url
-      const albumLinkA = doc.querySelector('[class*="PrimaryAlbum-"][href^="https://genius.com/albums/"]')
+      const albumLinkA = doc.querySelector('[class*="PrimaryAlbum"][href^="https://genius.com/albums/"]')
       if (albumLinkA) {
         doc.querySelectorAll('[href="#primary-album"]').forEach(a => {
           a.href = albumLinkA.href
@@ -1621,7 +1621,7 @@ Browser:    ${navigator.userAgent}
 
       // Insert album art
       const metaImageUrl = doc.querySelector('meta[property="og:image"][content]')
-      const sizedImage = doc.querySelector('div[class*="SongHeader-"] img[class*="SizedImage-"]:not([src])')
+      const sizedImage = doc.querySelector('div[class*="SongHeader"] img[class*="SizedImage"]:not([src])')
       if (sizedImage && metaImageUrl) {
         sizedImage.src = metaImageUrl.content
         sizedImage.style = 'max-width: 7em;max-height: 7em;'
@@ -1643,7 +1643,7 @@ Browser:    ${navigator.userAgent}
       h1.classList.add('mytitle')
 
       h1.parentNode.querySelectorAll('a[href^=https]').forEach(a => (a.target = '_blank'))
-      doc.querySelectorAll('div[class^=SongHeader] [class*="InlineSvg-"]').forEach(e => e.remove())
+      doc.querySelectorAll('div[class^=SongHeader] [class*="InlineSvg"]').forEach(e => e.remove())
       // h1.parentNode.querySelectorAll('[class*="HeaderCredits__"]').forEach(e => e.remove())
       removeIfExists(h1.parentNode.querySelector('div[class^="HeaderTracklist"]'))
 
@@ -1746,19 +1746,19 @@ Browser:    ${navigator.userAgent}
     border-left: calc(1.732*var(--egl-btn-half-border-size)) solid var(--egl-btn-color);
   }
 
-  #lyrics-root div[class*="Lyrics-"] {
+  #lyrics-root div[class*="Lyrics"] {
     grid-column: 1 / -1;
   }
 
-  div[class*="SidebarLyrics-"],
-  div[class*="RightSidebar-"],
-  div[class*="InreadContainer-"],
-  div[class*="LyricsHeader-"],
-  div[class*="PageFooter-"],
-  footer[class*="PageFooter-"],
-  div[class*="About-"],
-  div[class*="HeaderCredits-sc-"],
-  div[class*="QuestionList-"],
+  div[class*="SidebarLyrics"],
+  div[class*="RightSidebar"],
+  div[class*="InreadContainer"],
+  div[class*="LyricsHeader"],
+  div[class*="PageFooter"],
+  footer[class*="PageFooter"],
+  div[class*="About"],
+  div[class*="HeaderCredits-sc"],
+  div[class*="QuestionList"],
   #questions,
   div[class*=SongComments-],
   div[class*="AppleMusicPlayer"],
@@ -1766,9 +1766,13 @@ Browser:    ${navigator.userAgent}
   div[class*="ShareButtons"],
   div[class*="StickyContributorToolbar"],
   div[class*="StickyNavSentinel"],
-  div[class*="StickyNav-"],
+  div[class*="StickyNav"],
   #sticky-nav,
-  button[class*="SmallButton-"] {
+  button[class*="SmallButton"],
+  [class*="SongComments__Container"],
+  [class*="Field-shared__FieldContainer"],
+  [class*="IqPoints__Container"],
+  [class*="ContributorSidebar__Sidebar"] {
     display: none;
   }
   div[class*="InnerSectionDivider"] {
@@ -2018,17 +2022,17 @@ Browser:    ${navigator.userAgent}
           pushIfAny(removals, document.querySelector('#sticky-nav'))
           pushIfAny(removals, document.querySelector('footer'))
           pushIfAny(removals, document.querySelector('div[class^="Pyong"]'))
-          pushIfAny(removals, document.querySelector('div[class^="Button-"]'))
-          pushIfAny(removals, document.querySelector('div[class^="QuestionList-"]'))
-          pushIfAny(removals, document.querySelector('div[class^="SidebarLyrics-"]'))
-          removals.push(...document.querySelectorAll('div[class^="InreadContainer-"]'))
-          removals.push(...document.querySelectorAll('div[class*="RightSidebar-"]'))
+          pushIfAny(removals, document.querySelector('div[class^="Button"]'))
+          pushIfAny(removals, document.querySelector('div[class^="QuestionList"]'))
+          pushIfAny(removals, document.querySelector('div[class^="SidebarLyrics"]'))
+          removals.push(...document.querySelectorAll('div[class^="InreadContainer"]'))
+          removals.push(...document.querySelectorAll('div[class*="RightSidebar"]'))
           pushIfAny(removals, document.querySelector('div[class^="AppleMusicPlayer"]'))
           pushIfAny(removals, document.querySelector('div[class^="MusicVideo"]'))
           pushIfAny(removals, document.querySelector('div[class^="ShareButtons"]'))
           pushIfAny(removals, document.querySelector('div[class^="StickyContributorToolbar"]'))
-          removals.push(...document.querySelectorAll('button[class^="SmallButton-"]'))
-          pushIfAny(removals, document.querySelector('div[class^="SongDescription-"] div[class^="SongDescription-"]'))
+          removals.push(...document.querySelectorAll('button[class^="SmallButton"]'))
+          pushIfAny(removals, document.querySelector('div[class^="SongDescription"] div[class^="SongDescription"]'))
 
           const divs = document.querySelectorAll('div[class^="PageGriddesktop"]')
           for (const div of divs) {
@@ -2061,7 +2065,7 @@ Browser:    ${navigator.userAgent}
           }
 
           // Fix album link
-          const albumLinkA = document.querySelector('[class*="PrimaryAlbum-"][href^="https://genius.com/albums/"]')
+          const albumLinkA = document.querySelector('[class*="PrimaryAlbum"][href^="https://genius.com/albums/"]')
           if (albumLinkA) {
             document.querySelectorAll('[href="#primary-album"]').forEach(a => {
               a.href = albumLinkA.href
@@ -2077,7 +2081,7 @@ Browser:    ${navigator.userAgent}
 
         // Show artwork
         onload.push(function showArtwork () {
-          const noscripts = document.querySelectorAll('div[class^="SizedImage-"] noscript')
+          const noscripts = document.querySelectorAll('div[class^="SizedImage"] noscript')
           // noScriptImage
           for (const noscript of noscripts) {
             const div = noscript.parentNode
@@ -2087,7 +2091,7 @@ Browser:    ${navigator.userAgent}
 
           // Song artwork
           const metaImageUrl = document.querySelector('meta[property="og:image"][content]')
-          const sizedImage = document.querySelector('div[class*="SongHeader-"] img[class*="SizedImage-"]:not([src])')
+          const sizedImage = document.querySelector('div[class*="SongHeader"] img[class*="SizedImage"]:not([src])')
           if (sizedImage && metaImageUrl) {
             sizedImage.src = metaImageUrl.content
             sizedImage.style = 'max-width: 7em;max-height: 7em;'
@@ -2712,7 +2716,7 @@ Browser:    ${navigator.userAgent}
     html = html
       .replace('<style id="REPX1"></style>', () => {
         return `<style>${defaultCSSTexts[0]}</style>` // font-face
-      }).replace(/<svg([^><]+)><svg-repx(\d+) v1 \/><\/svg>/g, (a, w, d) => {
+      }).replace(/<svg([^><]+)><svg-repx(\d+) v1([^><]+><\/svg-repx(\d+)>|\s*\/>)<\/svg>/g, (a, w, d) => {
         d = +d
         if (d >= 0) {
           let text = defaultSVGBoxs[d]
@@ -2782,7 +2786,7 @@ Browser:    ${navigator.userAgent}
       ${contentStyle.includes('--egl-background') ? 'background-color: var(--egl-background);' : ''}
     }
 
-    [class*="SongHeader-"][class*="HeaderArtistAndTracklist"] {
+    [class*="SongHeader"][class*="HeaderArtistAndTracklist"] {
       flex-wrap: wrap;
     }
 
@@ -2837,7 +2841,7 @@ Browser:    ${navigator.userAgent}
 
     span[class*="LabelWithIcon"]>svg,
     button[class*="LabelWithIcon"]>svg,
-    span[class*="InlineSvg-"]>svg {
+    span[class*="InlineSvg"]>svg {
       fill: currentColor;
       /* dynamic color instead of black */
     }
@@ -2850,7 +2854,7 @@ Browser:    ${navigator.userAgent}
       cursor: inherit;
     }
 
-    #lyrics-root div[class=*="Lyrics-"] {
+    #lyrics-root div[class=*="Lyrics"] {
       padding: 0;
     }
 
@@ -2956,7 +2960,7 @@ Browser:    ${navigator.userAgent}
       word-break: break-word;
     }
 
-    #lyrics-root div[class=*="Lyrics-"] {
+    #lyrics-root div[class=*="Lyrics"] {
       word-break: keep-all;
       /* not only a single lyrics character get wrapped. the whole lyrics word will be wrapped */
     }
@@ -2974,14 +2978,14 @@ Browser:    ${navigator.userAgent}
       color: inherit;
     }
 
-    div[class*="SidebarLyrics-"],
-    div[class*="RightSidebar-"],
-    div[class*="InreadContainer-"],
-    div[class*="LyricsHeader-"],
-    div[class*="PageFooter-"],
-    footer[class*="PageFooter-"],
-    div[class*="About-"],
-    div[class*="QuestionList-"],
+    div[class*="SidebarLyrics"],
+    div[class*="RightSidebar"],
+    div[class*="InreadContainer"],
+    div[class*="LyricsHeader"],
+    div[class*="PageFooter"],
+    footer[class*="PageFooter"],
+    div[class*="About"],
+    div[class*="QuestionList"],
     #questions,
     div[class*=SongComments-],
     div[class*="AppleMusicPlayer"],
@@ -2989,9 +2993,9 @@ Browser:    ${navigator.userAgent}
     div[class*="ShareButtons"],
     div[class*="StickyContributorToolbar"],
     div[class*="StickyNavSentinel"],
-    div[class*="StickyNav-"],
+    div[class*="StickyNav"],
     #sticky-nav,
-    button[class*="SmallButton-"] {
+    button[class*="SmallButton"] {
       display: none;
     }
 
@@ -3117,7 +3121,8 @@ Browser:    ${navigator.userAgent}
       '<svg><path fill-rule="evenodd" d="M2.948.1h10.97v1.371H2.948V.101ZM15.29 2.843H1.578v1.372H15.29V2.843Zm.567 15.257H2.144a1.373 1.373 0 0 1-1.371-1.37v-9.6a1.373 1.373 0 0 1 1.37-1.37h13.713a1.373 1.373 0 0 1 1.371 1.37v9.599a1.373 1.373 0 0 1-1.37 1.371ZM2.144 7.13v9.599h13.712V7.13H2.144Z" clip-rule="evenodd"></path></svg>',
       '<svg><path d="M6.5 10.68.04.605h12.92L6.5 10.68z"></path></svg>',
       '<svg><path d="M16.58 20.73H2V6.15h9.07l2-2H0v18.58h18.58V8.75l-2 2v9.98z"></path><path d="M18.65 0l-4.16 4.15-2 2L8 10.66l-1.59 5.25 5.19-1.6 5-5 2-2 3.71-3.71zm-2.07 7.38l-5.71 5.71-1.23.38-.82-.82.38-1.26 5.25-5.23 2-2L18.65 2l1.67 1.67-1.74 1.71z"></path></svg>',
-      '<svg><circle cx="5" cy="5" r="5"></circle><path stroke-width="0.25" fill="#000" d="M4.43 7 2.25 4.968l.509-.546 1.634 1.524L7.136 3l.546.509L4.43 7Z"></path></svg>'
+      '<svg><circle cx="5" cy="5" r="5"></circle><path stroke-width="0.25" fill="#000" d="M4.43 7 2.25 4.968l.509-.546 1.634 1.524L7.136 3l.546.509L4.43 7Z"></path></svg>',
+      '<svg><circle cx="5" cy="5" r="5"></circle></svg>'
     ]
   // note: the script can detect that the fetched svg might be missing in the defaultSVGBoxs,
   // but if those SVGs are no longer used in all lyrics / theme, there will be no warning or logging to alert the developer.
