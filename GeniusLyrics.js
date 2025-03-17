@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.16.9
+// @version      5.16.10
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2019, cuzi (cuzi@openmail.cc) and contributors
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -3701,6 +3701,8 @@ Browser:    ${navigator.userAgent}
 
     if (typeof GM_openInTab === 'function') {
       GM_openInTab('https://genius.com/', { active: true })
+    } else {
+      window.open('https://genius.com/')
     }
 
     // Background overlay
@@ -3717,10 +3719,20 @@ Browser:    ${navigator.userAgent}
     win.setAttribute('id', 'mycaptchahint897454')
 
     let div = win.appendChild(document.createElement('div'))
-    div.innerHTML = `genius.com has blocked you.<br>Please open
-    <a style="color:#0066ff; text-decoration:underline;" target="_blank" href="https://genius.com">genius.com</a>
-    and solve the captcha/prove you are not a robot.<br>
-    Then reload the page.`
+    const message = document.createElement('div')
+    message.style = 'font-size:30px; width:70%'
+
+    message.appendChild(document.createTextNode('genius.com has blocked you. Please open '))
+
+    const link = message.appendChild(document.createElement('a'))
+    link.style = 'color:#0066ff; text-decoration:underline;'
+    link.target = '_blank'
+    link.href = 'https://genius.com'
+    link.textContent = 'genius.com'
+
+    message.appendChild(document.createTextNode(' and solve the captcha/prove you are not a robot. Then reload the page.'))
+
+    div.appendChild(message)
     div.style = 'font-size:30px; width:70%'
 
     div.appendChild(document.createElement('br'))
