@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.16.14
+// @version      5.16.15
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2019, cuzi (cuzi@openmail.cc) and contributors
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -2071,7 +2071,8 @@ Browser:    ${navigator.userAgent}
             document.querySelectorAll('[href="#primary-album"]').forEach(a => {
               a.href = albumLinkA.href
               a.target = '_blank'
-              if (!a.previousSibling.textContent.endsWith(' ')) {
+              const b = a.previousSibling
+              if (!b || !b.textContent.endsWith(' ')) {
               // add a space before album name
                 a.parentNode.insertBefore(document.createTextNode(' '), a)
               }
@@ -4632,6 +4633,7 @@ Browser:    ${navigator.userAgent}
         func()
       } catch (e) {
         console.error(`Error in iframe onload ${func.name || func}: ${e}`)
+        console.error(e)
       }
     }
     if (genius.option.removeEmptyBlocks === true) removeEmptyBlocks()
