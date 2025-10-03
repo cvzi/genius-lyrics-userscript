@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.16.15
+// @version      5.16.16
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2019, cuzi (cuzi@openmail.cc) and contributors
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -47,8 +47,8 @@ if (typeof module !== 'undefined') {
 function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   'use strict'
 
-  const __SELECTION_CACHE_VERSION__ = 12
-  const __REQUEST_CACHE_VERSION__ = 12
+  const __SELECTION_CACHE_VERSION__ = 13
+  const __REQUEST_CACHE_VERSION__ = 13
 
   /** @type {globalThis.PromiseConstructor} */
   const Promise = (async () => { })().constructor // YouTube polyfill to Promise in older browsers will make the feature being unstable.
@@ -2375,6 +2375,7 @@ Browser:    ${navigator.userAgent}
               color:white;
               max-width: ${bodyWidth - 20}px;
               overflow-x:hidden;
+              overflow-y:auto !important;
               font-family:CircularSp,CircularSp-Arab,CircularSp-Hebr,CircularSp-Cyrl,CircularSp-Grek,CircularSp-Deva,'HelveticaNeue',Arial,sans-serif;
               padding:10px;
             }
