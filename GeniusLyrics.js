@@ -2059,7 +2059,10 @@ Browser:    ${navigator.userAgent}
         function clickableTitle () {
           const url = document.querySelector('meta[property="og:url"]').content
           const h1 = document.querySelector('h1[class^="SongHeader"]')
-          h1.innerHTML = '<a target="_blank" href="' + url + '">' + h1.innerHTML + '</a>'
+          const linkClass = document.querySelector('a[class*="StyledLink"]') ? document.querySelector('a[class*="StyledLink"]').className : ''
+
+          h1.innerHTML = '<a target="_blank" class="' + linkClass + '" href="' + url + '">' + h1.textContent + '</a>'
+
           const img = document.querySelector('div[class^=SongHeader] img[src]')
           if (img) {
             img.parentNode.innerHTML = '<a target="_blank" href="' + url + '">' + img.innerHTML + '</a>'
