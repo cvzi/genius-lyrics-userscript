@@ -44,7 +44,7 @@ if (typeof module !== 'undefined') {
   module.exports = geniusLyrics
 }
 
-function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
+function geniusLyrics(custom) { // eslint-disable-line no-unused-vars
   'use strict'
 
   const __SELECTION_CACHE_VERSION__ = 13
@@ -130,7 +130,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     }
   })
 
-  function unScroll () { // unable to do delete window.xxx
+  function unScroll() { // unable to do delete window.xxx
     // only for mainWin
     window.lastScrollTopPosition = null
     window.scrollLyricsBusy = false
@@ -139,7 +139,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     window.newScrollTopPosition = null
     window.isPageAbleForAutoScroll = null
   }
-  function hideLyricsWithMessage () {
+  function hideLyricsWithMessage() {
     const ret = custom.hideLyrics(...arguments)
     if (ret === false) { // cancelled
       return false
@@ -149,11 +149,11 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     return ret
   }
 
-  function cancelLoading () {
+  function cancelLoading() {
     window.postMessage({ iAm: custom.scriptName, type: 'cancelLoading' }, '*')
   }
 
-  function getUnmodifiedWindowMethods (win) {
+  function getUnmodifiedWindowMethods(win) {
     if (!(win instanceof win.constructor)) { // window in isolated context
       return win
     }
@@ -278,13 +278,13 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     debug: false
   }
 
-  function cleanRequestCache () {
+  function cleanRequestCache() {
     return {
       __VERSION__: __REQUEST_CACHE_VERSION__
     }
   }
 
-  function cleanSelectionCache () {
+  function cleanSelectionCache() {
     return {
       __VERSION__: __SELECTION_CACHE_VERSION__
     }
@@ -302,7 +302,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   const isLZStringAvailable = typeof LZString !== 'undefined' && typeof (LZString || 0).compressToUTF16 === 'function' // eslint-disable-line no-undef
   // if (!isLZStringAvailable) throw new Error('LZString is not available. Please update your script.')
 
-  async function setJV (key, text) {
+  async function setJV(key, text) {
     if (isLZStringAvailable && genius.option.useLZCompression && genius.option.shouldUseLZStringCompression) {
       if (typeof text === 'object') text = JSON.stringify(text)
       if (typeof text !== 'string') return null
@@ -316,7 +316,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     }
   }
 
-  async function getJVstr (key, d) {
+  async function getJVstr(key, d) {
     const z = await custom.GM.getValue(key, null)
     if (z === null) return d
     if (z === '{}') return z
@@ -340,7 +340,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   }
   */
 
-  function measurePlainTextLength (text) {
+  function measurePlainTextLength(text) {
     try {
       return (new TextEncoder().encode(text)).length
     } catch (e) {
@@ -348,7 +348,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     }
   }
 
-  function measureJVLength (obj) {
+  function measureJVLength(obj) {
     let z
     if (isLZStringAvailable && genius.option.useLZCompression && genius.option.shouldUseLZStringCompression) {
       z = LZString.compressToUTF16(JSON.stringify(obj)) // eslint-disable-line no-undef
@@ -358,7 +358,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     return measurePlainTextLength(z)
   }
 
-  function getHostname (url) {
+  function getHostname(url) {
     // absolute path
     if (typeof url === 'string' && url.startsWith('http')) {
       const query = new URL(url)
@@ -370,7 +370,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     return a.hostname
   }
 
-  function removeIfExists (e) {
+  function removeIfExists(e) {
     if (e && e.remove) {
       e.remove()
     }
@@ -385,7 +385,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       }
     }
 
-  function removeTagsKeepText (node) {
+  function removeTagsKeepText(node) {
     let tmpNode = null
     while ((tmpNode = node.firstChild) !== null) {
       if ('tagName' in tmpNode && tmpNode.tagName !== 'BR') {
@@ -397,12 +397,12 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     node.remove()
   }
 
-  function decodeHTML (s) {
+  function decodeHTML(s) {
     return `${s}`.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
   }
 
-  function metricPrefix (n, decimals, k) {
-  // http://stackoverflow.com/a/18650828
+  function metricPrefix(n, decimals, k) {
+    // http://stackoverflow.com/a/18650828
     if (n <= 0) {
       return String(n)
     }
@@ -413,7 +413,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     return parseFloat((n / Math.pow(k, i)).toFixed(dm)) + sizes[i]
   }
 
-  function cleanUpSongTitle (songTitle) {
+  function cleanUpSongTitle(songTitle) {
     // Remove featuring artists and version info from song title
     songTitle = songTitle.replace(/\((single|master|studio|stereo|mono|anniversary|digital|edit|edition|naked|original|re|ed|no.*?\d+|mix|version|\d+th|\d{4}|\s|\.|-|\/)+\)/i, '').trim()
     songTitle = songTitle.replace(/[-‧⋅·ᐧ•‐‒–—―﹘]\s*(single|master|studio|stereo|mono|anniversary|digital|edit|edition|naked|original|re|ed|no.*?\d+|mix|version|\d+th|\d{4}|\s|\.|-|\/)+/i, '').trim()
@@ -425,7 +425,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     return songTitle
   }
 
-  function sumOffsets (obj) {
+  function sumOffsets(obj) {
     const sums = { left: 0, top: 0 }
     while (obj) {
       sums.left += obj.offsetLeft
@@ -435,13 +435,13 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     return sums
   }
 
-  function convertSelectionCacheV0toV1 (selectionCache) {
+  function convertSelectionCacheV0toV1(selectionCache) {
     // the old cache key use '--' which is possible to mixed up with the brand name
     // the new cache key use '\t' as separator
     const ret = {}
     const bugKeys = []
 
-    function pushBugKey (selectionCacheKey) {
+    function pushBugKey(selectionCacheKey) {
       const s = selectionCacheKey.split(/\t/)
       if (s.length !== 2) return
       const songTitle = s[0]
@@ -475,7 +475,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     return ret
   }
 
-  function convertSelectionCacheV1toV2 (selectionCache) {
+  function convertSelectionCacheV1toV2(selectionCache) {
     // ${title}\t${artists} => ${artists}\t${title}
     const ret = {}
 
@@ -490,7 +490,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     return ret
   }
 
-  function loadRequestCache (storedValue) {
+  function loadRequestCache(storedValue) {
     // global requestCache
     if (storedValue === '{}') {
       requestCache = cleanRequestCache()
@@ -510,7 +510,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     }
   }
 
-  function loadSelectionCache (storedValue) {
+  function loadSelectionCache(storedValue) {
     // global selectionCache
     if (storedValue === '{}') {
       selectionCache = cleanSelectionCache()
@@ -540,7 +540,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     }
   }
 
-  function loadCache () {
+  function loadCache() {
     Promise.all([
       getJVstr('selectioncache', '{}'),
       getJVstr('requestcache', '{}'),
@@ -569,14 +569,14 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     })
   }
 
-  function invalidateRequestCache (obj) {
+  function invalidateRequestCache(obj) {
     const resultCachekey = JSON.stringify(obj)
     if (resultCachekey in requestCache) {
       delete requestCache[resultCachekey]
     }
   }
 
-  function getRequestCacheKeyReplacer (key, value) {
+  function getRequestCacheKeyReplacer(key, value) {
     if (key === 'headers') {
       return undefined
     } else if (key === 'url') {
@@ -591,11 +591,11 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     }
     return value
   }
-  function getRequestCacheKey (obj) {
+  function getRequestCacheKey(obj) {
     return JSON.stringify(obj, getRequestCacheKeyReplacer)
   }
 
-  function request (obj) {
+  function request(obj) {
     const cachekey = getRequestCacheKey(obj)
     if (cachekey in requestCache) {
       return obj.load(JSON.parse(requestCache[cachekey].split('\n')[1]), null)
@@ -625,8 +625,8 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       data: obj.data,
       headers,
       cookiePartition,
-      onerror: obj.error ? obj.error : function xmlHttpRequestGenericOnError (response) { console.error('xmlHttpRequestGenericOnError: ' + response) },
-      onload: function xmlHttpRequestOnLoad (response) {
+      onerror: obj.error ? obj.error : function xmlHttpRequestGenericOnError(response) { console.error('xmlHttpRequestGenericOnError: ' + response) },
+      onload: function xmlHttpRequestOnLoad(response) {
         const time = (new Date()).toJSON()
         let cacheObject = null
         if (typeof obj.preProcess === 'function') {
@@ -648,7 +648,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
           }
         }
         // only cache when the callback call this function
-        function cacheResult (cacheObject) {
+        function cacheResult(cacheObject) {
           if (cacheObject !== null) {
             requestCache[cachekey] = time + '\n' + JSON.stringify(cacheObject)
             setJV('requestcache', requestCache)
@@ -664,16 +664,16 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     return custom.GM.xmlHttpRequest(req)
   }
 
-  function generateCompoundTitle (title, artists) {
+  function generateCompoundTitle(title, artists) {
     title = title.replace(/\s+/g, ' ') // space, \n, \t, ...
     artists = artists.replace(/\s+/g, ' ')
     return `${artists}\t${title}`
   }
-  function displayTextOfCompoundTitle (compoundTitle) {
+  function displayTextOfCompoundTitle(compoundTitle) {
     return compoundTitle.replace('\t', ' ')
   }
 
-  function rememberLyricsSelection (title, artists, jsonHit) {
+  function rememberLyricsSelection(title, artists, jsonHit) {
     const compoundTitleKey = artists === null ? title : generateCompoundTitle(title, artists)
     if (typeof jsonHit === 'object') {
       jsonHit = JSON.stringify(jsonHit)
@@ -685,7 +685,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     setJV('selectioncache', selectionCache)
   }
 
-  function forgetLyricsSelection (title, artists) {
+  function forgetLyricsSelection(title, artists) {
     const compoundTitleKey = artists === null ? title : generateCompoundTitle(title, artists)
     if (compoundTitleKey in selectionCache) {
       delete selectionCache[compoundTitleKey]
@@ -693,7 +693,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     }
   }
 
-  function forgetCurrentLyricsSelection () {
+  function forgetCurrentLyricsSelection() {
     const ctitle = genius.current.compoundTitle
     if (typeof ctitle === 'string') {
       forgetLyricsSelection(ctitle, null)
@@ -702,7 +702,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     return false
   }
 
-  function getLyricsSelection (title, artists) {
+  function getLyricsSelection(title, artists) {
     const compoundTitleKey = artists === null ? title : generateCompoundTitle(title, artists)
     if (compoundTitleKey in selectionCache) {
       return JSON.parse(selectionCache[compoundTitleKey])
@@ -711,7 +711,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     }
   }
 
-  function ReleaseDateComponent (components) {
+  function ReleaseDateComponent(components) {
     if (!components) return
     if (components.year - components.month - components.day > 0) { // avoid NaN
       return `${components.year}.${components.month < 10 ? '0' : ''}${components.month}.${components.day < 10 ? '0' : ''}${components.day}`
@@ -719,11 +719,11 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     return null
   }
 
-  function removeSymbolsAndWhitespace (s) {
+  function removeSymbolsAndWhitespace(s) {
     return s.replace(/[\s\p{P}$+<=>^`|~]/gu, '')
   }
 
-  function getHitResultType (result) {
+  function getHitResultType(result) {
     if (typeof (result.language || 0) === 'string') {
       if (result.language === 'romanization') return 'romanization'
       if (result.language === 'romanisation') return 'romanization'
@@ -756,7 +756,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     return ''
   }
 
-  function modifyHits (hits, query) {
+  function modifyHits(hits, query) {
     // the original hits store too much and not in a proper ordering
     // only song.result.url is neccessary
 
@@ -930,7 +930,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     return hits
   }
 
-  function geniusSearch (query, cb, cbError) {
+  function geniusSearch(query, cb, cbError) {
     console.log('Genius Search Query', query)
     let requestObj = {
       url: 'https://genius.com/api/search/song?page=1&q=' + encodeURIComponent(query),
@@ -938,8 +938,8 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         'X-Requested-With': 'XMLHttpRequest'
       },
       t: 'search', // differentiate with other types of requesting
-      responseType: 'json',
-      error: function geniusSearchOnError (response) {
+      responseType: 'html,markdown',
+      error: function geniusSearchOnError(response) {
         console.error(response)
         modalAlert(custom.scriptName + '\n\nError in geniusSearch(' + JSON.stringify(query) + ', ' + ('name' in cb ? cb.name : 'cb') + '):' +
           '\nRequest status:' + ('status' in response ? response.status : 'unknown') + ' ' + ('statusText' in response ? response.statusText : '') +
@@ -948,7 +948,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         if (typeof cbError === 'function') cbError()
         requestObj = null
       },
-      preProcess: function geniusSearchPreProcess (response) {
+      preProcess: function geniusSearchPreProcess(response) {
         let jsonData = null
         let errorMsg = ''
         try {
@@ -979,7 +979,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
           requestObj = null
         }
       },
-      load: function geniusSearchOnLoad (jsonData, cacheResult) {
+      load: function geniusSearchOnLoad(jsonData, cacheResult) {
         if (typeof cacheResult === 'function') cacheResult(jsonData)
         cb(jsonData)
       }
@@ -987,24 +987,24 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     request(requestObj)
   }
 
-  function loadGeniusSong (song, cb) {
+  function loadGeniusSong(song, cb) {
     request({
       url: song.result.url,
       theme: `${genius.option.themeKey}`, // different theme, differnt html cache
-      error: function loadGeniusSongOnError (response) {
+      error: function loadGeniusSongOnError(response) {
         console.error(response)
         modalAlert(custom.scriptName + '\n\nError loadGeniusSong(' + JSON.stringify(song) + ', cb):\n' +
           '\nRequest status:' + ('status' in response ? response.status : 'unknown') + ' ' + ('statusText' in response ? response.statusText : '') +
           ('finalUrl' in response ? '\nUrl: ' + response.finalUrl : ''))
       },
-      load: function loadGeniusSongOnLoad (response, cacheResult) {
+      load: function loadGeniusSongOnLoad(response, cacheResult) {
         // cacheResult(response)
         cb(response, cacheResult)
       }
     })
   }
 
-  async function waitForStableScrollTop () {
+  async function waitForStableScrollTop() {
     let p1
     let p2 = document.scrollingElement.scrollTop
     const ct = Date.now()
@@ -1016,11 +1016,11 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     } while (`${p1}` !== `${p2}`)
   }
 
-  function delay (ms) {
+  function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms)) // eslint-disable-line promise/param-names
   }
 
-  function setArrowUpDownStyle (resumeButton) {
+  function setArrowUpDownStyle(resumeButton) {
     if (!resumeButton) return
     const oldAttribute = resumeButton.getAttribute('arrow-icon')
     const newAttribute = (document.scrollingElement.scrollTop - window.newScrollTopPosition < 0) ? 'up' : 'down'
@@ -1029,7 +1029,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     }
   }
 
-  async function onResumeAutoScrollClick () {
+  async function onResumeAutoScrollClick() {
     const resumeAutoScrollButtonContainer = document.querySelector('#resumeAutoScrollButtonContainer')
     if (resumeAutoScrollButtonContainer === null || typeof window.newScrollTopPosition !== 'number') return
     window.scrollLyricsBusy = true
@@ -1047,7 +1047,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     window.scrollLyricsBusy = false
   }
 
-  function onResumeAutoScrollFromHereClick () {
+  function onResumeAutoScrollFromHereClick() {
     const resumeAutoScrollButtonContainer = document.querySelector('#resumeAutoScrollButtonContainer')
     if (resumeAutoScrollButtonContainer === null || typeof window.staticOffsetTop !== 'number' || typeof window.newScrollTopPosition !== 'number') return
     window.scrollLyricsBusy = true
@@ -1072,7 +1072,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     }, 30)
   }
 
-  function getNewScrollTop (div) {
+  function getNewScrollTop(div) {
     const staticTop = typeof window.staticOffsetTop === 'number' ? window.staticOffsetTop : theme.defaultStaticOffsetTop
     div = div || document.querySelector(theme.scrollableContainer)
     const offsetTop = (div.getBoundingClientRect().top - document.scrollingElement.getBoundingClientRect().top)
@@ -1084,7 +1084,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     }
   }
 
-  async function scrollLyricsGeneric (position) {
+  async function scrollLyricsGeneric(position) {
     window.latestScrollPos = position
 
     if (window.scrollLyricsBusy) return
@@ -1102,7 +1102,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     const maxScrollTop = document.scrollingElement.scrollHeight - iframeHeight
     let btnContainer = document.querySelector('#resumeAutoScrollButtonContainer')
 
-    async function showButtons () {
+    async function showButtons() {
       const staticTopChanged = window.staticOffsetTop !== staticTop
       window.newScrollTopPosition = newScrollTop
       if (staticTopChanged) {
@@ -1139,7 +1139,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       window.scrollLyricsBusy = false
     }
 
-    function isShowButtonRequired () {
+    function isShowButtonRequired() {
       if (typeof lastPos === 'number' && lastPos >= 0 && Math.abs(lastPos - document.scrollingElement.scrollTop) > 5) { // lastPos !== null
         showButtons()
         return true
@@ -1147,7 +1147,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       return false
     }
 
-    function smoothScroll () {
+    function smoothScroll() {
       window.lastScrollTopPosition = newScrollTop
       document.scrollingElement.scrollTo({
         top: newScrollTop,
@@ -1155,7 +1155,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       })
     }
 
-    function debug () {
+    function debug() {
       if (!window.first) {
         window.first = true
 
@@ -1224,7 +1224,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     window.scrollLyricsBusy = false
   }
 
-  function loadGeniusAnnotations (song, html, annotationsEnabled, cb) {
+  function loadGeniusAnnotations(song, html, annotationsEnabled, cb) {
     let annotations = {}
     if (!annotationsEnabled) {
       // return cb(song, html, {})
@@ -1248,15 +1248,15 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         'X-Requested-With': 'XMLHttpRequest'
       },
       t: 'annotations', // differentiate with other types of requesting
-      responseType: 'json',
-      error: function loadGeniusAnnotationsOnError (response) {
+      responseType: 'html,markdown',
+      error: function loadGeniusAnnotationsOnError(response) {
         console.error(response)
         modalAlert(custom.scriptName + '\n\nError loadGeniusAnnotations(' + JSON.stringify(song) + ', cb):\n' +
           '\nRequest status:' + ('status' in response ? response.status : 'unknown') + ' ' + ('statusText' in response ? response.statusText : '') +
           ('finalUrl' in response ? '\nUrl: ' + response.finalUrl : ''))
         cb(annotations)
       },
-      preProcess: function loadGeniusAnnotationsPreProcess (response) {
+      preProcess: function loadGeniusAnnotationsPreProcess(response) {
         const r = JSON.parse(response.responseText).response
         annotations = {}
         if (typeof r.referents.length === 'number') {
@@ -1283,7 +1283,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         }
         return annotations
       },
-      load: function loadGeniusAnnotationsOnLoad (annotations, cacheResult) {
+      load: function loadGeniusAnnotationsOnLoad(annotations, cacheResult) {
         if (typeof cacheResult === 'function') cacheResult(annotations)
         cb(annotations)
       }
@@ -1291,7 +1291,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   }
 
   const themeCommon = {
-    lyricsAppInit () {
+    lyricsAppInit() {
       let application = document.querySelector('#application')
       if (application !== null) {
         application.classList.add('app11')
@@ -1299,7 +1299,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       application = null
     },
     // Change links to target=_blank
-    targetBlankLinks () {
+    targetBlankLinks() {
       const originalUrl = document.querySelector('meta[property="og:url"]') ? document.querySelector('meta[property="og:url"]').content : null
       const as = document.querySelectorAll('body a[href]:not([href|="#"]):not([target="_blank"])')
       for (const a of as) {
@@ -1318,10 +1318,10 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         }
       }
     },
-    setScrollUpdateLocation () {
+    setScrollUpdateLocation() {
       document.addEventListener('scroll', scrollUpdateLocationHandler, false)
     },
-    getAnnotationsContainer (a) {
+    getAnnotationsContainer(a) {
       let c = document.getElementById('annotationcontainer958')
       if (!c) {
         c = document.body.appendChild(document.createElement('div'))
@@ -1354,7 +1354,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       annotationContent.textContent = ''
       return [annotationTabBar, annotationContent]
     },
-    annotationSwitchTab (ev) {
+    annotationSwitchTab(ev) {
       const id = this.dataset.annotid
       const selectedElements = document.querySelectorAll('#annotationcontainer958 .annotationtabbar .tabbutton.selected, #annotationcontainer958 .annotationtab.selected')
       for (const e of selectedElements) {
@@ -1363,7 +1363,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       this.classList.add('selected')
       document.querySelector(`#annotationcontainer958 .annotationtab[id="annottab_${id}"]`).classList.add('selected')
     },
-    showAnnotation (ev) {
+    showAnnotation(ev) {
       ev.preventDefault()
 
       // Annotation id
@@ -1493,10 +1493,10 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       }
     },
 
-    removeAnnotations () {
+    removeAnnotations() {
       document.querySelectorAll('#lyrics-root a[class^="ReferentFragment"]').forEach(removeTagsKeepText)
     },
-    addAnnotationHandling () {
+    addAnnotationHandling() {
       try {
         window.annotations_userscript = JSON.parse(document.getElementById('annotationsdata_for_userscript').innerHTML)
       } catch (e) {
@@ -1524,7 +1524,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       })
     },
 
-    setCustomFontSize () {
+    setCustomFontSize() {
       if (genius.option.fontSize && genius.option.fontSize > 0) {
         if (document.getElementById('lyrics_text_div')) {
           document.getElementById('lyrics_text_div').style.fontSize = `${genius.option.fontSize}px`
@@ -1535,7 +1535,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       }
     },
 
-    themeError (themeName, errorMsg, originalUrl, song) {
+    themeError(themeName, errorMsg, originalUrl, song) {
       return `<div style="color:black;background:white;font-family:sans-serif">
       <br>
       <h1>&#128561; Oops!</h1>
@@ -1563,7 +1563,7 @@ Browser:    ${navigator.userAgent}
       <br>
        </div>`
     },
-    fixInstrumentalBridge () {
+    fixInstrumentalBridge() {
       for (const div of document.querySelectorAll('div[data-lyrics-container="true"]')) {
         let innerHTML = div.innerHTML
         const before = innerHTML
@@ -1573,7 +1573,7 @@ Browser:    ${navigator.userAgent}
         }
       }
     },
-    extractLyrics (html, song) {
+    extractLyrics(html, song) {
       /*
       Extract the lyrics and title/album header from genius page html
       */
@@ -1659,7 +1659,7 @@ Browser:    ${navigator.userAgent}
     }
   }
 
-  function appendHeadText (html, headhtml) {
+  function appendHeadText(html, headhtml) {
     // Add to <head>
     const idxHead = html.indexOf('</head>')
     if (idxHead > 5) {
@@ -1671,7 +1671,7 @@ Browser:    ${navigator.userAgent}
   }
   const isChrome = navigator.userAgent.indexOf('Chrome') !== -1
   const iframeCSSCommon =
-  `
+    `
   html {
     --egl-btn-half-border-size: 7px;
     --egl-btn-color: #222;
@@ -1934,7 +1934,7 @@ Browser:    ${navigator.userAgent}
   }
   `
 
-  function setAnnotationsContainerTop (c, a, isContentChanged) {
+  function setAnnotationsContainerTop(c, a, isContentChanged) {
     const rect = a.getBoundingClientRect()
     const bodyH = document.scrollingElement.clientHeight
 
@@ -1953,7 +1953,7 @@ Browser:    ${navigator.userAgent}
     }
   }
 
-  function scrollUpdateLocationHandler () {
+  function scrollUpdateLocationHandler() {
     getRafPromise(() => {
       let c = document.querySelector('#annotationcontainer958[style*="display: block;"]')
       if (c !== null) {
@@ -1967,7 +1967,7 @@ Browser:    ${navigator.userAgent}
     })
   }
 
-  async function scrollToBegining () {
+  async function scrollToBegining() {
     document.documentElement.classList.add('instant-scroll')
     await new Promise(resolve => setTimeout(resolve, 100))
     const isContentStylesIsAdded = !!document.querySelector('style#egl-contentstyles')
@@ -2001,16 +2001,16 @@ Browser:    ${navigator.userAgent}
       themeKey: 'genius',
       scrollableContainer: 'html #application',
       defaultStaticOffsetTop: 0,
-      scripts: function themeGeniusScripts () {
+      scripts: function themeGeniusScripts() {
         const onload = []
 
-        function pushIfAny (arr, element) {
+        function pushIfAny(arr, element) {
           if (element) {
             arr.push(element)
           }
         }
 
-        function hideStuff () {
+        function hideStuff() {
           let removals = []
           // Hide "Manage Lyrics" and "Click here to go to the old song page"
           pushIfAny(removals, document.querySelector('div[class^="LyricsControls_"]'))
@@ -2056,7 +2056,7 @@ Browser:    ${navigator.userAgent}
         }
 
         // Make song title clickable
-        function clickableTitle () {
+        function clickableTitle() {
           const url = document.querySelector('meta[property="og:url"]').content
           const h1 = document.querySelector('h1[class^="SongHeader"]')
           const linkClass = document.querySelector('a[class*="StyledLink"]') ? document.querySelector('a[class*="StyledLink"]').className : ''
@@ -2076,7 +2076,7 @@ Browser:    ${navigator.userAgent}
               a.target = '_blank'
               const b = a.previousSibling
               if (!b || !b.textContent.endsWith(' ')) {
-              // add a space before album name
+                // add a space before album name
                 a.parentNode.insertBefore(document.createTextNode(' '), a)
               }
             })
@@ -2085,7 +2085,7 @@ Browser:    ${navigator.userAgent}
         onload.push(clickableTitle)
 
         // Show artwork
-        onload.push(function showArtwork () {
+        onload.push(function showArtwork() {
           const noscripts = document.querySelectorAll('div[class^="SizedImage"] noscript')
           // noScriptImage
           for (const noscript of noscripts) {
@@ -2156,7 +2156,7 @@ Browser:    ${navigator.userAgent}
 
         return onload
       },
-      combine: function themeGeniusCombineGeniusResources (song, html, annotations, cb) {
+      combine: function themeGeniusCombineGeniusResources(song, html, annotations, cb) {
         let headhtml = ''
 
         // Change design
@@ -2210,7 +2210,7 @@ Browser:    ${navigator.userAgent}
       themeKey: 'cleanwhite',
       scrollableContainer: '.lyrics_body_pad',
       defaultStaticOffsetTop: 0,
-      scripts: function themeCleanWhiteScripts () {
+      scripts: function themeCleanWhiteScripts() {
         const onload = []
 
         // fixInstrumentalBridge
@@ -2242,7 +2242,7 @@ Browser:    ${navigator.userAgent}
         return onload
       },
 
-      combine: function themeCleanWhiteCombineGeniusResources (song, html, annotations, onCombine) {
+      combine: function themeCleanWhiteCombineGeniusResources(song, html, annotations, onCombine) {
         const result = themeCommon.extractLyrics(html, song)
         if (result.error) {
           return onCombine(result.errorHtml)
@@ -2326,7 +2326,7 @@ Browser:    ${navigator.userAgent}
       themeKey: 'spotify',
       scrollableContainer: '.lyrics_body_pad',
       defaultStaticOffsetTop: 0,
-      scripts: function themeSpotifyScripts () {
+      scripts: function themeSpotifyScripts() {
         const onload = []
 
         // fixInstrumentalBridge
@@ -2357,7 +2357,7 @@ Browser:    ${navigator.userAgent}
 
         return onload
       },
-      combine: function themeSpotifyCombineGeniusResources (song, html, annotations, onCombine) {
+      combine: function themeSpotifyCombineGeniusResources(song, html, annotations, onCombine) {
         const result = themeCommon.extractLyrics(html, song)
         if (result.error) {
           return onCombine(result.errorHtml)
@@ -2442,11 +2442,11 @@ Browser:    ${navigator.userAgent}
   genius.option.themeKey = Object.keys(themes)[0]
   theme = themes[genius.option.themeKey]
 
-  function combineGeniusResources (song, html, annotations, cb) {
+  function combineGeniusResources(song, html, annotations, cb) {
     return theme.combine(song, html, annotations, cb)
   }
 
-  function reloadCurrentLyrics () {
+  function reloadCurrentLyrics() {
     // this is for special use - if the iframe is moved to another container, the content will be re-rendered.
     // As the lyrics is lost, it requires reloading
     const compoundTitle = genius.current.compoundTitle
@@ -2460,7 +2460,7 @@ Browser:    ${navigator.userAgent}
     return false
   }
 
-  function multipleResultsFound (hits, mTitle, mArtists) {
+  function multipleResultsFound(hits, mTitle, mArtists) {
     // Multiple matches and no one exact match
     // or multiple artists multiple results
     if ('autoSelectLyrics' in custom) {
@@ -2474,7 +2474,7 @@ Browser:    ${navigator.userAgent}
     custom.listSongs(hits)
   }
 
-  function loadLyrics (force, beLessSpecific, songTitle, songArtistsArr, musicIsPlaying) {
+  function loadLyrics(force, beLessSpecific, songTitle, songArtistsArr, musicIsPlaying) {
     let songArtists = null
     let compoundTitle = null
     let queryType = 0
@@ -2504,13 +2504,13 @@ Browser:    ${navigator.userAgent}
         custom.onNewSongPlaying(songTitle, songArtistsArr)
       }
 
-      function isFuzzyMatched (hits) {
+      function isFuzzyMatched(hits) {
         // if first hit's _order is the only highest, consider it as fuzzy matched
         if (!hits) return null
         return hits[0] && hits[1] && hits[0]._order > hits[1]._order && hits[1]._order > 0
       }
 
-      function resultMsg (hits, ...args) {
+      function resultMsg(hits, ...args) {
         console.log(...args)
         console.log(hits)
       }
@@ -2519,7 +2519,7 @@ Browser:    ${navigator.userAgent}
       if (!force && hitFromCache) {
         showLyrics(hitFromCache, 1)
       } else {
-        geniusSearch(displayTextOfCompoundTitle(mCTitle), function geniusSearchCb (r) {
+        geniusSearch(displayTextOfCompoundTitle(mCTitle), function geniusSearchCb(r) {
           const hits = r.response.sections[0].hits
           if (hits.length === 0) {
             hideLyricsWithMessage()
@@ -2567,14 +2567,14 @@ Browser:    ${navigator.userAgent}
               multipleResultsFound(hits, mCTitle, null)
             }
           }
-        }, function geniusSearchErrorCb () {
+        }, function geniusSearchErrorCb() {
           // do nothing
         })
       }
     }
   }
 
-  function appendElements (target, elements) {
+  function appendElements(target, elements) {
     if (typeof target.append === 'function') {
       target.append(...elements)
     } else {
@@ -2584,11 +2584,11 @@ Browser:    ${navigator.userAgent}
     }
   }
 
-  function isGreasemonkey () {
+  function isGreasemonkey() {
     return 'info' in custom.GM && 'scriptHandler' in custom.GM.info && custom.GM.info.scriptHandler === 'Greasemonkey'
   }
 
-  function setupLyricsDisplayDOM (song, searchresultsLengths) {
+  function setupLyricsDisplayDOM(song, searchresultsLengths) {
     // getCleanLyricsContainer
     const container = custom.getCleanLyricsContainer()
     container.className = '' // custom.getCleanLyricsContainer might forget to clear the className if the element is reused
@@ -2626,7 +2626,7 @@ Browser:    ${navigator.userAgent}
     hideButton.classList.add('genius-lyrics-hide-button')
     hideButton.style.cursor = 'pointer'
     hideButton.textContent = 'Hide'
-    hideButton.addEventListener('click', function hideButtonClick (ev) {
+    hideButton.addEventListener('click', function hideButtonClick(ev) {
       genius.option.autoShow = false // Temporarily disable showing lyrics automatically on song change
       if (genius.iv.main > 0) {
         clearInterval(genius.iv.main)
@@ -2641,7 +2641,7 @@ Browser:    ${navigator.userAgent}
     configButton.classList.add('genius-lyrics-config-button')
     configButton.style.cursor = 'pointer'
     configButton.textContent = 'Options'
-    configButton.addEventListener('click', function configButtonClick (ev) {
+    configButton.addEventListener('click', function configButtonClick(ev) {
       config()
     })
     elementsToBeAppended.push(configButton)
@@ -2652,7 +2652,7 @@ Browser:    ${navigator.userAgent}
       wrongLyricsButton.classList.add('genius-lyrics-wronglyrics-button')
       wrongLyricsButton.style.cursor = 'pointer'
       wrongLyricsButton.textContent = 'Wrong lyrics'
-      wrongLyricsButton.addEventListener('click', function wrongLyricsButtonClick (ev) {
+      wrongLyricsButton.addEventListener('click', function wrongLyricsButtonClick(ev) {
         removeElements(document.querySelectorAll('.loadingspinnerholder'))
         forgetLyricsSelection(genius.current.compoundTitle, null)
         const searchFieldText = displayTextOfCompoundTitle(genius.current.compoundTitle)
@@ -2670,7 +2670,7 @@ Browser:    ${navigator.userAgent}
       // } else {
       backbutton.textContent = `Back to search (${searchresultsLengths - 1} other result${searchresultsLengths === 2 ? '' : 's'})`
       // }
-      backbutton.addEventListener('click', function backbuttonClick (ev) {
+      backbutton.addEventListener('click', function backbuttonClick(ev) {
         const searchFieldText = displayTextOfCompoundTitle(genius.current.compoundTitle)
         custom.showSearchField(searchFieldText)
       })
@@ -2699,7 +2699,7 @@ Browser:    ${navigator.userAgent}
     }
   }
 
-  function defaultCSS (html) { // independent of iframe or main window
+  function defaultCSS(html) { // independent of iframe or main window
     // use with contentStyling
     // cache might have REPXn
     // if(genius.option.enableStyleSubstitution !== true) return html
@@ -2736,7 +2736,7 @@ Browser:    ${navigator.userAgent}
     return html
   }
 
-  function contentStyling () {
+  function contentStyling() {
     // contentStyling is to generate a specific css for the styling matching the main window
     // mainly background-color and text colors
     // (this is part of the contentStylingIframe)
@@ -2761,7 +2761,7 @@ Browser:    ${navigator.userAgent}
     return css
   }
 
-  function contentStylingIframe (html, contentStyle) {
+  function contentStylingIframe(html, contentStyle) {
     // contentStylingIframe is a function to customize the styling to the html. As the original styles are removed and this is a generic style to apply to every lyrics
     // this can make the cache size of lyrics become small and guarantee the style align all the time.
     // however, this contracts the original way that GeniusLyrics.js used.
@@ -3074,7 +3074,7 @@ Browser:    ${navigator.userAgent}
 
   let isShowLyricsInterrupted = false
   let isShowLyricsIsCancelledByUser = false
-  function interuptMessageHandler (ev) {
+  function interuptMessageHandler(ev) {
     const data = (ev || 0).data || 0
     if (data.iAm === custom.scriptName && data.type === 'lyricsDisplayState' && typeof data.visibility === 'string') {
       isShowLyricsInterrupted = data.visibility !== 'loading'
@@ -3163,7 +3163,7 @@ Browser:    ${navigator.userAgent}
 
     'About': 'ncAboutQ'
   }))
-  function normalizeClassNamesV2OnHTMLCode (htmlText) {
+  function normalizeClassNamesV2OnHTMLCode(htmlText) {
     let cacheMap = new Map()
     htmlText = htmlText.replace(/\s+class="([a-zA-Z0-9\-_\s]+)"/g, (m, a) => {
       const r = cacheMap.get(a)
@@ -3190,7 +3190,7 @@ Browser:    ${navigator.userAgent}
     return htmlText
   }
 
-  function normalizeClassNamesV2OnPageDOM () {
+  function normalizeClassNamesV2OnPageDOM() {
     for (const className of normalizeClassMap.values()) {
       const elements = document.querySelectorAll(`.${className}`)
       const n = elements.length
@@ -3219,7 +3219,7 @@ Browser:    ${navigator.userAgent}
   }
 
   /* eslint-enable quote-props */
-  async function trimHTMLReponseTextFn (htmlText) {
+  async function trimHTMLReponseTextFn(htmlText) {
     /*
 
     original:                                         200 ~ 400 KB
@@ -3312,7 +3312,7 @@ Browser:    ${navigator.userAgent}
     return htmlText
   }
 
-  function defaultSpinnerDOM (container, bar, iframe) {
+  function defaultSpinnerDOM(container, bar, iframe) {
     const spinnerDOM = {
       createSpinnerHolder: () => {
         const spinnerHolder = document.createElement('div')
@@ -3361,7 +3361,7 @@ Browser:    ${navigator.userAgent}
     })
   }))
 
-  function showLyrics (songInfo, searchresultsLengths) {
+  function showLyrics(songInfo, searchresultsLengths) {
     // showLyrics
     const currentFunctionClosureIdentifier = ((window.showLyricsIdentifier || 0) + 1) % 100000000
     window.showLyricsIdentifier = currentFunctionClosureIdentifier // if this function closure is no longer valid, they will be not equal.
@@ -3404,7 +3404,7 @@ Browser:    ${navigator.userAgent}
     spinnerDOM.displaySpinnerHolder()
     // container.appendChild(spinnerHolder)
 
-    function spinnerUpdate (text, title, status, textStatus) {
+    function spinnerUpdate(text, title, status, textStatus) {
       if (typeof text === 'string') spinnerDOM.setSpinnerNum(text)
       if (typeof title === 'string') spinnerDOM.setStatusTitle(title)
       if ('notifyGeniusLoading' in custom && arguments.length > 2) {
@@ -3436,29 +3436,29 @@ Browser:    ${navigator.userAgent}
       isCancelLoadingEnabled = false
     })
 
-    function isThisShowLyricsInvalidated () {
+    function isThisShowLyricsInvalidated() {
       return isShowLyricsInterrupted === true || window.showLyricsIdentifier !== currentFunctionClosureIdentifier
     }
 
     spinnerUpdate('5', 'Downloading lyrics...', 0, 'start')
     unScroll()
 
-    async function updateLyricsDisplayState () {
+    async function updateLyricsDisplayState() {
       if (document.visibilityState === 'visible') await getRafPromise().then()
       window.postMessage({ iAm: custom.scriptName, type: 'lyricsDisplayState', visibility: 'loading', song: songInfo, searchresultsLengths }, '*')
       if (document.visibilityState === 'visible') await getRafPromise().then()
     }
     updateLyricsDisplayState()
 
-    function interuptedByExternal () {
+    function interuptedByExternal() {
       window.removeEventListener('message', interuptMessageHandler, false)
     }
 
-    async function showLyricsRunner () {
+    async function showLyricsRunner() {
       try {
         if (isThisShowLyricsInvalidated()) return interuptedByExternal()
         let cacheReqResult = null
-        let html = await new Promise(resolve => loadGeniusSong(songInfo, function loadGeniusSongCb (response, cacheResult) {
+        let html = await new Promise(resolve => loadGeniusSong(songInfo, function loadGeniusSongCb(response, cacheResult) {
           cacheReqResult = cacheResult // not immediately cache this html; cache the proceeded html only
           resolve(response.responseText)
         }))
@@ -3471,12 +3471,12 @@ Browser:    ${navigator.userAgent}
           }
           // not obtained from cache
           spinnerUpdate('4', 'Downloading annotations...', 100, 'donwloading')
-          let annotations = await new Promise(resolve => loadGeniusAnnotations(songInfo, html, annotationsEnabled, function loadGeniusAnnotationsCb (annotations) {
+          let annotations = await new Promise(resolve => loadGeniusAnnotations(songInfo, html, annotationsEnabled, function loadGeniusAnnotationsCb(annotations) {
             resolve(annotations)
           }))
           if (isThisShowLyricsInvalidated()) return interuptedByExternal()
           spinnerUpdate('3', 'Composing page...', 200, 'pageComposing')
-          html = await new Promise(resolve => combineGeniusResources(songInfo, html, annotations, function combineGeniusResourcesCb (html) {
+          html = await new Promise(resolve => combineGeniusResources(songInfo, html, annotations, function combineGeniusResourcesCb(html) {
             // in fact `combineGeniusResources` is synchronous
             resolve(html)
           }))
@@ -3559,7 +3559,7 @@ Browser:    ${navigator.userAgent}
           unScroll()
         })
 
-        function reloadFrame () {
+        function reloadFrame() {
           // no use if the iframe is detached
           tv1 = 0
           if (window.showLyricsIdentifier !== currentFunctionClosureIdentifier) return
@@ -3573,7 +3573,7 @@ Browser:    ${navigator.userAgent}
         // After 15 seconds, try to reload the iframe
         tv1 = setTimeout(reloadFrame, 15000)
 
-        function fresh () {
+        function fresh() {
           tv2 = 0
           if (window.showLyricsIdentifier !== currentFunctionClosureIdentifier) return
           if (isShowLyricsIsCancelledByUser) return
@@ -3594,7 +3594,7 @@ Browser:    ${navigator.userAgent}
         // After 30 seconds, try again fresh (only once)
         tv2 = setTimeout(fresh, 30000)
 
-        function unableToProcess (msg) {
+        function unableToProcess(msg) {
           clearInterval(iv)
           iv = 0
           console.warn(msg)
@@ -3643,7 +3643,7 @@ Browser:    ${navigator.userAgent}
     showLyricsRunner()
   }
 
-  function showLyricsAndRemember (title, artists, hit, searchresultsLengths) {
+  function showLyricsAndRemember(title, artists, hit, searchresultsLengths) {
     showLyrics(hit, searchresultsLengths)
     // store the selection
     Promise.resolve(0).then(() => {
@@ -3653,19 +3653,19 @@ Browser:    ${navigator.userAgent}
     })
   }
 
-  async function updateAutoScrollEnabled () {
+  async function updateAutoScrollEnabled() {
     const newValue = await custom.GM.getValue('autoscrollenabled')
     autoScrollEnabled = newValue
   }
-  function isScrollLyricsEnabled () {
+  function isScrollLyricsEnabled() {
     return autoScrollEnabled // note: if iframe is not ready, still no action
   }
 
-  function isScrollLyricsCallable () {
+  function isScrollLyricsCallable() {
     return autoScrollEnabled && window.isPageAbleForAutoScroll === true // note: if iframe is not ready, still no action
   }
 
-  function scrollLyrics (positionFraction) {
+  function scrollLyrics(positionFraction) {
     if (isScrollLyricsCallable() === false) {
       return
     }
@@ -3677,8 +3677,8 @@ Browser:    ${navigator.userAgent}
     }
   }
 
-  function searchByQuery (query, container, callback) {
-    geniusSearch(query, function geniusSearchCb (r) {
+  function searchByQuery(query, container, callback) {
+    geniusSearch(query, function geniusSearchCb(r) {
       const hits = r.response.sections[0].hits
       if (hits.length === 0) {
         if (typeof callback === 'function') {
@@ -3695,7 +3695,7 @@ Browser:    ${navigator.userAgent}
           custom.listSongs(hits, container, query)
         }
       }
-    }, function geniusSearchErrorCb () {
+    }, function geniusSearchErrorCb() {
       if (typeof callback === 'function') {
         const res = { status: 500 }
         callback(res)
@@ -3704,7 +3704,7 @@ Browser:    ${navigator.userAgent}
     })
   }
 
-  async function captchaHint (responseText) {
+  async function captchaHint(responseText) {
     if (document.querySelector('#mycaptchahint897454') !== null) return // avoid showing duplicating option window
 
     if (await custom.GM.getValue('noMoreCaptchaHint', false)) return
@@ -3779,7 +3779,7 @@ Browser:    ${navigator.userAgent}
     div.appendChild(document.createElement('textarea')).value = responseText
   }
 
-  function config () {
+  function config() {
     if (document.querySelector('#myconfigwin39457845') !== null) return // avoid showing duplicating option window
 
     // Background overlay
@@ -3825,11 +3825,11 @@ Browser:    ${navigator.userAgent}
     checkAutoShow.id = 'checkAutoShow748'
     checkAutoShow.checked = genius.option.autoShow === true
     custom.GM.getValue('optionautoshow', checkAutoShow.checked === true).then(function (v) {
-    // Get real value, genius.option.autoShow might have been changed temporarily
+      // Get real value, genius.option.autoShow might have been changed temporarily
       genius.option.autoShow = v === true || v === 'true'
       checkAutoShow.checked = genius.option.autoShow
     })
-    const onAutoShow = function onAutoShowListener (evt) {
+    const onAutoShow = function onAutoShowListener(evt) {
       const checkAutoShow = evt.target
       custom.GM.setValue('optionautoshow', checkAutoShow.checked === true)
       genius.option.autoShow = checkAutoShow.checked === true
@@ -3856,7 +3856,7 @@ Browser:    ${navigator.userAgent}
       }
       option.textContent = themes[key].name
     }
-    const onSelectTheme = function onSelectThemeListener (evt) {
+    const onSelectTheme = function onSelectThemeListener(evt) {
       const selectTheme = evt.target
       const hasChanged = genius.option.themeKey !== selectTheme.selectedOptions[0].value
       if (hasChanged) {
@@ -3888,7 +3888,7 @@ Browser:    ${navigator.userAgent}
     inputFontSize.max = 99
     inputFontSize.id = 'inputFontSize748'
     inputFontSize.style.maxWidth = '5em'
-    const onFontSizeChanged = function onFontSizeChangeListener (evt) {
+    const onFontSizeChanged = function onFontSizeChangeListener(evt) {
       genius.option.fontSize = Math.max(0, parseInt(inputFontSize.value) || 0)
       custom.GM.setValue('fontsize', genius.option.fontSize).then(() => {
         if (genius.onThemeChanged) {
@@ -3907,7 +3907,7 @@ Browser:    ${navigator.userAgent}
     checkAnnotationsEnabled.type = 'checkbox'
     checkAnnotationsEnabled.id = 'checkAnnotationsEnabled748'
     checkAnnotationsEnabled.checked = annotationsEnabled === true
-    const onAnnotationsEnabled = function onAnnotationsEnabledListener (evt) {
+    const onAnnotationsEnabled = function onAnnotationsEnabledListener(evt) {
       const checkAnnotationsEnabled = evt.target
       if (checkAnnotationsEnabled.checked !== annotationsEnabled) {
         annotationsEnabled = checkAnnotationsEnabled.checked === true
@@ -3928,7 +3928,7 @@ Browser:    ${navigator.userAgent}
     checkAutoScrollEnabled.type = 'checkbox'
     checkAutoScrollEnabled.id = 'checkAutoScrollEnabled748'
     checkAutoScrollEnabled.checked = autoScrollEnabled === true
-    const onAutoScrollEnabled = function onAutoScrollEnabledListener (evt) {
+    const onAutoScrollEnabled = function onAutoScrollEnabledListener(evt) {
       const checkAutoScrollEnabled = evt.target
       const newValue = checkAutoScrollEnabled.checked === true
       if (newValue !== autoScrollEnabled) {
@@ -3976,7 +3976,7 @@ Browser:    ${navigator.userAgent}
       }
       option.textContent = o.text
     }
-    const onSelectRomajiPriority = function onSelectRomajiListener (evt) {
+    const onSelectRomajiPriority = function onSelectRomajiListener(evt) {
       const selectRomajiPriority = evt.target
       const val = selectRomajiPriority.selectedOptions[0].value
       const hasChanged = genius.option.romajiPriority !== val
@@ -4014,7 +4014,7 @@ Browser:    ${navigator.userAgent}
       }
       option.textContent = o.text
     }
-    const onSelectLZCompression = function onSelectLZCompressionListener (evt) {
+    const onSelectLZCompression = function onSelectLZCompressionListener(evt) {
       const selectLZCompression = evt.target
       const val = (selectLZCompression.selectedOptions[0].value === 'true')
       const hasChanged = genius.option.useLZCompression !== val
@@ -4035,7 +4035,7 @@ Browser:    ${navigator.userAgent}
     const closeButton = div.appendChild(document.createElement('button'))
     closeButton.textContent = 'Close'
     closeButton.setAttribute('id', 'myconfigwin39457845_close_button')
-    closeButton.addEventListener('click', function onCloseButtonClick () {
+    closeButton.addEventListener('click', function onCloseButtonClick() {
       document.querySelectorAll('#myconfigwin39457845').forEach(d => d.remove())
       document.querySelectorAll('#myoverlay7658438').forEach(d => d.remove())
       // Un-blur background
@@ -4050,7 +4050,7 @@ Browser:    ${navigator.userAgent}
     const bytes = metricPrefix(measureJVLength(selectionCache) + measureJVLength(requestCache), 2, 1024) + 'Bytes'
     const clearCacheButton = div.appendChild(document.createElement('button'))
     clearCacheButton.textContent = `Clear cache (${bytes})`
-    clearCacheButton.addEventListener('click', function onClearCacheButtonClick (evt) {
+    clearCacheButton.addEventListener('click', function onClearCacheButtonClick(evt) {
       const clearCacheButton = evt.target
       clearCacheFn().then(function () {
         clearCacheButton.textContent = 'Cleared'
@@ -4070,7 +4070,7 @@ Browser:    ${navigator.userAgent}
       }
     }
     updateDebugButton(debugButton)
-    debugButton.addEventListener('click', function onDebugButtonClick (evt) {
+    debugButton.addEventListener('click', function onDebugButtonClick(evt) {
       const debugButton = evt.target
       genius.debug = !genius.debug
       custom.GM.setValue('debug', genius.debug).then(function () {
@@ -4084,24 +4084,24 @@ Browser:    ${navigator.userAgent}
         'font-size': '15px'
       }
     },
-    'Powered by ',
-    ['a', { style: { 'font-size': '15px' } }, { attr: { target: '_blank', href: 'https://github.com/cvzi/genius-lyrics-userscript/' } }, 'GeniusLyrics.js'
-    ],
-    'Copyright © 2019 ',
-    ['a', { style: { 'font-size': '15px' } }, { attr: { href: 'mailto:cuzi@openmail.cc' } }, 'cuzi'
-    ],
-    ' and contributors.',
-    ['br'],
-    'Licensed under the GNU General Public License v3.0'
+      'Powered by ',
+      ['a', { style: { 'font-size': '15px' } }, { attr: { target: '_blank', href: 'https://github.com/cvzi/genius-lyrics-userscript/' } }, 'GeniusLyrics.js'
+      ],
+      'Copyright © 2019 ',
+      ['a', { style: { 'font-size': '15px' } }, { attr: { href: 'mailto:cuzi@openmail.cc' } }, 'cuzi'
+      ],
+      ' and contributors.',
+      ['br'],
+      'Licensed under the GNU General Public License v3.0'
     ])
     div = win.appendChild(div)
   }
 
-  function closeModalUIs () {
+  function closeModalUIs() {
     document.querySelectorAll('.modal_ui_genius_lyrics_overlay').forEach(div => div.remove())
   }
 
-  function modalAlert (text, buttons = { OK: true }) {
+  function modalAlert(text, buttons = { OK: true }) {
     return new Promise(function (resolve) {
       const buttonMap = (obj, mapFn) => {
         const arr = []
@@ -4122,45 +4122,45 @@ Browser:    ${navigator.userAgent}
           }
         }
       },
-      ['div',
-        {
-          classList: ['modal_ui_genius_lyrics_dialog_box']
-        },
-        text,
         ['div',
           {
-            classList: ['modal_ui_genius_lyrics_dialog_buttons_holder']
+            classList: ['modal_ui_genius_lyrics_dialog_box']
           },
-          ...buttonMap(buttons, (key, value, i) => {
-            return ['button',
-              { classList: ['modal_ui_genius_lyrics_dialog_button'] },
-              {
-                listener: {
-                  click: () => {
-                    bg.remove()
-                    resolve(value)
+          text,
+          ['div',
+            {
+              classList: ['modal_ui_genius_lyrics_dialog_buttons_holder']
+            },
+            ...buttonMap(buttons, (key, value, i) => {
+              return ['button',
+                { classList: ['modal_ui_genius_lyrics_dialog_button'] },
+                {
+                  listener: {
+                    click: () => {
+                      bg.remove()
+                      resolve(value)
+                    }
                   }
-                }
-              },
-              { attr: { tabindex: i } },
-              key]
-          })
+                },
+                { attr: { tabindex: i } },
+                key]
+            })
+          ]
         ]
-      ]
       )
       document.body.appendChild(bg)
       bg.querySelector('button[tabindex="0"]').focus()
     })
   }
 
-  function modalConfirm (text) {
+  function modalConfirm(text) {
     return modalAlert(text, {
       OK: true,
       Cancel: false
     })
   }
 
-  function addOneMessageListener (type, cb) {
+  function addOneMessageListener(type, cb) {
     let arr = onMessage[type]
     if (!arr) {
       arr = onMessage[type] = []
@@ -4168,7 +4168,7 @@ Browser:    ${navigator.userAgent}
     arr.push(cb)
   }
 
-  function listenToMessagesHandler (e) {
+  function listenToMessagesHandler(e) {
     const data = ((e || 0).data || 0)
     if (data.iAm !== custom.scriptName) {
       return
@@ -4187,18 +4187,18 @@ Browser:    ${navigator.userAgent}
     }
   }
 
-  function listenToMessages () {
+  function listenToMessages() {
     window.addEventListener('message', listenToMessagesHandler, false)
   }
 
-  function unlistenToMessages () {
+  function unlistenToMessages() {
     window.removeEventListener('message', listenToMessagesHandler, false)
   }
 
-  function pageKeyboardEvent (keyParams, fct) {
-    document.addEventListener('keypress', function onKeyPress (ev) {
+  function pageKeyboardEvent(keyParams, fct) {
+    document.addEventListener('keypress', function onKeyPress(ev) {
       if (ev.key === keyParams.key && ev.shiftKey === keyParams.shiftKey &&
-      ev.ctrlKey === keyParams.ctrlKey && ev.altKey === keyParams.altKey) {
+        ev.ctrlKey === keyParams.ctrlKey && ev.altKey === keyParams.altKey) {
         let e = ev.target
         while (e) {
           // Filter input, textarea, etc.
@@ -4214,7 +4214,7 @@ Browser:    ${navigator.userAgent}
     })
   }
 
-  function toggleLyrics () {
+  function toggleLyrics() {
     const isLyricsIframeExist = !!document.getElementById('lyricsiframe')
     if (genius.iv.main > 0) {
       clearInterval(genius.iv.main)
@@ -4238,7 +4238,7 @@ Browser:    ${navigator.userAgent}
     }
   }
 
-  function addKeyboardShortcut (keyParams) {
+  function addKeyboardShortcut(keyParams) {
     window.addEventListener('message', function (ev) {
       const data = (ev || 0).data || 0
       if (data.iAm === custom.scriptName && data.type === 'togglelyrics') {
@@ -4250,7 +4250,7 @@ Browser:    ${navigator.userAgent}
     })
   }
 
-  function addKeyboardShortcutInFrame (keyParams) {
+  function addKeyboardShortcutInFrame(keyParams) {
     pageKeyboardEvent(keyParams, function (ev) {
       if (window.parent) {
         window.parent.postMessage({ iAm: custom.scriptName, type: 'togglelyrics' }, '*')
@@ -4258,7 +4258,7 @@ Browser:    ${navigator.userAgent}
     })
   }
 
-  function addCss () {
+  function addCss() {
     document.head.appendChild(document.createElement('style')).textContent = `
     #mycaptchahint897454 {
       position:fixed;
@@ -4436,14 +4436,14 @@ Browser:    ${navigator.userAgent}
     }
   }
 
-  async function getGMValues (o) {
+  async function getGMValues(o) {
     // GM.getValues will be soon avaible in TM & VM due to MV3 (TM issue #2045), tally with chrome.storage
     const entries = Object.entries(o)
     const values = await Promise.all(entries.map(entry => custom.GM.getValue(entry[0], entry[1])))
     return Object.fromEntries(values.map((val, idx) => [entries[idx][0], val]))
   }
 
-  function removeEmptyBlocks () {
+  function removeEmptyBlocks() {
     for (const s of document.querySelectorAll('[id*="-ad-"]:empty')) {
       s.remove()
     }
@@ -4466,7 +4466,7 @@ Browser:    ${navigator.userAgent}
     }
   }
 
-  async function mainRunner () {
+  async function mainRunner() {
     // obtain the default options prepared by the userscript in the top frame
     const defaultOptions = custom.defaultOptions
     if (defaultOptions && typeof defaultOptions === 'object') {
@@ -4591,7 +4591,7 @@ Browser:    ${navigator.userAgent}
     // clean up
     e = null
 
-    function cssTriggeringHook (resolve) {
+    function cssTriggeringHook(resolve) {
       document.addEventListener('animationstart', (ev) => {
         const evTarget = ev.target
         if (ev.animationName === 'appDomAppended' || ev.animationName === 'appDomAppended2') {
