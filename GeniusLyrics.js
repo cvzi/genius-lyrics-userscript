@@ -3,7 +3,7 @@
 // ==UserLibrary==
 // @name         GeniusLyrics
 // @description  Downloads and shows genius lyrics for Tampermonkey scripts
-// @version      5.16.17
+// @version      5.16.18
 // @license      GPL-3.0-or-later; http://www.gnu.org/licenses/gpl-3.0.txt
 // @copyright    2019, cuzi (cuzi@openmail.cc) and contributors
 // @supportURL   https://github.com/cvzi/genius-lyrics-userscript/issues
@@ -609,7 +609,10 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       'User-Agent': navigator.userAgent
     }
     if (method === 'POST') headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8'
-    if (obj.responseType === 'json') headers['Accept'] = 'application/json' // eslint-disable-line dot-notation
+    if (obj.responseType === 'json') {
+      headers['Accept'] = 'application/json' // eslint-disable-line dot-notation
+      headers['Content-Type'] = 'application/json; charset=utf-8'
+    }
     if (obj.headers) {
       headers = Object.assign(headers, obj.headers)
     }
@@ -659,7 +662,6 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     }
 
     if (obj.responseType) req.responseType = obj.responseType
-    if (obj.responseType === 'json') req.overrideMimeType = 'application/json; charset=utf-8'
 
     return custom.GM.xmlHttpRequest(req)
   }
@@ -938,7 +940,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         'X-Requested-With': 'XMLHttpRequest'
       },
       t: 'search', // differentiate with other types of requesting
-      responseType: 'html,markdown',
+      responseType: 'json',
       error: function geniusSearchOnError (response) {
         console.error(response)
         modalAlert(custom.scriptName + '\n\nError in geniusSearch(' + JSON.stringify(query) + ', ' + ('name' in cb ? cb.name : 'cb') + '):' +
@@ -1248,7 +1250,7 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
         'X-Requested-With': 'XMLHttpRequest'
       },
       t: 'annotations', // differentiate with other types of requesting
-      responseType: 'html,markdown',
+      responseType: 'json',
       error: function loadGeniusAnnotationsOnError (response) {
         console.error(response)
         modalAlert(custom.scriptName + '\n\nError loadGeniusAnnotations(' + JSON.stringify(song) + ', cb):\n' +
