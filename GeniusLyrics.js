@@ -145,6 +145,10 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       return false
     }
     unScroll()
+    resetPictureInPictureScrollState()
+    pictureInPictureState.lyricsText = ''
+    pictureInPictureState.statusText = ''
+    closePictureInPictureWindow()
     window.postMessage({ iAm: custom.scriptName, type: 'lyricsDisplayState', visibility: 'hidden' }, '*')
     return ret
   }
@@ -213,6 +217,10 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
       autoShow: true,
       themeKey: null,
       romajiPriority: 'low',
+      pictureInPictureMode: 'disabled',
+      firefoxPictureInPictureWidth: 0,
+      firefoxPictureInPictureHeight: 0,
+      firefoxPictureInPictureFontSize: 0,
       fontSize: 0, // == 0 : use default value, >= 1 : "px" value
       useLZCompression: false,
       shouldUseLZStringCompression: null,
@@ -298,6 +306,67 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
   let annotationsEnabled = true
   let autoScrollEnabled = false
   const onMessage = {}
+  const pictureInPictureModes = ['disabled', 'when-tab-is-hidden', 'always']
+  const detectPictureInPictureCapabilities = function () {
+    const supportsDocumentPictureInPicture = typeof window.documentPictureInPicture === 'object' && typeof (window.documentPictureInPicture || 0).requestWindow === 'function'
+    let supportsFirefoxVideoSourcePictureInPicture = false
+    try {
+      const canvas = document.createElement('canvas')
+      const video = document.createElement('video')
+      supportsFirefoxVideoSourcePictureInPicture = navigator.userAgent.indexOf('Firefox') !== -1 &&
+        typeof canvas.captureStream === 'function' &&
+        typeof video.play === 'function'
+    } catch (e) {}
+    const supportsAutomaticPictureInPicture = supportsDocumentPictureInPicture && typeof (navigator.mediaSession || 0).setActionHandler === 'function'
+    const usesVideoElementPictureInPicture = !supportsDocumentPictureInPicture && supportsFirefoxVideoSourcePictureInPicture
+    const supportsAnyPictureInPicture = supportsAutomaticPictureInPicture || usesVideoElementPictureInPicture
+    return {
+      supportsDocumentPictureInPicture,
+      usesVideoElementPictureInPicture,
+      supportsAutomaticPictureInPicture,
+      supportsAnyPictureInPicture
+    }
+  }
+  const {
+    supportsDocumentPictureInPicture,
+    usesVideoElementPictureInPicture,
+    supportsAutomaticPictureInPicture,
+    supportsAnyPictureInPicture
+  } = detectPictureInPictureCapabilities()
+  const pictureInPictureDarkModeMedia = typeof window.matchMedia === 'function' ? window.matchMedia('(prefers-color-scheme: dark)') : null
+  const pictureInPictureState = {
+    window: null,
+    lyricsText: '',
+    statusText: '',
+    actionHandlerInstalled: false,
+    mediaSessionWrapped: false,
+    originalSetActionHandler: null,
+    interceptedEnterPictureInPictureHandler: null,
+    pictureInPictureActionHandler: null,
+    scrollPaused: false,
+    scrollOffsetTop: 0,
+    lastRequestedPositionFraction: 0,
+    lastExpectedScrollTop: null,
+    currentWindowInitialized: null,
+    video: null,
+    canvas: null,
+    context: null,
+    renderFrameId: 0,
+    nativePictureInPictureActive: false,
+    renderedPositionFraction: 0,
+    firefoxPreviewVisible: true,
+    firefoxControlPanelVisible: false,
+    firefoxAspectRatio: 16 / 9,
+    firefoxAspectBoxWidth: 0,
+    firefoxAspectBoxHeight: 0,
+    firefoxResolutionWidth: 0,
+    firefoxResolutionHeight: 0,
+    firefoxFontSize: 0,
+    firefoxNeedsPiPReactivationHint: false,
+    firefoxPersistTimerId: 0,
+    firefoxUi: null,
+    firefoxOptionsUi: null
+  }
 
   const isLZStringAvailable = typeof LZString !== 'undefined' && typeof (LZString || 0).compressToUTF16 === 'function' // eslint-disable-line no-undef
   // if (!isLZStringAvailable) throw new Error('LZString is not available. Please update your script.')
@@ -328,6 +397,990 @@ function geniusLyrics (custom) { // eslint-disable-line no-unused-vars
     if (w === 'b') return LZString.decompressFromUTF16(t) // eslint-disable-line no-undef
     if (w === 'a') return t
     return t
+  }
+
+  function normalizePictureInPictureMode (value) {
+    if (!pictureInPictureModes.includes(value)) return 'disabled'
+    if (value === 'when-tab-is-hidden' && !supportsAutomaticPictureInPicture) return 'disabled'
+    if (value === 'always' && !supportsAnyPictureInPicture) return 'disabled'
+    return value
+  }
+
+  function isPictureInPictureModeEnabled () {
+    return normalizePictureInPictureMode(genius.option.pictureInPictureMode) !== 'disabled'
+  }
+
+  function isPictureInPictureAlwaysModeEnabled () {
+    return normalizePictureInPictureMode(genius.option.pictureInPictureMode) === 'always'
+  }
+
+  function isPictureInPictureHiddenModeEnabled () {
+    return normalizePictureInPictureMode(genius.option.pictureInPictureMode) === 'when-tab-is-hidden'
+  }
+
+  function resetPictureInPictureScrollState () {
+    pictureInPictureState.scrollPaused = false
+    pictureInPictureState.scrollOffsetTop = 0
+    pictureInPictureState.lastRequestedPositionFraction = 0
+    pictureInPictureState.lastExpectedScrollTop = null
+    pictureInPictureState.renderedPositionFraction = 0
+    pictureInPictureState.firefoxPreviewVisible = true
+    pictureInPictureState.firefoxControlPanelVisible = false
+  }
+
+  function getPictureInPictureWindow () {
+    const pipWindow = pictureInPictureState.window || (((window.documentPictureInPicture || 0).window) || null)
+    if (pipWindow && pipWindow.closed !== true) {
+      pictureInPictureState.window = pipWindow
+      return pipWindow
+    }
+    pictureInPictureState.window = null
+    pictureInPictureState.currentWindowInitialized = null
+    return null
+  }
+
+  function getPictureInPictureColors () {
+    const isDarkMode = pictureInPictureDarkModeMedia ? pictureInPictureDarkModeMedia.matches : true
+    return isDarkMode
+      ? { backgroundColor: '#000000', textColor: '#ffffff', colorScheme: 'dark' }
+      : { backgroundColor: '#ffffff', textColor: '#000000', colorScheme: 'light' }
+  }
+
+  function getPictureInPictureDesiredScrollTop (scrollingElement, positionFraction) {
+    if (!scrollingElement) return 0
+    const position = Math.min(1, Math.max(0, Number(positionFraction) || 0))
+    const maxScrollTop = Math.max(0, scrollingElement.scrollHeight - scrollingElement.clientHeight)
+    return Math.min(maxScrollTop, Math.max(0, maxScrollTop * position + pictureInPictureState.scrollOffsetTop))
+  }
+
+  function setPictureInPictureButtonsVisible (visible) {
+    const pipWindow = getPictureInPictureWindow()
+    if (!pipWindow) return
+    const buttons = pipWindow.document.getElementById('genius-picture-in-picture-scroll-buttons')
+    if (buttons) {
+      buttons.style.display = visible ? 'flex' : 'none'
+    }
+  }
+
+  function onResumePictureInPictureAutoScrollClick () {
+    const pipWindow = getPictureInPictureWindow()
+    if (!pipWindow) return
+    const scrollingElement = pipWindow.document.scrollingElement
+    if (!scrollingElement) return
+
+    pictureInPictureState.scrollPaused = false
+    pictureInPictureState.lastExpectedScrollTop = getPictureInPictureDesiredScrollTop(scrollingElement, pictureInPictureState.lastRequestedPositionFraction)
+    setPictureInPictureButtonsVisible(false)
+    scrollingElement.scrollTop = pictureInPictureState.lastExpectedScrollTop
+  }
+
+  function onResumePictureInPictureAutoScrollFromHereClick () {
+    const pipWindow = getPictureInPictureWindow()
+    if (!pipWindow) return
+    const scrollingElement = pipWindow.document.scrollingElement
+    if (!scrollingElement) return
+
+    const desiredScrollTop = getPictureInPictureDesiredScrollTop(scrollingElement, pictureInPictureState.lastRequestedPositionFraction)
+    pictureInPictureState.scrollOffsetTop += scrollingElement.scrollTop - desiredScrollTop
+    pictureInPictureState.scrollPaused = false
+    pictureInPictureState.lastExpectedScrollTop = scrollingElement.scrollTop
+    setPictureInPictureButtonsVisible(false)
+  }
+
+  function initPictureInPictureWindow (pipWindow) {
+    if (!pipWindow || pictureInPictureState.currentWindowInitialized === pipWindow) return
+    pictureInPictureState.currentWindowInitialized = pipWindow
+
+    pipWindow.addEventListener('scroll', function onPictureInPictureScroll () {
+      const scrollingElement = pipWindow.document.scrollingElement
+      if (!scrollingElement || pictureInPictureState.lastExpectedScrollTop === null) return
+
+      if (pictureInPictureState.scrollPaused) return
+
+      if (Math.abs(scrollingElement.scrollTop - pictureInPictureState.lastExpectedScrollTop) > 5) {
+        pictureInPictureState.scrollPaused = true
+        setPictureInPictureButtonsVisible(true)
+      }
+    }, true)
+  }
+
+  const FIREFOX_PICTURE_IN_PICTURE_MIN_DIMENSION = 64
+  const FIREFOX_PICTURE_IN_PICTURE_MAX_DIMENSION = 4096
+  const FIREFOX_PICTURE_IN_PICTURE_MIN_FONT_SIZE = 12
+
+  function getDefaultFirefoxPictureInPictureCanvasDimensions () {
+    const ratio = 16 / 9
+    const outerWidth = 180
+    const outerHeight = 110
+    const defaultBoxWidth = 120
+    const defaultBoxHeight = 68
+    const areaScale = Math.sqrt(
+      Math.max(0.04, Math.min(1, (defaultBoxWidth * defaultBoxHeight) / (outerWidth * outerHeight)))
+    )
+    const maxDimension = Math.round(320 + areaScale * (1280 - 320))
+    return {
+      width: maxDimension,
+      height: Math.max(FIREFOX_PICTURE_IN_PICTURE_MIN_DIMENSION, Math.round(maxDimension / ratio))
+    }
+  }
+
+  function getDefaultFirefoxPictureInPictureFontSize (width, height) {
+    return Math.max(18, Math.round(32 * Math.min(width / 720, height / 405)))
+  }
+
+  function normalizeFirefoxPictureInPictureDimension (value, fallback) {
+    const parsed = parseInt(value)
+    const nextValue = Number.isFinite(parsed) && parsed > 0 ? parsed : fallback
+    return Math.max(
+      FIREFOX_PICTURE_IN_PICTURE_MIN_DIMENSION,
+      Math.min(FIREFOX_PICTURE_IN_PICTURE_MAX_DIMENSION, parseInt(nextValue) || FIREFOX_PICTURE_IN_PICTURE_MIN_DIMENSION)
+    )
+  }
+
+  function normalizeFirefoxPictureInPictureFontSize (value, fallback, width, height) {
+    const parsed = parseInt(value)
+    const fallbackValue = parseInt(fallback)
+    const nextValue = Number.isFinite(parsed) && parsed > 0
+      ? parsed
+      : Number.isFinite(fallbackValue) && fallbackValue > 0
+        ? fallbackValue
+        : getDefaultFirefoxPictureInPictureFontSize(width, height)
+    return Math.max(FIREFOX_PICTURE_IN_PICTURE_MIN_FONT_SIZE, nextValue)
+  }
+
+  function getFirefoxPictureInPictureOptionsUi () {
+    const ui = pictureInPictureState.firefoxOptionsUi
+    if (!ui || !ui.resolutionWidthInput || ui.resolutionWidthInput.isConnected !== true) {
+      pictureInPictureState.firefoxOptionsUi = null
+      return null
+    }
+    return ui
+  }
+
+  function syncFirefoxPictureInPictureOptionsUi () {
+    const optionsUi = getFirefoxPictureInPictureOptionsUi()
+    if (!optionsUi) return
+    optionsUi.resolutionWidthInput.value = `${pictureInPictureState.firefoxResolutionWidth || ''}`
+    optionsUi.resolutionHeightInput.value = `${pictureInPictureState.firefoxResolutionHeight || ''}`
+    optionsUi.fontSizeInput.value = `${pictureInPictureState.firefoxFontSize || ''}`
+  }
+
+  function syncFirefoxDerivedMetricsFromBox () {
+    const width = normalizeFirefoxPictureInPictureDimension(
+      pictureInPictureState.firefoxAspectBoxWidth,
+      pictureInPictureState.firefoxResolutionWidth || getDefaultFirefoxPictureInPictureCanvasDimensions().width
+    )
+    const height = normalizeFirefoxPictureInPictureDimension(
+      pictureInPictureState.firefoxAspectBoxHeight,
+      pictureInPictureState.firefoxResolutionHeight || getDefaultFirefoxPictureInPictureCanvasDimensions().height
+    )
+    pictureInPictureState.firefoxAspectBoxWidth = width
+    pictureInPictureState.firefoxAspectBoxHeight = height
+    pictureInPictureState.firefoxAspectRatio = Math.max(0.2, width / height)
+    pictureInPictureState.firefoxResolutionWidth = width
+    pictureInPictureState.firefoxResolutionHeight = height
+    pictureInPictureState.firefoxFontSize = normalizeFirefoxPictureInPictureFontSize(
+      pictureInPictureState.firefoxFontSize,
+      genius.option.firefoxPictureInPictureFontSize,
+      width,
+      height
+    )
+    genius.option.firefoxPictureInPictureWidth = width
+    genius.option.firefoxPictureInPictureHeight = height
+    genius.option.firefoxPictureInPictureFontSize = pictureInPictureState.firefoxFontSize
+  }
+
+  function syncFirefoxPictureInPictureStateFromOptions () {
+    const defaults = getDefaultFirefoxPictureInPictureCanvasDimensions()
+    pictureInPictureState.firefoxAspectBoxWidth = normalizeFirefoxPictureInPictureDimension(
+      genius.option.firefoxPictureInPictureWidth,
+      defaults.width
+    )
+    pictureInPictureState.firefoxAspectBoxHeight = normalizeFirefoxPictureInPictureDimension(
+      genius.option.firefoxPictureInPictureHeight,
+      defaults.height
+    )
+    pictureInPictureState.firefoxFontSize = normalizeFirefoxPictureInPictureFontSize(
+      genius.option.firefoxPictureInPictureFontSize,
+      getDefaultFirefoxPictureInPictureFontSize(defaults.width, defaults.height),
+      pictureInPictureState.firefoxAspectBoxWidth,
+      pictureInPictureState.firefoxAspectBoxHeight
+    )
+    syncFirefoxDerivedMetricsFromBox()
+    genius.option.firefoxPictureInPictureWidth = pictureInPictureState.firefoxResolutionWidth
+    genius.option.firefoxPictureInPictureHeight = pictureInPictureState.firefoxResolutionHeight
+    genius.option.firefoxPictureInPictureFontSize = pictureInPictureState.firefoxFontSize
+  }
+
+  function persistFirefoxPictureInPictureSettings () {
+    if (pictureInPictureState.firefoxPersistTimerId) {
+      clearTimeout(pictureInPictureState.firefoxPersistTimerId)
+      pictureInPictureState.firefoxPersistTimerId = 0
+    }
+    genius.option.firefoxPictureInPictureWidth = pictureInPictureState.firefoxResolutionWidth
+    genius.option.firefoxPictureInPictureHeight = pictureInPictureState.firefoxResolutionHeight
+    genius.option.firefoxPictureInPictureFontSize = pictureInPictureState.firefoxFontSize
+    return Promise.all([
+      custom.GM.setValue('firefoxPictureInPictureWidth', genius.option.firefoxPictureInPictureWidth),
+      custom.GM.setValue('firefoxPictureInPictureHeight', genius.option.firefoxPictureInPictureHeight),
+      custom.GM.setValue('firefoxPictureInPictureFontSize', genius.option.firefoxPictureInPictureFontSize)
+    ])
+  }
+
+  function schedulePersistFirefoxPictureInPictureSettings () {
+    if (pictureInPictureState.firefoxPersistTimerId) {
+      clearTimeout(pictureInPictureState.firefoxPersistTimerId)
+    }
+    pictureInPictureState.firefoxPersistTimerId = setTimeout(() => {
+      pictureInPictureState.firefoxPersistTimerId = 0
+      persistFirefoxPictureInPictureSettings()
+    }, 150)
+  }
+
+  function markFirefoxPiPNeedsReactivationHint () {
+    pictureInPictureState.firefoxNeedsPiPReactivationHint = true
+    const ui = pictureInPictureState.firefoxUi
+    if (ui && ui.reactivateHint) {
+      ui.reactivateHint.style.display = 'block'
+    }
+  }
+
+  function updateFirefoxAspectRatioBox () {
+    const ui = pictureInPictureState.firefoxUi
+    if (ui && ui.aspectInner) {
+      ui.aspectInner.style.width = `${pictureInPictureState.firefoxAspectBoxWidth}px`
+      ui.aspectInner.style.height = `${pictureInPictureState.firefoxAspectBoxHeight}px`
+      if (ui.resolutionWidthInput) {
+        ui.resolutionWidthInput.value = `${pictureInPictureState.firefoxResolutionWidth || ''}`
+      }
+      if (ui.resolutionHeightInput) {
+        ui.resolutionHeightInput.value = `${pictureInPictureState.firefoxResolutionHeight || ''}`
+      }
+      if (ui.fontSizeInput) {
+        ui.fontSizeInput.value = `${pictureInPictureState.firefoxFontSize || ''}`
+      }
+      if (ui.aspectLabel) {
+        ui.aspectLabel.textContent = `${pictureInPictureState.firefoxResolutionWidth} x ${pictureInPictureState.firefoxResolutionHeight}px (${pictureInPictureState.firefoxAspectRatio.toFixed(2)}:1)`
+      }
+      if (ui.aspectInnerLabel) {
+        ui.aspectInnerLabel.textContent = `${pictureInPictureState.firefoxResolutionWidth} x ${pictureInPictureState.firefoxResolutionHeight}`
+      }
+    }
+    syncFirefoxPictureInPictureOptionsUi()
+  }
+
+  function recreateVideoElementPictureInPictureCanvas () {
+    if (!usesVideoElementPictureInPicture) return null
+    const video = pictureInPictureState.video
+    const width = Math.max(64, parseInt(pictureInPictureState.firefoxResolutionWidth) || 0)
+    const height = Math.max(64, parseInt(pictureInPictureState.firefoxResolutionHeight) || 0)
+    if (!width || !height) return null
+    const canvas = document.createElement('canvas')
+    canvas.width = width
+    canvas.height = height
+    const context = canvas.getContext('2d')
+    if (!context) return null
+    pictureInPictureState.canvas = canvas
+    pictureInPictureState.context = context
+    if (video) {
+      video.srcObject = canvas.captureStream(30)
+      video.play().catch(() => {})
+    }
+    pictureInPictureState.renderedPositionFraction = pictureInPictureState.lastRequestedPositionFraction
+    return canvas
+  }
+
+  function updateFirefoxPictureInPictureUi () {
+    const ui = pictureInPictureState.firefoxUi
+    if (!ui) return
+    const visible = usesVideoElementPictureInPicture && isPictureInPictureAlwaysModeEnabled()
+    ui.root.style.display = visible ? 'flex' : 'none'
+    ui.videoContainer.style.display = pictureInPictureState.firefoxPreviewVisible ? 'block' : 'none'
+    ui.closeButton.style.display = pictureInPictureState.firefoxPreviewVisible ? '' : 'none'
+    ui.panel.style.display = (pictureInPictureState.firefoxPreviewVisible && pictureInPictureState.firefoxControlPanelVisible) ? 'block' : 'none'
+    ui.reactivateHint.style.display = pictureInPictureState.firefoxNeedsPiPReactivationHint ? 'block' : 'none'
+    updateFirefoxAspectRatioBox()
+  }
+
+  function ensureVideoElementPictureInPictureUi () {
+    // TODO use the actual video element and let the user resize it. Current implementation is confusing
+    if (!usesVideoElementPictureInPicture) return null
+    if (pictureInPictureState.firefoxUi) return pictureInPictureState.firefoxUi
+    if (!pictureInPictureState.firefoxResolutionWidth || !pictureInPictureState.firefoxResolutionHeight) {
+      syncFirefoxPictureInPictureStateFromOptions()
+    }
+
+    const root = document.body.appendChild(document.createElement('div'))
+    root.style.position = 'fixed'
+    root.style.right = '16px'
+    root.style.bottom = '16px'
+    root.style.zIndex = '1002'
+    root.style.display = 'none'
+    root.style.flexDirection = 'column'
+    root.style.alignItems = 'flex-end'
+    root.style.gap = '8px'
+
+    const panel = root.appendChild(document.createElement('div'))
+    panel.style.display = 'none'
+    panel.style.width = 'min(calc(100vw - 32px), 1020px)'
+    panel.style.maxWidth = '1020px'
+    panel.style.padding = '10px'
+    panel.style.borderRadius = '8px'
+    panel.style.backgroundColor = 'rgba(20, 20, 20, 0.92)'
+    panel.style.color = '#fff'
+    panel.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.35)'
+    panel.style.font = '12px system-ui, sans-serif'
+
+    const title = panel.appendChild(document.createElement('div'))
+    title.textContent = 'PiP Controls'
+    title.style.fontWeight = '600'
+    title.style.marginBottom = '8px'
+
+    const hint = panel.appendChild(document.createElement('div'))
+    hint.textContent = 'Drag the lower-right handle to the actual PiP size. Large sizes stay full-scale here and can be scrolled.'
+    hint.style.marginBottom = '8px'
+
+    const aspectLabel = panel.appendChild(document.createElement('div'))
+    aspectLabel.style.marginBottom = '8px'
+
+    const inputsRow = panel.appendChild(document.createElement('div'))
+    inputsRow.style.display = 'grid'
+    inputsRow.style.gridTemplateColumns = '1fr 1fr'
+    inputsRow.style.gap = '8px'
+    inputsRow.style.marginBottom = '8px'
+
+    const resolutionGroup = inputsRow.appendChild(document.createElement('label'))
+    resolutionGroup.textContent = 'Resolution'
+    resolutionGroup.style.display = 'flex'
+    resolutionGroup.style.flexDirection = 'column'
+    resolutionGroup.style.gap = '4px'
+
+    const resolutionInputs = resolutionGroup.appendChild(document.createElement('div'))
+    resolutionInputs.style.display = 'flex'
+    resolutionInputs.style.alignItems = 'center'
+    resolutionInputs.style.gap = '4px'
+
+    const resolutionWidthInput = resolutionInputs.appendChild(document.createElement('input'))
+    resolutionWidthInput.type = 'number'
+    resolutionWidthInput.min = `${FIREFOX_PICTURE_IN_PICTURE_MIN_DIMENSION}`
+    resolutionWidthInput.max = `${FIREFOX_PICTURE_IN_PICTURE_MAX_DIMENSION}`
+    resolutionWidthInput.style.width = '100%'
+
+    const resolutionSeparator = resolutionInputs.appendChild(document.createElement('span'))
+    resolutionSeparator.textContent = 'x'
+
+    const resolutionHeightInput = resolutionInputs.appendChild(document.createElement('input'))
+    resolutionHeightInput.type = 'number'
+    resolutionHeightInput.min = `${FIREFOX_PICTURE_IN_PICTURE_MIN_DIMENSION}`
+    resolutionHeightInput.max = `${FIREFOX_PICTURE_IN_PICTURE_MAX_DIMENSION}`
+    resolutionHeightInput.style.width = '100%'
+
+    const fontSizeGroup = inputsRow.appendChild(document.createElement('label'))
+    fontSizeGroup.textContent = 'Font size'
+    fontSizeGroup.style.display = 'flex'
+    fontSizeGroup.style.flexDirection = 'column'
+    fontSizeGroup.style.gap = '4px'
+
+    const fontSizeInput = fontSizeGroup.appendChild(document.createElement('input'))
+    fontSizeInput.type = 'number'
+    fontSizeInput.min = `${FIREFOX_PICTURE_IN_PICTURE_MIN_FONT_SIZE}`
+
+    for (const input of [resolutionWidthInput, resolutionHeightInput, fontSizeInput]) {
+      input.style.border = '1px solid rgba(255, 255, 255, 0.18)'
+      input.style.backgroundColor = 'rgba(255, 255, 255, 0.08)'
+      input.style.color = '#fff'
+      input.style.borderRadius = '6px'
+      input.style.padding = '4px 6px'
+      input.style.font = '12px system-ui, sans-serif'
+    }
+
+    const aspectOuter = panel.appendChild(document.createElement('div'))
+    aspectOuter.style.width = '100%'
+    aspectOuter.style.maxWidth = '1000px'
+    aspectOuter.style.minWidth = '260px'
+    aspectOuter.style.maxHeight = 'min(calc(100vh - 260px), 620px)'
+    aspectOuter.style.minHeight = '180px'
+    aspectOuter.style.margin = '0 auto 8px'
+    aspectOuter.style.overflow = 'auto'
+    aspectOuter.style.padding = '12px'
+    aspectOuter.style.border = '1px solid rgba(255, 255, 255, 0.35)'
+    aspectOuter.style.borderRadius = '8px'
+    aspectOuter.style.background = 'repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.06) 12px, rgba(255, 255, 255, 0.03) 12px, rgba(255, 255, 255, 0.03) 24px)'
+    aspectOuter.style.boxSizing = 'border-box'
+
+    const aspectStage = aspectOuter.appendChild(document.createElement('div'))
+    aspectStage.style.minWidth = '100%'
+    aspectStage.style.minHeight = '100%'
+    aspectStage.style.display = 'flex'
+    aspectStage.style.alignItems = 'flex-start'
+    aspectStage.style.justifyContent = 'flex-start'
+
+    const aspectInner = aspectStage.appendChild(document.createElement('div'))
+    aspectInner.style.position = 'relative'
+    aspectInner.style.border = '2px solid #fff'
+    aspectInner.style.borderRadius = '6px'
+    aspectInner.style.background = 'rgba(255, 255, 255, 0.1)'
+    aspectInner.style.boxSizing = 'border-box'
+    aspectInner.style.margin = '0 12px 12px 0'
+
+    const aspectInnerLabel = aspectInner.appendChild(document.createElement('div'))
+    aspectInnerLabel.style.position = 'absolute'
+    aspectInnerLabel.style.left = '10px'
+    aspectInnerLabel.style.top = '10px'
+    aspectInnerLabel.style.padding = '4px 6px'
+    aspectInnerLabel.style.borderRadius = '999px'
+    aspectInnerLabel.style.backgroundColor = 'rgba(20, 20, 20, 0.78)'
+    aspectInnerLabel.style.font = '12px system-ui, sans-serif'
+    aspectInnerLabel.style.pointerEvents = 'none'
+
+    const aspectHandle = aspectInner.appendChild(document.createElement('div'))
+    aspectHandle.style.position = 'absolute'
+    aspectHandle.style.right = '-8px'
+    aspectHandle.style.bottom = '-8px'
+    aspectHandle.style.width = '16px'
+    aspectHandle.style.height = '16px'
+    aspectHandle.style.borderRadius = '50%'
+    aspectHandle.style.background = '#fff'
+    aspectHandle.style.cursor = 'nwse-resize'
+
+    const reactivateHint = panel.appendChild(document.createElement('div'))
+    reactivateHint.textContent = 'Re-open PiP from the video below to apply the new size.'
+    reactivateHint.style.display = 'none'
+    reactivateHint.style.marginTop = '8px'
+    reactivateHint.style.color = '#ffd666'
+
+    const buttons = root.appendChild(document.createElement('div'))
+    buttons.style.display = 'flex'
+    buttons.style.gap = '6px'
+
+    const controlButton = buttons.appendChild(document.createElement('button'))
+    controlButton.textContent = 'PiP'
+    const closeButton = buttons.appendChild(document.createElement('button'))
+    closeButton.textContent = 'Close'
+
+    for (const button of [controlButton, closeButton]) {
+      button.style.border = '1px solid rgba(255, 255, 255, 0.18)'
+      button.style.backgroundColor = 'rgba(20, 20, 20, 0.92)'
+      button.style.color = '#fff'
+      button.style.borderRadius = '999px'
+      button.style.padding = '6px 10px'
+      button.style.font = '12px system-ui, sans-serif'
+      button.style.cursor = 'pointer'
+      button.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.35)'
+    }
+
+    const videoContainer = root.appendChild(document.createElement('div'))
+    videoContainer.style.display = 'block'
+
+    controlButton.addEventListener('click', function onFirefoxPictureInPictureControlClick () {
+      pictureInPictureState.firefoxPreviewVisible = true
+      pictureInPictureState.firefoxControlPanelVisible = !pictureInPictureState.firefoxControlPanelVisible
+      updateFirefoxPictureInPictureUi()
+    })
+    closeButton.addEventListener('click', function onFirefoxPictureInPictureCloseClick () {
+      pictureInPictureState.firefoxPreviewVisible = false
+      pictureInPictureState.firefoxControlPanelVisible = false
+      updateFirefoxPictureInPictureUi()
+    })
+
+    const applyFirefoxAspectBoxChange = function (persistImmediately) {
+      syncFirefoxDerivedMetricsFromBox()
+      updateFirefoxAspectRatioBox()
+      recreateVideoElementPictureInPictureCanvas()
+      schedulePictureInPictureRender()
+      markFirefoxPiPNeedsReactivationHint()
+      if (persistImmediately) {
+        persistFirefoxPictureInPictureSettings()
+      } else {
+        schedulePersistFirefoxPictureInPictureSettings()
+      }
+    }
+
+    const startAspectDrag = function (ev) {
+      ev.preventDefault()
+      const startWidth = pictureInPictureState.firefoxAspectBoxWidth
+      const startHeight = pictureInPictureState.firefoxAspectBoxHeight
+      const startX = ev.clientX
+      const startY = ev.clientY
+      const onMove = function (moveEv) {
+        pictureInPictureState.firefoxAspectBoxWidth = normalizeFirefoxPictureInPictureDimension(
+          startWidth + (moveEv.clientX - startX),
+          startWidth
+        )
+        pictureInPictureState.firefoxAspectBoxHeight = normalizeFirefoxPictureInPictureDimension(
+          startHeight + (moveEv.clientY - startY),
+          startHeight
+        )
+        applyFirefoxAspectBoxChange(false)
+      }
+      const onUp = function () {
+        document.removeEventListener('mousemove', onMove, true)
+        document.removeEventListener('mouseup', onUp, true)
+        persistFirefoxPictureInPictureSettings()
+      }
+      document.addEventListener('mousemove', onMove, true)
+      document.addEventListener('mouseup', onUp, true)
+    }
+    aspectHandle.addEventListener('mousedown', startAspectDrag)
+
+    const applyManualFirefoxResolutionAndFont = function () {
+      pictureInPictureState.firefoxAspectBoxWidth = normalizeFirefoxPictureInPictureDimension(
+        resolutionWidthInput.value,
+        pictureInPictureState.firefoxResolutionWidth
+      )
+      pictureInPictureState.firefoxAspectBoxHeight = normalizeFirefoxPictureInPictureDimension(
+        resolutionHeightInput.value,
+        pictureInPictureState.firefoxResolutionHeight
+      )
+      pictureInPictureState.firefoxFontSize = normalizeFirefoxPictureInPictureFontSize(
+        fontSizeInput.value,
+        pictureInPictureState.firefoxFontSize,
+        pictureInPictureState.firefoxAspectBoxWidth,
+        pictureInPictureState.firefoxAspectBoxHeight
+      )
+      applyFirefoxAspectBoxChange(true)
+    }
+    resolutionWidthInput.addEventListener('change', applyManualFirefoxResolutionAndFont)
+    resolutionHeightInput.addEventListener('change', applyManualFirefoxResolutionAndFont)
+    fontSizeInput.addEventListener('change', applyManualFirefoxResolutionAndFont)
+
+    pictureInPictureState.firefoxUi = {
+      root,
+      panel,
+      aspectLabel,
+      aspectInner,
+      aspectInnerLabel,
+      resolutionWidthInput,
+      resolutionHeightInput,
+      fontSizeInput,
+      reactivateHint,
+      closeButton,
+      videoContainer
+    }
+    updateFirefoxAspectRatioBox()
+    return pictureInPictureState.firefoxUi
+  }
+
+  function ensureVideoElementPictureInPictureElements () {
+    if (!usesVideoElementPictureInPicture) return null
+    ensureVideoElementPictureInPictureUi()
+    if (pictureInPictureState.video && pictureInPictureState.canvas && pictureInPictureState.context) {
+      return pictureInPictureState.video
+    }
+
+    const video = document.createElement('video')
+    video.muted = true
+    video.playsInline = true
+    video.controls = false
+    video.disablePictureInPicture = false
+    video.classList.add('genius-lyrics-pip-preview')
+    video.style.width = '150px'
+    video.style.height = '150px'
+    video.style.objectFit = 'contain'
+    video.style.borderRadius = '6px'
+    video.style.backgroundColor = '#000'
+    video.style.cursor = 'pointer'
+    video.style.zIndex = '1002'
+    video.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.35)'
+    video.style.border = '1px solid rgba(255, 255, 255, 0.18)'
+    video.title = 'Use Firefox\'s Picture-in-Picture button on this video'
+    video.addEventListener('enterpictureinpicture', function onVideoEnterPictureInPicture () {
+      pictureInPictureState.nativePictureInPictureActive = true
+      pictureInPictureState.firefoxNeedsPiPReactivationHint = false
+      updateFirefoxPictureInPictureUi()
+    })
+    video.addEventListener('leavepictureinpicture', function onVideoLeavePictureInPicture () {
+      pictureInPictureState.nativePictureInPictureActive = false
+      updateFirefoxPictureInPictureUi()
+    })
+
+    pictureInPictureState.video = video
+    pictureInPictureState.firefoxUi.videoContainer.replaceChildren(video)
+    recreateVideoElementPictureInPictureCanvas()
+    updateFirefoxPictureInPictureUi()
+    return video
+  }
+
+  function renderVideoElementPictureInPictureFrame () {
+    if (!usesVideoElementPictureInPicture) return
+    const canvas = pictureInPictureState.canvas
+    const context = pictureInPictureState.context
+    if (!canvas || !context) return
+
+    const { backgroundColor, textColor } = getPictureInPictureColors()
+    const fontSize = Math.max(12, pictureInPictureState.firefoxFontSize || Math.round(32 * Math.min(canvas.width / 720, canvas.height / 405)))
+    context.fillStyle = backgroundColor
+    context.fillRect(0, 0, canvas.width, canvas.height)
+
+    context.fillStyle = textColor
+    context.font = `${fontSize}px system-ui, sans-serif`
+    context.textBaseline = 'top'
+
+    const text = pictureInPictureState.statusText || pictureInPictureState.lyricsText || ''
+    const lines = text.length > 0 ? text.split('\n') : ['']
+    const lineHeight = Math.round(fontSize * 1.375)
+    const topPadding = Math.round(fontSize * 3.75)
+    const leftPadding = Math.round(fontSize)
+    const totalHeight = topPadding * 2 + lines.length * lineHeight
+    const maxScrollTop = Math.max(0, totalHeight - canvas.height)
+    let targetPositionFraction = pictureInPictureState.lastRequestedPositionFraction
+    if (targetPositionFraction < pictureInPictureState.renderedPositionFraction &&
+      pictureInPictureState.renderedPositionFraction - targetPositionFraction < 0.0025) {
+      targetPositionFraction = pictureInPictureState.renderedPositionFraction
+    }
+    const delta = targetPositionFraction - pictureInPictureState.renderedPositionFraction
+    if (Math.abs(delta) < 0.0002) {
+      pictureInPictureState.renderedPositionFraction = targetPositionFraction
+    } else {
+      pictureInPictureState.renderedPositionFraction += delta * 0.18
+    }
+    const scrollTop = maxScrollTop * pictureInPictureState.renderedPositionFraction
+
+    for (let i = 0; i < lines.length; i++) {
+      const y = Math.round(topPadding + i * lineHeight - scrollTop)
+      if (y > -lineHeight && y < canvas.height + lineHeight) {
+        context.fillText(lines[i], leftPadding, y)
+      }
+    }
+
+    if (shouldContinueVideoElementPictureInPictureRender()) {
+      pictureInPictureState.renderFrameId = requestAnimationFrame(renderVideoElementPictureInPictureFrame)
+    } else {
+      pictureInPictureState.renderFrameId = 0
+    }
+  }
+
+  function schedulePictureInPictureRender () {
+    if (usesVideoElementPictureInPicture) {
+      if (pictureInPictureState.renderFrameId !== 0) return
+      pictureInPictureState.renderFrameId = requestAnimationFrame(renderVideoElementPictureInPictureFrame)
+      return
+    }
+    renderPictureInPictureWindowContent()
+  }
+
+  function shouldContinueVideoElementPictureInPictureRender () {
+    return usesVideoElementPictureInPicture &&
+      !!pictureInPictureState.video &&
+      (isPictureInPictureModeEnabled() || pictureInPictureState.nativePictureInPictureActive)
+  }
+
+  function renderPictureInPictureWindowContent () {
+    const pipWindow = getPictureInPictureWindow()
+    if (!pipWindow) return
+
+    const pipDocument = pipWindow.document
+    if (!pipDocument.body) return
+
+    if (!pipDocument.getElementById('genius-picture-in-picture-root')) {
+      pipDocument.title = 'Lyrics'
+      pipDocument.body.innerHTML = `
+        <div id="genius-picture-in-picture-root">
+          <div id="genius-picture-in-picture-scroll-buttons">
+            <button id="genius-picture-in-picture-resume-button" type="button" title="Resume auto scrolling">Resume</button>
+            <button id="genius-picture-in-picture-resume-from-here-button" type="button" title="Resume auto scrolling from here">From here</button>
+          </div>
+          <pre id="genius-picture-in-picture-lyrics"></pre>
+        </div>
+      `
+      pipDocument.getElementById('genius-picture-in-picture-resume-button').addEventListener('click', onResumePictureInPictureAutoScrollClick)
+      pipDocument.getElementById('genius-picture-in-picture-resume-from-here-button').addEventListener('click', onResumePictureInPictureAutoScrollFromHereClick)
+    }
+
+    const { backgroundColor, textColor, colorScheme } = getPictureInPictureColors()
+    pipDocument.documentElement.style.colorScheme = colorScheme
+    pipDocument.body.style.margin = '0'
+    pipDocument.body.style.backgroundColor = backgroundColor
+    pipDocument.body.style.color = textColor
+    pipDocument.body.style.font = '16px system-ui, sans-serif'
+
+    const root = pipDocument.getElementById('genius-picture-in-picture-root')
+    const lyrics = pipDocument.getElementById('genius-picture-in-picture-lyrics')
+    if (!root || !lyrics) return
+
+    root.style.boxSizing = 'border-box'
+    root.style.width = '100%'
+    root.style.minHeight = '100vh'
+    root.style.padding = '16px'
+    root.style.backgroundColor = backgroundColor
+    root.style.color = textColor
+
+    const buttons = pipDocument.getElementById('genius-picture-in-picture-scroll-buttons')
+    if (buttons) {
+      buttons.style.position = 'fixed'
+      buttons.style.top = '12px'
+      buttons.style.right = '12px'
+      buttons.style.display = pictureInPictureState.scrollPaused ? 'flex' : 'none'
+      buttons.style.flexDirection = 'row'
+      buttons.style.gap = '6px'
+      buttons.style.zIndex = '2'
+    }
+    for (const button of pipDocument.querySelectorAll('#genius-picture-in-picture-scroll-buttons button')) {
+      button.style.border = `1px solid ${textColor}`
+      button.style.backgroundColor = backgroundColor
+      button.style.color = textColor
+      button.style.borderRadius = '999px'
+      button.style.padding = '6px 10px'
+      button.style.font = '12px system-ui, sans-serif'
+      button.style.cursor = 'pointer'
+    }
+
+    lyrics.style.margin = '0'
+    lyrics.style.paddingTop = '42px'
+    lyrics.style.whiteSpace = 'pre-wrap'
+    lyrics.style.wordBreak = 'break-word'
+    lyrics.style.font = 'inherit'
+    lyrics.textContent = pictureInPictureState.statusText || pictureInPictureState.lyricsText || ''
+
+    initPictureInPictureWindow(pipWindow)
+  }
+
+  function closePictureInPictureWindow () {
+    if (usesVideoElementPictureInPicture) {
+      const video = pictureInPictureState.video
+      if (video && document.pictureInPictureElement === video && typeof document.exitPictureInPicture === 'function') {
+        document.exitPictureInPicture().catch(() => {})
+      }
+      return
+    }
+
+    const pipWindow = getPictureInPictureWindow()
+    pictureInPictureState.window = null
+    pictureInPictureState.currentWindowInitialized = null
+    if (pipWindow && pipWindow.closed !== true) {
+      pipWindow.close()
+    }
+  }
+
+  async function closeNativePictureInPictureWindow () {
+    if (typeof document.exitPictureInPicture !== 'function') return false
+    if (!document.pictureInPictureElement) return false
+    try {
+      await document.exitPictureInPicture()
+      return true
+    } catch (e) {
+      console.warn('Genius Lyrics - unable to close existing Picture-in-Picture window.', e)
+      return false
+    }
+  }
+
+  async function ensurePictureInPictureWindow () {
+    if (!supportsDocumentPictureInPicture || !isPictureInPictureModeEnabled()) return null
+
+    let pipWindow = getPictureInPictureWindow()
+    if (!pipWindow) {
+      await closeNativePictureInPictureWindow()
+      pipWindow = await window.documentPictureInPicture.requestWindow({
+        width: 360,
+        height: 480
+      })
+      pictureInPictureState.window = pipWindow
+      pipWindow.addEventListener('pagehide', function onPictureInPictureClosed () {
+        if (pictureInPictureState.window === pipWindow) {
+          pictureInPictureState.window = null
+        }
+      }, { once: true })
+    }
+
+    renderPictureInPictureWindowContent()
+    syncPictureInPictureScrollFromIframe()
+    return pipWindow
+  }
+
+  function normalizePictureInPictureLyricsText (text) {
+    if (typeof text !== 'string') return ''
+    return text
+      .replace(/\r/g, '')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim()
+  }
+
+  function updatePictureInPictureLyricsText (text) {
+    pictureInPictureState.lyricsText = normalizePictureInPictureLyricsText(text)
+    schedulePictureInPictureRender()
+  }
+
+  function getLyricsIframeScrollPositionFraction () {
+    const iframe = document.getElementById('lyricsiframe')
+    const iframeDocument = (iframe || 0).contentDocument
+    const scrollingElement = (iframeDocument || 0).scrollingElement
+    if (!scrollingElement) return null
+
+    const maxScrollTop = Math.max(0, scrollingElement.scrollHeight - scrollingElement.clientHeight)
+    if (maxScrollTop === 0) return 0
+    return scrollingElement.scrollTop / maxScrollTop
+  }
+
+  function scrollPictureInPictureLyrics (positionFraction) {
+    if (usesVideoElementPictureInPicture) {
+      pictureInPictureState.lastRequestedPositionFraction = Math.min(1, Math.max(0, Number(positionFraction) || 0))
+      schedulePictureInPictureRender()
+      return
+    }
+
+    const pipWindow = getPictureInPictureWindow()
+    if (!pipWindow) return
+
+    const scrollingElement = pipWindow.document.scrollingElement
+    if (!scrollingElement) return
+
+    pictureInPictureState.lastRequestedPositionFraction = Math.min(1, Math.max(0, Number(positionFraction) || 0))
+    pictureInPictureState.lastExpectedScrollTop = getPictureInPictureDesiredScrollTop(scrollingElement, pictureInPictureState.lastRequestedPositionFraction)
+    if (pictureInPictureState.scrollPaused) return
+
+    scrollingElement.scrollTop = pictureInPictureState.lastExpectedScrollTop
+  }
+
+  function syncPictureInPictureScrollFromIframe () {
+    const positionFraction = getLyricsIframeScrollPositionFraction()
+    if (typeof positionFraction === 'number') {
+      scrollPictureInPictureLyrics(positionFraction)
+    }
+  }
+
+  function setPictureInPictureStatusText (text) {
+    pictureInPictureState.statusText = typeof text === 'string' ? text : ''
+    schedulePictureInPictureRender()
+  }
+
+  function refreshPictureInPictureLyricsFromIframe () {
+    const iframe = document.getElementById('lyricsiframe')
+    const iframeDocument = (iframe || 0).contentDocument
+    if (!iframeDocument) return ''
+
+    const lyricsContainer = iframeDocument.getElementById('lyrics_text_div') || iframeDocument.getElementById('lyrics-root')
+    const lyricsText = lyricsContainer ? (lyricsContainer.innerText || lyricsContainer.textContent || '') : ''
+    updatePictureInPictureLyricsText(lyricsText)
+    syncPictureInPictureScrollFromIframe()
+    return pictureInPictureState.lyricsText
+  }
+
+  async function openPictureInPictureWindow () {
+    if (!supportsAnyPictureInPicture || !isPictureInPictureModeEnabled()) return null
+    try {
+      if (usesVideoElementPictureInPicture) {
+        const video = ensureVideoElementPictureInPictureElements()
+        if (!video) return null
+        renderVideoElementPictureInPictureFrame()
+        await video.play()
+        if (typeof video.requestPictureInPicture === 'function' && document.pictureInPictureElement !== video) {
+          await video.requestPictureInPicture()
+        }
+        return video
+      }
+      return await ensurePictureInPictureWindow()
+    } catch (e) {
+      console.warn('Genius Lyrics - unable to open Picture-in-Picture window.', e)
+      return null
+    }
+  }
+
+  function installPictureInPictureActionHandlerBroker () {
+    if (!supportsAutomaticPictureInPicture) return false
+    if (pictureInPictureState.mediaSessionWrapped) return true
+
+    const mediaSession = navigator.mediaSession
+    if (!mediaSession || typeof mediaSession.setActionHandler !== 'function') {
+      return false
+    }
+
+    const originalSetActionHandler = mediaSession.setActionHandler.bind(mediaSession)
+    pictureInPictureState.originalSetActionHandler = originalSetActionHandler
+    pictureInPictureState.pictureInPictureActionHandler = async function onEnterPictureInPicture (details) {
+      if (isPictureInPictureHiddenModeEnabled()) {
+        if (document.visibilityState !== 'hidden') return
+        refreshPictureInPictureLyricsFromIframe()
+        await openPictureInPictureWindow()
+        return
+      }
+
+      const fallbackHandler = pictureInPictureState.interceptedEnterPictureInPictureHandler
+      if (typeof fallbackHandler === 'function') {
+        return await fallbackHandler(details)
+      }
+    }
+
+    try {
+      mediaSession.setActionHandler = function setActionHandlerPatched (type, callback) {
+        if (type === 'enterpictureinpicture') {
+          pictureInPictureState.interceptedEnterPictureInPictureHandler = callback
+          if (isPictureInPictureHiddenModeEnabled()) {
+            pictureInPictureState.actionHandlerInstalled = true
+            return originalSetActionHandler(type, pictureInPictureState.pictureInPictureActionHandler)
+          }
+        }
+        return originalSetActionHandler(type, callback)
+      }
+      pictureInPictureState.mediaSessionWrapped = true
+      return true
+    } catch (e) {
+      console.warn('Genius Lyrics - unable to patch Media Session handler registration.', e)
+      pictureInPictureState.originalSetActionHandler = null
+      pictureInPictureState.pictureInPictureActionHandler = null
+      return false
+    }
+  }
+
+  function updatePictureInPictureActionHandler () {
+    if (usesVideoElementPictureInPicture) {
+      if (!isPictureInPictureModeEnabled()) {
+        closePictureInPictureWindow()
+      }
+      return
+    }
+
+    if (!supportsAutomaticPictureInPicture) {
+      closePictureInPictureWindow()
+      return
+    }
+
+    if (!installPictureInPictureActionHandlerBroker()) {
+      closePictureInPictureWindow()
+      return
+    }
+
+    const originalSetActionHandler = pictureInPictureState.originalSetActionHandler
+    if (typeof originalSetActionHandler !== 'function') {
+      closePictureInPictureWindow()
+      return
+    }
+
+    if (isPictureInPictureHiddenModeEnabled()) {
+      try {
+        originalSetActionHandler('enterpictureinpicture', pictureInPictureState.pictureInPictureActionHandler)
+        pictureInPictureState.actionHandlerInstalled = true
+      } catch (e) {
+        console.warn('Genius Lyrics - unable to register Picture-in-Picture handler.', e)
+      }
+    }
+
+    if (!isPictureInPictureHiddenModeEnabled()) {
+      if (pictureInPictureState.actionHandlerInstalled) {
+        try {
+          originalSetActionHandler('enterpictureinpicture', pictureInPictureState.interceptedEnterPictureInPictureHandler)
+        } catch (e) {
+          console.warn('Genius Lyrics - unable to restore Picture-in-Picture handler.', e)
+        }
+        pictureInPictureState.actionHandlerInstalled = false
+      }
+      closePictureInPictureWindow()
+    }
+  }
+
+  function onPictureInPictureMessage (ev) {
+    const data = (ev || 0).data || 0
+    if (data.iAm !== custom.scriptName || data.type !== 'iframeScrollPosition') return
+    if (typeof data.positionFraction === 'number') {
+      scrollPictureInPictureLyrics(data.positionFraction)
+    }
+  }
+
+  function maybeOpenAlwaysPictureInPictureWindow () {
+    if (!isPictureInPictureAlwaysModeEnabled()) return
+    if (usesVideoElementPictureInPicture) return
+    if (!getPictureInPictureWindow() && pictureInPictureState.lyricsText) {
+      openPictureInPictureWindow()
+    }
   }
 
   /*
@@ -2650,6 +3703,10 @@ Browser:    ${navigator.userAgent}
     })
     elementsToBeAppended.push(configButton)
 
+    if (usesVideoElementPictureInPicture) {
+      ensureVideoElementPictureInPictureElements()
+    }
+
     if (searchresultsLengths === 1) {
       // Wrong lyrics button
       const wrongLyricsButton = document.createElement('span')
@@ -2691,6 +3748,7 @@ Browser:    ${navigator.userAgent}
     // flush to DOM tree
     appendElements(bar, elementsToBeAppended)
     appendElements(container, [bar, iframe])
+    updateFirefoxPictureInPictureUi()
 
     // clean up
     elementsToBeAppended.length = 0
@@ -3394,6 +4452,9 @@ Browser:    ${navigator.userAgent}
       return
     }
 
+    resetPictureInPictureScrollState()
+    setPictureInPictureStatusText('Loading lyrics...')
+
     let spinnerDOM = null
     if ('customSpinnerDOM' in custom && typeof custom.customSpinnerDOM === 'function') {
       spinnerDOM = custom.customSpinnerDOM(container, bar, iframe)
@@ -3550,6 +4611,9 @@ Browser:    ${navigator.userAgent}
           // note: this is not called after the whole page is rendered
           // console.log(ev.data)
           clear() // loaded
+          setPictureInPictureStatusText('')
+          refreshPictureInPictureLyricsFromIframe()
+          maybeOpenAlwaysPictureInPictureWindow()
           spinnerUpdate(null, null, 901, 'complete')
           window.postMessage({ iAm: custom.scriptName, type: 'lyricsDisplayState', visibility: 'loaded', lyricsSuccess: true }, '*')
           unScroll()
@@ -3560,6 +4624,8 @@ Browser:    ${navigator.userAgent}
         })
         addOneMessageListener('iframeContentRendered', function (ev) {
           if (isShowLyricsIsCancelledByUser || window.showLyricsIdentifier !== currentFunctionClosureIdentifier) return
+          refreshPictureInPictureLyricsFromIframe()
+          maybeOpenAlwaysPictureInPictureWindow()
           unScroll()
         })
 
@@ -3583,6 +4649,7 @@ Browser:    ${navigator.userAgent}
           if (isShowLyricsIsCancelledByUser) return
           console.debug('tv2')
           clear() // unable to load
+          setPictureInPictureStatusText('')
           spinnerUpdate(null, null, 902, 'failed')
           unScroll()
           window.postMessage({ iAm: custom.scriptName, type: 'lyricsDisplayState', visibility: 'loaded', lyricsSuccess: false }, '*')
@@ -3679,6 +4746,7 @@ Browser:    ${navigator.userAgent}
     if (contentWindow && typeof contentWindow.postMessage === 'function') {
       contentWindow.postMessage({ iAm: custom.scriptName, type: 'scrollLyrics', position: positionFraction }, '*')
     }
+    scrollPictureInPictureLyrics(positionFraction)
   }
 
   function searchByQuery (query, container, callback) {
@@ -3847,6 +4915,131 @@ Browser:    ${navigator.userAgent}
 
     div.appendChild(document.createElement('br'))
     div.appendChild(document.createTextNode('(if you disable this, a small button will appear in the top right corner to show the lyrics)'))
+
+    // Select: Picture-in-Picture
+    div = win.appendChild(document.createElement('div'))
+    label = div.appendChild(document.createElement('label'))
+    label.setAttribute('for', 'selectPictureInPictureMode748')
+    label.textContent = 'Picture in Picture: '
+
+    const selectPictureInPictureMode = div.appendChild(document.createElement('select'))
+    selectPictureInPictureMode.id = 'selectPictureInPictureMode748'
+    const pictureInPictureModeOptions = supportsAutomaticPictureInPicture
+      ? [
+          { text: 'Disabled', value: 'disabled' },
+          { text: 'When tab is hidden', value: 'when-tab-is-hidden' },
+          { text: 'Always', value: 'always' }
+        ]
+      : supportsAnyPictureInPicture
+        ? [
+            { text: 'Disabled', value: 'disabled' },
+            { text: 'Always', value: 'always' }
+          ]
+        : [
+            { text: 'Disabled', value: 'disabled' }
+          ]
+    for (const o of pictureInPictureModeOptions) {
+      const option = selectPictureInPictureMode.appendChild(document.createElement('option'))
+      option.value = o.value
+      option.textContent = o.text
+      option.selected = normalizePictureInPictureMode(genius.option.pictureInPictureMode) === o.value
+    }
+    const onSelectPictureInPictureMode = function onSelectPictureInPictureModeListener (evt) {
+      const val = normalizePictureInPictureMode(evt.target.selectedOptions[0].value)
+      if (genius.option.pictureInPictureMode === val) return
+      genius.option.pictureInPictureMode = val
+      custom.GM.setValue('pictureInPictureMode', genius.option.pictureInPictureMode).then(() => {
+        if (genius.option.pictureInPictureMode !== 'disabled') {
+          refreshPictureInPictureLyricsFromIframe()
+          setPictureInPictureStatusText('')
+          maybeOpenAlwaysPictureInPictureWindow()
+        }
+        updatePictureInPictureActionHandler()
+        updateFirefoxPictureInPictureUi()
+      })
+    }
+    selectPictureInPictureMode.addEventListener('change', onSelectPictureInPictureMode)
+    selectPictureInPictureMode.disabled = !supportsAnyPictureInPicture
+
+    div.appendChild(document.createElement('br'))
+    div.appendChild(document.createTextNode(
+      !supportsAnyPictureInPicture
+        ? 'Picture in Picture is not supported in this browser.'
+        : usesVideoElementPictureInPicture
+          ? 'Firefox requires pressing the browser\'s built-in PiP button on the small video shown in the lyrics bar when Always is enabled.'
+          : 'Open a Picture in Picture window automatically when the tab is hidden, or keep it open all the time.'
+    ))
+
+    if (usesVideoElementPictureInPicture) {
+      div = win.appendChild(document.createElement('div'))
+
+      label = div.appendChild(document.createElement('label'))
+      label.textContent = 'Firefox PiP size: '
+
+      const firefoxPiPWidthInput = div.appendChild(document.createElement('input'))
+      firefoxPiPWidthInput.type = 'number'
+      firefoxPiPWidthInput.min = `${FIREFOX_PICTURE_IN_PICTURE_MIN_DIMENSION}`
+      firefoxPiPWidthInput.max = `${FIREFOX_PICTURE_IN_PICTURE_MAX_DIMENSION}`
+      firefoxPiPWidthInput.style.maxWidth = '6em'
+      firefoxPiPWidthInput.value = `${genius.option.firefoxPictureInPictureWidth || pictureInPictureState.firefoxResolutionWidth || ''}`
+
+      div.appendChild(document.createTextNode(' x '))
+
+      const firefoxPiPHeightInput = div.appendChild(document.createElement('input'))
+      firefoxPiPHeightInput.type = 'number'
+      firefoxPiPHeightInput.min = `${FIREFOX_PICTURE_IN_PICTURE_MIN_DIMENSION}`
+      firefoxPiPHeightInput.max = `${FIREFOX_PICTURE_IN_PICTURE_MAX_DIMENSION}`
+      firefoxPiPHeightInput.style.maxWidth = '6em'
+      firefoxPiPHeightInput.value = `${genius.option.firefoxPictureInPictureHeight || pictureInPictureState.firefoxResolutionHeight || ''}`
+
+      div.appendChild(document.createTextNode(' px'))
+      div.appendChild(document.createElement('br'))
+
+      const firefoxPiPFontLabel = div.appendChild(document.createElement('label'))
+      firefoxPiPFontLabel.textContent = 'Firefox PiP font size: '
+
+      const firefoxPiPFontInput = div.appendChild(document.createElement('input'))
+      firefoxPiPFontInput.type = 'number'
+      firefoxPiPFontInput.min = `${FIREFOX_PICTURE_IN_PICTURE_MIN_FONT_SIZE}`
+      firefoxPiPFontInput.style.maxWidth = '6em'
+      firefoxPiPFontInput.value = `${genius.option.firefoxPictureInPictureFontSize || pictureInPictureState.firefoxFontSize || ''}`
+
+      div.appendChild(document.createTextNode(' px'))
+      div.appendChild(document.createElement('br'))
+      div.appendChild(document.createTextNode('These values are shared with the live Firefox PiP resize tool and are saved automatically.'))
+
+      const onFirefoxPiPOptionsChanged = function onFirefoxPiPOptionsChangedListener () {
+        pictureInPictureState.firefoxAspectBoxWidth = normalizeFirefoxPictureInPictureDimension(
+          firefoxPiPWidthInput.value,
+          pictureInPictureState.firefoxResolutionWidth
+        )
+        pictureInPictureState.firefoxAspectBoxHeight = normalizeFirefoxPictureInPictureDimension(
+          firefoxPiPHeightInput.value,
+          pictureInPictureState.firefoxResolutionHeight
+        )
+        pictureInPictureState.firefoxFontSize = normalizeFirefoxPictureInPictureFontSize(
+          firefoxPiPFontInput.value,
+          pictureInPictureState.firefoxFontSize,
+          pictureInPictureState.firefoxAspectBoxWidth,
+          pictureInPictureState.firefoxAspectBoxHeight
+        )
+        syncFirefoxDerivedMetricsFromBox()
+        updateFirefoxAspectRatioBox()
+        recreateVideoElementPictureInPictureCanvas()
+        schedulePictureInPictureRender()
+        markFirefoxPiPNeedsReactivationHint()
+        persistFirefoxPictureInPictureSettings()
+      }
+      firefoxPiPWidthInput.addEventListener('change', onFirefoxPiPOptionsChanged)
+      firefoxPiPHeightInput.addEventListener('change', onFirefoxPiPOptionsChanged)
+      firefoxPiPFontInput.addEventListener('change', onFirefoxPiPOptionsChanged)
+
+      pictureInPictureState.firefoxOptionsUi = {
+        resolutionWidthInput: firefoxPiPWidthInput,
+        resolutionHeightInput: firefoxPiPHeightInput,
+        fontSizeInput: firefoxPiPFontInput
+      }
+    }
 
     // Select: Theme
     div = win.appendChild(document.createElement('div'))
@@ -4484,6 +5677,10 @@ Browser:    ${navigator.userAgent}
       theme: genius.option.themeKey,
       annotationsenabled: annotationsEnabled,
       autoscrollenabled: autoScrollEnabled,
+      pictureInPictureMode: genius.option.pictureInPictureMode,
+      firefoxPictureInPictureWidth: genius.option.firefoxPictureInPictureWidth,
+      firefoxPictureInPictureHeight: genius.option.firefoxPictureInPictureHeight,
+      firefoxPictureInPictureFontSize: genius.option.firefoxPictureInPictureFontSize,
       romajipriority: genius.option.romajiPriority,
       fontsize: genius.option.fontSize,
       useLZCompression: genius.option.useLZCompression
@@ -4508,9 +5705,16 @@ Browser:    ${navigator.userAgent}
     theme = themes[genius.option.themeKey]
     annotationsEnabled = !!values.annotationsenabled
     autoScrollEnabled = !!values.autoscrollenabled
+    genius.option.pictureInPictureMode = normalizePictureInPictureMode(values.pictureInPictureMode)
+    genius.option.firefoxPictureInPictureWidth = values.firefoxPictureInPictureWidth
+    genius.option.firefoxPictureInPictureHeight = values.firefoxPictureInPictureHeight
+    genius.option.firefoxPictureInPictureFontSize = values.firefoxPictureInPictureFontSize
     genius.option.romajiPriority = values.romajipriority
     genius.option.fontSize = Math.max(0, parseInt(values.fontsize) || 0)
     genius.option.useLZCompression = values.useLZCompression
+    syncFirefoxPictureInPictureStateFromOptions()
+    updateFirefoxAspectRatioBox()
+    recreateVideoElementPictureInPictureCanvas()
 
     if (genius.onThemeChanged) {
       for (const f of genius.onThemeChanged) {
@@ -4531,6 +5735,22 @@ Browser:    ${navigator.userAgent}
 
     // top
     if (!isMessaging) {
+      updatePictureInPictureActionHandler()
+      window.addEventListener('message', onPictureInPictureMessage, false)
+      updateFirefoxPictureInPictureUi()
+      if (pictureInPictureDarkModeMedia) {
+        const onPictureInPictureColorSchemeChange = () => schedulePictureInPictureRender()
+        if (typeof pictureInPictureDarkModeMedia.addEventListener === 'function') {
+          pictureInPictureDarkModeMedia.addEventListener('change', onPictureInPictureColorSchemeChange)
+        } else if (typeof pictureInPictureDarkModeMedia.addListener === 'function') {
+          pictureInPictureDarkModeMedia.addListener(onPictureInPictureColorSchemeChange)
+        }
+      }
+      document.addEventListener('visibilitychange', function onVisibilityChange () {
+        if (document.visibilityState === 'visible' && !isPictureInPictureAlwaysModeEnabled()) {
+          closePictureInPictureWindow()
+        }
+      })
       listenToMessages()
       loadCache()
       addCss()
@@ -4652,6 +5872,22 @@ Browser:    ${navigator.userAgent}
       }
       scrollLyricsGeneric(e.data.position)
     })
+    {
+      let scrollSyncRaf = 0
+      const notifyCurrentScrollPosition = () => {
+        scrollSyncRaf = 0
+        const scrollingElement = document.scrollingElement
+        if (!scrollingElement) return
+        const maxScrollTop = Math.max(0, scrollingElement.scrollHeight - scrollingElement.clientHeight)
+        const positionFraction = maxScrollTop === 0 ? 0 : (scrollingElement.scrollTop / maxScrollTop)
+        communicationWindow.postMessage({ iAm: custom.scriptName, type: 'iframeScrollPosition', positionFraction }, '*')
+      }
+      document.addEventListener('scroll', function onIframeScroll () {
+        if (scrollSyncRaf !== 0) return
+        scrollSyncRaf = requestAnimationFrame(notifyCurrentScrollPosition)
+      }, true)
+      notifyCurrentScrollPosition()
+    }
     if ('toggleLyricsKey' in custom) {
       addKeyboardShortcutInFrame(custom.toggleLyricsKey)
     }
